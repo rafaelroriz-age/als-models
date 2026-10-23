@@ -1,0 +1,8 @@
+LakehouseOel
+j2qfysdun5iebf3ezw2l7ke4eu-vpyatc664ptezeejap7oap22qu.datawarehouse.fabric.microsoft.com
+
+Ontology_OeL_lh_17803110c5844a0cbb9f60e1d2a86ebf
+j2qfysdun5iebf3ezw2l7ke4eu-vpyatc664ptezeejap7oap22qu.datawarehouse.fabric.microsoft.com
+
+s360
+j2qfysdun5iebf3ezw2l7ke4eu-vpyatc664ptezeejap7oap22qu.datawarehouse.fabric.microsoft.com
