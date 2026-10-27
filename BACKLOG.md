@@ -92,7 +92,7 @@ Tarefa T04 do BACKLOG.md. Leia AGENTS.md e a Etapa 1 de docs_fabric/12_plano_tra
 ```
 
 ### T05 · Descobrir a origem do Annual Sample Potential e o status ativo do equipamento
-- **Status:** doing
+- **Status:** done
 - **Papel:** @especialista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
