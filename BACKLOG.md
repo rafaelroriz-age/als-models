@@ -296,7 +296,7 @@ Tarefa T17 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §1 (Forecast 27), docs
 ```
 
 ### T18 · KPI 2: cross-check com Zoho sem dupla contagem
-- **Status:** doing
+- **Status:** done
 - **Papel:** @especialista-dados
 - **Depende:** T17
 - **Ambiente:** fabric
