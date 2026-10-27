@@ -89,6 +89,7 @@
 2. **Estatísticos de série temporal:** ETS/Theta e SARIMA (statsmodels, statsforecast). Bons em séries longas e sazonais; baratos em CU.
 3. **Séries esparsas/intermitentes:** Croston, SBA, TSB. Prováveis para compartimento e equipamento com poucas coletas.
 4. **Hierárquicos:** reconciliação Cliente → Equipamento → Compartimento (MinT/bottom-up), para que os níveis somem de forma coerente.
+   - *T13 (offline, implementado):* `src/models/hierarquia.py` com bottom-up, top-down por proporções históricas (janela opcional; cliente sem volume divide igualmente) e agregação por tipo de equipamento, setor e segmento; `tests/test_hierarquia.py` prova que os níveis somam e que segmento = soma dos clientes (`python -m pytest`: 35 passed). MinT fica como extensão documentada na docstring do módulo, não implementada (exige previsões em todos os níveis, de T10/T11, e covariância dos erros).
 5. **ML tabular global:** LightGBM/XGBoost com features de lag, sazonalidade e segmento; regressão quantílica para p10/p50/p90. Costuma ser o melhor custo-benefício para muitas séries curtas.
 6. **Probabilístico/híbrido:** modelo de vida útil (horas até a próxima coleta) combinado com previsão de uso do horímetro; e modelo de sobrevivência para churn/reativação.
 7. **Classificação e detecção de mudança de regime (proposta do Rafael, 21/10):** classificar clientes antes de prever (árvores/floresta) e detectar mudança de ponto em séries de receita (changepoint, ex.: PELT). Modelo de sobrevivência/vida útil para frota inativa por segmento.

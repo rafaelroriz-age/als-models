@@ -196,7 +196,7 @@ Tarefa T12 do BACKLOG.md. Leia AGENTS.md, docs_fabric/05_criterios_sucesso.md e 
 ```
 
 ### T13 · Reconciliação hierárquica Cliente → Equipamento → Compartimento
-- **Status:** todo
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
