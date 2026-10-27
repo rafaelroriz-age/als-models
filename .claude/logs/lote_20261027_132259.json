@@ -1,0 +1,50 @@
+[
+  {
+    "tarefa": "T01",
+    "modelo": "haiku",
+    "effort": "low",
+    "retorno": "backgrounded · c498fc90 · backlog-T01\n  claude agents             list sessions\n  claude attach c498fc90    open in this terminal\n  claude logs c498fc90      show recent output\n  claude stop c498fc90      stop this session\nStarting background service…"
+  },
+  {
+    "tarefa": "T25",
+    "modelo": "opus",
+    "effort": "high",
+    "retorno": "backgrounded · 6f012389 · backlog-T25\n  claude agents             list sessions\n  claude attach 6f012389    open in this terminal\n  claude logs 6f012389      show recent output\n  claude stop 6f012389      stop this session"
+  },
+  {
+    "tarefa": "T06",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · 1e29e9d3 · backlog-T06\n  claude agents             list sessions\n  claude attach 1e29e9d3    open in this terminal\n  claude logs 1e29e9d3      show recent output\n  claude stop 1e29e9d3      stop this session"
+  },
+  {
+    "tarefa": "T08",
+    "modelo": "haiku",
+    "effort": "low",
+    "retorno": "backgrounded · 6229b968 · backlog-T08\n  claude agents             list sessions\n  claude attach 6229b968    open in this terminal\n  claude logs 6229b968      show recent output\n  claude stop 6229b968      stop this session"
+  },
+  {
+    "tarefa": "T09",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · 6537d5a8 · backlog-T09\n  claude agents             list sessions\n  claude attach 6537d5a8    open in this terminal\n  claude logs 6537d5a8      show recent output\n  claude stop 6537d5a8      stop this session"
+  },
+  {
+    "tarefa": "T10",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · 1dd12d97 · backlog-T10\n  claude agents             list sessions\n  claude attach 1dd12d97    open in this terminal\n  claude logs 1dd12d97      show recent output\n  claude stop 1dd12d97      stop this session"
+  },
+  {
+    "tarefa": "T12",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · bebf910c · backlog-T12\n  claude agents             list sessions\n  claude attach bebf910c    open in this terminal\n  claude logs bebf910c      show recent output\n  claude stop bebf910c      stop this session"
+  },
+  {
+    "tarefa": "T23",
+    "modelo": "haiku",
+    "effort": "low",
+    "retorno": "backgrounded · 6891bb3f · backlog-T23\n  claude agents             list sessions\n  claude attach 6891bb3f    open in this terminal\n  claude logs 6891bb3f      show recent output\n  claude stop 6891bb3f      stop this session"
+  }
+]

@@ -1,0 +1,11 @@
+Nada em andamento.
+Lote de 8 tarefas:
+  T01  [baixa → haiku/low/US$1] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T25  [alta → opus/high/US$8] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T06  [media → sonnet/medium/US$3] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T08  [baixa → haiku/low/US$1] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T09  [media → sonnet/medium/US$3] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T10  [media → sonnet/medium/US$3] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T12  [media → sonnet/medium/US$3] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+  T23  [baixa → haiku/low/US$1] FALHOU (código 1): --bg with bypassPermissions requires accepting the disclaimer first. Run `claude --dangerously-skip-permissions` once interactively.
+Nada em andamento nem liberado. Fim.
