@@ -78,7 +78,7 @@ Tarefa T03 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §2. Com os dados reai
 ```
 
 ### T04 · Preencher a matriz de cobertura dos insumos
-- **Status:** doing
+- **Status:** done
 - **Papel:** @analista-dados
 - **Depende:** T02, T03
 - **Ambiente:** fabric
