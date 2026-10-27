@@ -71,6 +71,15 @@ Cada gate é um conjunto de expectations (Great Expectations) que **bloqueia** a
 - **Backtest:** MAPE/MAE por mês, segmento e cliente desde 2022 vs. baselines; curva de convergência semanal.
 - **FinOps:** CU por execução e por consulta MCP/DirectLake.
 
+### 4.1 Features de série por entidade × mês (T07, `src/features/series.py`)
+
+`gerar_features(mensal, ate=None, p=ParametrosSeries())` recebe `entidade, periodo, valor[, segmento]`, completa os meses sem registro com 0 (`completar_meses`) e devolve `valor` (alvo) mais: `lag_1/2/3/12`, `mm_3/mm_12`, `tendencia_6` (inclinação OLS dos 6 meses anteriores), `mes_sin/mes_cos`, `segmento` (último conhecido) e `status` (`classificar_clientes` de `regras.py` com corte no fim do mês anterior; `sem_historico` na 1ª observação).
+
+- **Sem vazamento:** toda janela parte de `valor.shift(1)`; lags usam só `shift(k≥1)`.
+- **Parâmetros (RN não aprovada):** `ParametrosSeries` expõe lags, janelas, janela da tendência, `janela_completa` (False aceita média móvel parcial), `incluir_status` (RN-03/RN-04, churn "a validar") e `recorrencia` (`ParametrosRecorrencia`: 6 meses/90 dias/6 meses de churn).
+- **Testes** (`tests/test_series.py`, dados sintéticos, 7 casos): valores conhecidos de lags/MM/tendência, janela parcial vs. cheia, sazonalidade/segmento/zeros, status, e dois testes de vazamento: (1) somar 1e6 a um mês não altera nenhuma feature de meses ≤ ele; (2) truncar o histórico antes do mês alvo (`ate=alvo`) reproduz as mesmas features. `python -m pytest`: 31 passed.
+- **Limite conhecido:** o status roda `classificar_clientes` uma vez por mês (custo ~ meses × clientes); medir no volume real (T14).
+
 ## 5. Ordem de execução
 
 1. Fase 0: `scripts/fabric_probe.py` → preencher `specs/01_origens_dados.md` e [08](08_dicionario_de_dados.md); notebooks `00_validacao` definem os G0/G1 reais.
