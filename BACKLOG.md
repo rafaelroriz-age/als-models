@@ -166,7 +166,7 @@ Tarefa T08 do BACKLOG.md. Leia AGENTS.md, docs_fabric/10 (RN-05 e RN-06), docs_f
 ```
 
 ### T09 · Classificação de clientes (Fase 1b) sobre o Customer Status
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
