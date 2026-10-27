@@ -12,6 +12,7 @@ dependencies = ["pandas>=2.0", "numpy", "pyarrow", "openpyxl"]
 [project.optional-dependencies]
 local = ["pyodbc", "azure-identity", "requests"]
 dev = ["pytest"]
+ml = ["lightgbm>=4.0"]
 
 [tool.setuptools.packages.find]
 include = ["src", "src.*"]
