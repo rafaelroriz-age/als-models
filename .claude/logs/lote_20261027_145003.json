@@ -1,0 +1,14 @@
+[
+  {
+    "tarefa": "T15",
+    "modelo": "opus",
+    "effort": "high",
+    "retorno": "backgrounded · 0231dea1 · backlog-T15\n  claude agents             list sessions\n  claude attach 0231dea1    open in this terminal\n  claude logs 0231dea1      show recent output\n  claude stop 0231dea1      stop this session"
+  },
+  {
+    "tarefa": "T17",
+    "modelo": "opus",
+    "effort": "high",
+    "retorno": "backgrounded · d5511f65 · backlog-T17\n  claude agents             list sessions\n  claude attach d5511f65    open in this terminal\n  claude logs d5511f65      show recent output\n  claude stop d5511f65      stop this session"
+  }
+]

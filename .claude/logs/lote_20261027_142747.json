@@ -1,0 +1,14 @@
+[
+  {
+    "tarefa": "T04",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · b4f0b99c · backlog-T04\n  claude agents             list sessions\n  claude attach b4f0b99c    open in this terminal\n  claude logs b4f0b99c      show recent output\n  claude stop b4f0b99c      stop this session\nStarting background service…"
+  },
+  {
+    "tarefa": "T14",
+    "modelo": "opus",
+    "effort": "high",
+    "retorno": "backgrounded · e60fda82 · backlog-T14\n  claude agents             list sessions\n  claude attach e60fda82    open in this terminal\n  claude logs e60fda82      show recent output\n  claude stop e60fda82      stop this session"
+  }
+]

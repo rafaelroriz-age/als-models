@@ -1,0 +1,8 @@
+[
+  {
+    "tarefa": "T16",
+    "modelo": "opus",
+    "effort": "high",
+    "retorno": "backgrounded · 4afc4625 · backlog-T16\n  claude agents             list sessions\n  claude attach 4afc4625    open in this terminal\n  claude logs 4afc4625      show recent output\n  claude stop 4afc4625      stop this session"
+  }
+]
