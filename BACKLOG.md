@@ -106,7 +106,7 @@ Tarefa T05 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §3, docs_fabric/10 (RN
 ```
 
 ### T25 · Executor de notebooks no Fabric via API (sem depender da porta 1433)
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** fabric
