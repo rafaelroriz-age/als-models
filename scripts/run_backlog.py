@@ -4,7 +4,8 @@ Uso:
     python scripts/run_backlog.py run    [--ambiente offline|fabric|humano] [--model X] [--dry]
     python scripts/run_backlog.py colher [--dry]     # commita, faz merge na main e marca done o que terminou
     python scripts/run_backlog.py auto   [--ambiente X] [--intervalo 120]   # colher + run em loop
-    python scripts/run_backlog.py status              # imprime e regenera PROGRESSO.md
+    python scripts/run_backlog.py restart [T01 T02 ...] [--dry] [--auto]   # recomeça tarefas doing/blocked
+    python scripts/run_backlog.py status             # imprime e regenera PROGRESSO.md
 O modelo, o esforço e o teto de gasto vêm do campo `Dificuldade` de cada tarefa (tabela ROTA).
 Acompanhar: `claude agents`, `claude logs <id>`, `claude attach <id>`, `claude stop <id>`.
 """
@@ -197,6 +198,50 @@ def cmd_colher(args):
     return feitas
 
 
+def cmd_restart(args):
+    """Descarta sessão, worktree e branch de tarefas travadas e as devolve para `todo`."""
+    linhas, tarefas = ler()
+    exe = achar_claude()
+    sessoes = {s.get("name"): s for s in (sessoes_ativas(exe) if exe else [])}
+    if args.ids:
+        alvo = args.ids
+    else:
+        alvo = [i for i, t in tarefas.items() if t["status"] in ("doing", "blocked")
+                and (args.forcar or sessoes.get(f"backlog-{i}", {}).get("status") != "busy")]
+        poupadas = [i for i, t in tarefas.items() if t["status"] == "doing" and i not in alvo]
+        if poupadas:
+            print(f"  Poupadas por estarem trabalhando (use --forcar ou cite o id): {', '.join(poupadas)}")
+    desconhecidas = [i for i in alvo if i not in tarefas]
+    if desconhecidas:
+        sys.exit(f"Tarefas inexistentes: {', '.join(desconhecidas)}")
+    feitas = [i for i in alvo if tarefas[i]["status"] == "done"]
+    if feitas:
+        sys.exit(f"{', '.join(feitas)} já está done (integrada na main); não há o que reiniciar.")
+    if not alvo:
+        print("Nenhuma tarefa doing/blocked para reiniciar.")
+    else:
+        for tid in alvo:
+            nome, branch = f"backlog-{tid}", f"worktree-backlog-{tid}"
+            perdidos = len(git("log", "--oneline", f"main..{branch}").stdout.split("\n")) - 1 if (WORKTREES / nome).exists() else 0
+            print(f"  {tid}  {'(simulação) ' if args.dry else ''}reinicia"
+                  + (f" (descarta {perdidos} commit(s) não integrados)" if perdidos > 0 else ""))
+            if args.dry:
+                continue
+            s = sessoes.get(nome)
+            if s and exe:
+                subprocess.run([exe, "stop", s["id"]], capture_output=True)
+                subprocess.run([exe, "rm", s["id"]], capture_output=True)
+            if (WORKTREES / nome).exists():
+                git("worktree", "remove", "-f", "-f", str(WORKTREES / nome))
+            git("worktree", "prune")
+            git("branch", "-D", branch)
+            gravar_status(linhas, tarefas, tid, "todo")
+        if not args.dry:
+            commitar_controle("backlog: reinicia " + ", ".join(alvo))
+    if args.auto and not args.dry:
+        cmd_auto(argparse.Namespace(ambiente=args.ambiente, intervalo=args.intervalo))
+
+
 def cmd_auto(args):
     while True:
         cmd_colher(argparse.Namespace(dry=False))
@@ -259,11 +304,18 @@ def main():
     p = sub.add_parser("auto")
     p.add_argument("--ambiente", choices=("offline", "fabric", "humano"), help="sem o filtro, dispara todos")
     p.add_argument("--intervalo", type=int, default=120, help="segundos entre verificações")
+    p = sub.add_parser("restart", help="recomeça tarefas travadas (doing/blocked); sem ids, todas elas")
+    p.add_argument("ids", nargs="*")
+    p.add_argument("--dry", action="store_true")
+    p.add_argument("--forcar", action="store_true", help="inclui também as sessões que estão trabalhando")
+    p.add_argument("--auto", action="store_true", help="depois de reiniciar, retoma o fluxo automático")
+    p.add_argument("--ambiente", choices=("offline", "fabric", "humano"))
+    p.add_argument("--intervalo", type=int, default=120)
     sub.add_parser("status")
     args = ap.parse_args()
     if sys.platform.startswith("win"):
         sys.stdout.reconfigure(encoding="utf-8")
-    {"run": cmd_run, "colher": cmd_colher, "auto": cmd_auto, "status": cmd_status}[args.cmd](args)
+    {"run": cmd_run, "colher": cmd_colher, "auto": cmd_auto, "restart": cmd_restart, "status": cmd_status}[args.cmd](args)
 
 
 if __name__ == "__main__":
