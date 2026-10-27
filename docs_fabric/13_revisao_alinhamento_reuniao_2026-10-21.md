@@ -27,8 +27,39 @@ Todas as hipóteses abaixo serão prototipadas e comparadas por acurácia (backt
 |---|----------|-------------------------|
 | H1 | Papel das oportunidades >80% do Zoho no forecast | (a) somam ao forecast, como no Power BI atual; (b) só descontam, no cross-check. **27/10 (T17, parcial):** `src/features/receita.py` separa o realizado total do realizado em escopo (recorrente + não recorrente ativo no corte), que é a base para medir a dupla contagem na T18. **27/10 (T18, código pronto, resultado pendente):** `src/features/crosscheck.py` + `notebooks/30_kpi2_vendas/32_crosscheck_zoho.py` comparam, por corte mensal (ago/25–ago/26) e horizonte 1–3, quatro variantes sobre o Forecast 27 calculado dos dados: só base, base + oportunidades >80% (soma), base + só as de entidades fora do escopo (desconta_escopo) e base − o que a base já projeta por entidade (desconta_parcial); mede WAPE/viés e a parte das oportunidades em entidades já projetadas. Testes em `tests/test_crosscheck.py` (5 passam). **A execução em dados reais foi interrompida por falta de memória da máquina e não deu número**; reexecutar o notebook (cerca de 20 min; consulta de `silver_zoho.deals` só SELECT) antes de fechar a hipótese. Ressalvas: o Zoho guarda só o estado atual do negócio (probabilidade final, não a do corte); `valor` do negócio parece ser valor do contrato (Closed Won soma R$ 921 mi contra R$ 179 mi faturados), por isso há o cenário rateado pelo prazo; `valor_ponderado` da T14 usa a probabilidade final, e 2.118 negócios ganhos ficaram com 50% |
 | H2 | O que a receita representa | (a) venda de kit/pacote; (b) análise processada. **27/10 (T17, parcial, dados da T14 em `data/base`):** no Protheus (ago/24–out/26), CFOP x933 (serviço/análise) = R$ 83,1 mi, x949 (outras saídas) = R$ 55,1 mi e x102 (venda de mercadoria/kit) = R$ 31,4 mi. Só 1.315 de 7.424 entidades têm amostras e faturamento. Funções prontas: kit × análise por CFOP, R$/amostra, correlação defasada consumo × receita. **Falta rodar a correlação e o backtest do Forecast 27 (notebook 30_kpi2_vendas)**. EBIT sem fonte na tabela-base (D2) |
-| H3 | Formato de entrega | (a) dashboard HTML + acesso SQL às tabelas de saída; (b) modelo semântico (DirectLake); (c) API/MCP **27/10 (T20, protótipo (a) com dados SINTÉTICOS, a saída da T15 não existia):** `src/serving/exemplo/dashboard_sintetico.html` (1 arquivo, ~0,5 MB, sem backend nem recurso externo) mostra Real (realizado + p50 previsto) × Potencial, faixa p10–p90, % Achieved, filtros de segmento, mês/semana e período, tabela por cliente/equipamento e alertas de queda >20% e churn de compartimento. Para o cliente decidir: (a) entrega o resultado já, mas é um retrato estático (dados embutidos, atualização = regerar o arquivo), sem pergunta aberta; as mesmas tabelas ficam acessíveis por SQL (`src/serving/sql/01_forecast_consumo.sql`, proposta não executada); (b) e (c) permitiriam filtro/consulta ao vivo e o agente do CRM, que o HTML não faz. Limitações: números fictícios; p10/p90 do nível segmento exigem reconciliação (T13), somar quantis não vale; o protótipo não mede custo em CU nem latência (T21) |
+| H3 | Formato de entrega | (a) dashboard HTML + acesso SQL às tabelas de saída; (b) modelo semântico (DirectLake); (c) API/MCP **27/10 (T20, protótipo (a) com dados SINTÉTICOS, a saída da T15 não existia):** `src/serving/exemplo/dashboard_sintetico.html` (1 arquivo, ~0,5 MB, sem backend nem recurso externo) mostra Real (realizado + p50 previsto) × Potencial, faixa p10–p90, % Achieved, filtros de segmento, mês/semana e período, tabela por cliente/equipamento e alertas de queda >20% e churn de compartimento. Para o cliente decidir: (a) entrega o resultado já, mas é um retrato estático (dados embutidos, atualização = regerar o arquivo), sem pergunta aberta; as mesmas tabelas ficam acessíveis por SQL (`src/serving/sql/01_forecast_consumo.sql`, proposta não executada); (b) e (c) permitiriam filtro/consulta ao vivo e o agente do CRM, que o HTML não faz. Limitações: números fictícios; p10/p90 do nível segmento exigem reconciliação (T13), somar quantis não vale; o protótipo não mede custo em CU nem latência (T21). **27/10 (T21):** comparativo com (b) e (c) — ver "H3 · Comparativo de entrega" abaixo |
 | H4 | Regra de recorrência: última compra <90 dias é E ou OU | **Resolvida: E** (texto do Forecast 27; Customer Status dá 233 só com ≥6 meses vs 231 com E). Ver [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) |
+
+### H3 · Comparativo de entrega (T21, 27/10)
+
+Base: protótipo (a) da T20 (`src/serving/dashboard.py`, dados sintéticos, sem medição de CU). Avaliação por leitura e estimativa; o que depende de medição está marcado como **a medir (T22)**.
+
+| Critério | (a) Dashboard HTML + SQL | (b) Modelo semântico (DirectLake) | (c) API / MCP |
+|---|---|---|---|
+| **O que entrega** | Um arquivo HTML com dados embutidos; mesmas tabelas por SQL (`src/serving/sql/01_forecast_consumo.sql`) | Relatório Power BI e medidas DAX sobre `als_*` na Gold, com Direct Lake | Endpoint ou MCP (`07`) que devolve previsão + intervalo sob pergunta |
+| **Esforço para entregar** | Baixo: já existe. Falta ligar à saída real da T15/T16 e criar as tabelas `als_*` | Médio: modelo, medidas (WAPE, % Achieved, faixa p10–p90), RLS por segmento, publicação | Alto: serviço, service principal com escopo mínimo, testes de contrato, configuração do cliente MCP no agente |
+| **Custo em CU (F8)** | Baixo e pontual: a consulta roda só ao gerar o arquivo (no pipeline). **A medir (T22)** | Consumo por carga do modelo e por consulta DAX; com agregados na Gold fica leve. **A medir (T22)** | Mesmo custo do semântico/SQL por consulta, somado ao do agente (LLM fica fora da F8). Custo por pergunta cresce com o uso. **A medir (T22)** |
+| **Manutenção** | Alta: regerar o arquivo a cada corte; mudança de contrato quebra o gerador; sem histórico de versão | Média: atualização pelo pipeline; medidas e RLS versionadas no modelo | Média-alta: contrato de API, segredos, auditoria de consultas, evolução do agente |
+| **Latência** | Abrir o arquivo: imediata. Sem consulta ao vivo | Segundos (cache do Direct Lake e de visual); bom para filtros | Segundos por pergunta (consulta + composição da resposta do agente) |
+| **Aderência ao agente do CRM (longo prazo)** | Baixa: não é consultável por agente; o SQL serve mas sem camada de negócio | Alta: Fabric data agent ou `Fabric-Analytics-MCP` consultam o semântico direto (`07`, critérios) | Alta e direta: é a própria interface do agente |
+| **Risco principal** | Parecer entrega final e ficar desatualizada; número fictício virar referência | Dependência de licença/capacidade para os leitores; medidas DAX pesadas | Custo e superfície de dados crescem sem controle se o contrato não for estreito |
+
+**Leitura.** (a) entrega algo hoje, mas não é caminho de longo prazo. (b) é o ponto de encontro: resolve o relatório e serve de base para o agente via data agent ou MCP fino, sem duplicar regra de negócio. (c) só se justifica quando o agente existir; antes disso é custo sem usuário.
+
+**Recomendação (T21):** (b) como entrega principal, construído sobre as tabelas `als_*` da Gold (agregados pré-calculados, como pede `07`). Manter (a) apenas como retrato provisório para a revisão com o cliente, sem uso operacional. Deixar (c) para a fase do agente do CRM, por cima do semântico. Confirmar a escolha só depois da medição de CU na T22.
+
+**Perguntas objetivas para o cliente decidir:**
+1. Os leitores do relatório têm licença Power BI (Pro ou PPU) ou o acesso será pela capacidade F8? Quantos usuários?
+2. O agente do CRM entra no escopo desta entrega ou é fase seguinte?
+3. A cadência semanal é requisito ou desejável (hoje é pendência da §5)?
+4. Basta um relatório com filtros de segmento e período, ou é preciso consulta ao vivo por cliente?
+5. Aceita o HTML estático como entrega provisória para a revisão, sabendo que os números do protótipo são fictícios?
+6. Há janela de CU livre na F8 para o pipeline de forecast e o consumo de consultas (pendência da §5)?
+7. A publicação vai para produção ou primeiro para um workspace de desenvolvimento (T23)?
+
+**Nota do fechamento (27/10):** a T22 já concluiu, mas mediu o custo de treino e previsão dos modelos (forecast mensal ≈ 150–1.000 CU-s, ver [06](06_plano_execucao.md) Fase 5), não o custo de consulta do semântico/SQL nem a latência. Os "a medir (T22)" acima seguem em aberto como item novo da Fase 5.
+
+**Pendente:** medir CU e latência reais de consulta com as tabelas da T15/T16; validar o contrato `als_*` com o time de dados antes de criar qualquer objeto no Fabric.
 
 ## 3. Descobertas por dados (engenharia reversa)
 
@@ -125,6 +156,7 @@ Composição dos inativos em 27/10/2026: 40.800 com flag 0, 463.941 com flag 1 e
 | Perguntas "ao cliente" já respondidas ou viradas em descoberta | Removidas dos docs 03, 06, 10 e 12 |
 | Grafia "Proteus" | Unificada para "Protheus" (exceto doc 00, fiel ao PDF) |
 | `LEIA-ME` desatualizado | Índice completo |
+| Integração da T21 com conflito em 07 e 13 (T20 e T21 editaram a mesma seção de H3) | Resolvido à mão (27/10): mantidos o protótipo H3a da T20 e o comparativo da T21 em 07; em 13, a linha H3 da T20 ganhou a referência ao quadro da T21 |
 
 **Mantidos como estão:** `documentacao-tecnica.md` e `00_escopo_original.md` (fiéis à fonte), planilhas convertidas e a transcrição.
 **27/10 (T24):** o `.md` da apresentação foi reescrito com o escopo atual (KPI 1 Real/Potencial; KPI 2 com faturamento e EBIT separados; novos e reativados fora; % Achieved de D6; entrega por protótipos H3; decisões D1–D12).
@@ -135,7 +167,8 @@ Composição dos inativos em 27/10/2026: 40.800 com flag 0, 463.941 com flag 1 e
 - Meta numérica de acurácia (MAPE) por KPI e horizontes de previsão.
 - Cadência exigida: semanal é requisito ou desejável?
 - Hierarquia matriz/filial do Zoho utilizável para agrupar clientes (ex.: 8 usinas de um grupo)?
-- Janela de CU livre na F8 para agendar pipelines.
+- Janela de CU livre na F8 para agendar pipelines. A T22 estimou a necessidade (forecast mensal 15–20 min de notebook de 2 vCores; backtest trimestral ≈ 35 min sem ETS); falta o time informar a janela livre.
+- Escolha do formato de entrega (H3): a T21 recomenda (b) modelo semântico; o cliente decide com as 7 perguntas de §2.
 - Fórmula original do Annual Sample Potential (R1): os dados não a reproduzem; o potencial de Customer Status é valor colado, com 26% dos clientes abaixo do realizado de FY25. Confirmar com o Bahia.
 - Regra de grupo do ERP ID (R9): o código de 6 dígitos do S360/Zoho seria o código Protheus + 1 dígito de filial (`A19129` + `5`). Confirmar com o time de dados.
 - Por que 49,5% dos grupos Protheus (55,2% do faturamento) não têm cliente no S360 (R9): venda de peças, intercompany, cliente sem coleta ou código guardado de outro jeito. Não apurado.

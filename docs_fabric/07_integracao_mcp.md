@@ -105,3 +105,8 @@ Se o MCP for escolhido, adicionar à **Fase 5 — Entrega e handoff**:
 - **Contrato:** `COLUNAS_FORECAST` (nível segmento/cliente/equipamento × mês/semana: `realizado`, `prev_p10/p50/p90`, `potencial`) e `COLUNAS_ALERTAS` (queda RN-05 e churn RN-06) em `src/serving/dashboard.py`; aceita CSV ou parquet.
 - **SQL:** `src/serving/sql/01_forecast_consumo.sql` (T-SQL de leitura; tabelas `als_*` de entrada são propostas, ainda inexistentes no Fabric).
 - **Testes:** `tests/test_serving.py`. Pendente: ligar à saída real da T15/T16 quando existir.
+
+## Comparativo das três opções de entrega (T21, 27/10)
+
+- Quadro (a) dashboard HTML + SQL, (b) modelo semântico, (c) API/MCP, com esforço, manutenção, latência, aderência ao agente do CRM e riscos: [13 §2, H3](13_revisao_alinhamento_reuniao_2026-10-21.md).
+- Recomendação: (b) como entrega principal, sobre as tabelas `als_*` da Gold; (c) na fase do agente, por cima do semântico (data agent ou `Fabric-Analytics-MCP`). CU e latência reais ainda não medidos (T22).

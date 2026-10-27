@@ -342,7 +342,7 @@ Tarefa T20 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §2 (H3), docs_fabric/0
 ```
 
 ### T21 · Comparativo das opções de entrega
-- **Status:** doing
+- **Status:** done
 - **Papel:** @gestor-projetos
 - **Depende:** T20
 - **Ambiente:** offline

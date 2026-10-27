@@ -2,7 +2,7 @@
 
 > Gerado por `python scripts/run_backlog.py status` a partir do [BACKLOG.md](BACKLOG.md). Não edite à mão.
 
-Atualizado em 27/10/2026 18:08 · **24/25 concluídas** · 1 em andamento · 0 a fazer · 0 bloqueadas
+Atualizado em 27/10/2026 19:13 · **25/25 concluídas** · 0 em andamento · 0 a fazer · 0 bloqueadas
 
 ## Próximo lote (pode rodar em paralelo)
 
@@ -10,7 +10,7 @@ Atualizado em 27/10/2026 18:08 · **24/25 concluídas** · 1 em andamento · 0 a
 
 ## Sessões em background agora
 
-- backlog-T21: busy
+- nenhuma
 
 ## Bloco A — Acesso e Fase 0 (dados reais) (6/6)
 
@@ -47,12 +47,12 @@ Atualizado em 27/10/2026 18:08 · **24/25 concluídas** · 1 em andamento · 0 a
 | ✅ | **T18** KPI 2: cross-check com Zoho sem dupla contagem | @especialista-dados | fabric | media | T17 |
 | ✅ | **T19** Documento de decisão de modelos | @cientista-dados | offline | media | T15, T17 |
 
-## Bloco D — Entrega (2/3)
+## Bloco D — Entrega (3/3)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
 | ✅ | **T20** Protótipo H1: dashboard HTML + SQL | @engenheiro-ia | offline | media | T15 |
-| 🔄 | **T21** Comparativo das opções de entrega | @gestor-projetos | offline | baixa | T20 |
+| ✅ | **T21** Comparativo das opções de entrega | @gestor-projetos | offline | baixa | T20 |
 | ✅ | **T22** FinOps: custo em CU por experimento | @engenheiro-software | fabric | media | T15 |
 
 ## Bloco E — Decisões e comunicação (2/2)

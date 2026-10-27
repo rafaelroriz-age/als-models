@@ -75,6 +75,8 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 
 ### Fase 5 — Entrega e handoff
 - [x] Protótipos de entrega: **T20 (27/10)** — dashboard HTML estático com dados sintéticos (Real/Potencial, p10–p90, % Achieved, filtros por segmento/mês/período, tabela por cliente/equipamento, alertas); `src/serving/dashboard.template.html` e exemplo em `exemplo/dashboard_sintetico.html`. SQL da saída não executado. Alternativas (b) semântico e (c) API/MCP em aberto ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2, H3). Pipeline agendada pendente da escolha do cliente.
+- [x] Comparativo das opções de entrega: **T21 (27/10)** — quadro (a) HTML + SQL × (b) semântico × (c) API/MCP em [13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2 (H3). Recomendação: (b) como entrega principal sobre `als_*` da Gold, (a) só como retrato provisório, (c) na fase do agente do CRM. Escolha final é do cliente (7 perguntas no 13).
+- [ ] Medir CU e latência de consulta do semântico/SQL com as tabelas reais da T15/T16 (a T22 mediu só o custo de treino/previsão dos modelos).
 - [x] FinOps: custo × acurácia dos modelos escolhidos (T22, proxy tempo × vCores; detalhe abaixo; refazer com a métrica de capacidade na F8).
 - Documentação de premissas/limitações e handoff.
 
