@@ -74,7 +74,7 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 - Great Expectations / pytest nos pipelines.
 
 ### Fase 5 — Entrega e handoff
-- Protótipos de entrega (HTML + SQL, semântico, API/MCP) e escolha do cliente; pipeline agendada.
+- [x] Protótipos de entrega: **T20 (27/10)** — dashboard HTML estático com dados sintéticos (Real/Potencial, p10–p90, % Achieved, filtros por segmento/mês/período, tabela por cliente/equipamento, alertas); `src/serving/dashboard.template.html` e exemplo em `exemplo/dashboard_sintetico.html`. SQL da saída não executado. Alternativas (b) semântico e (c) API/MCP em aberto ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2, H3). Pipeline agendada pendente da escolha do cliente.
 - [x] FinOps: custo × acurácia dos modelos escolhidos (T22, proxy tempo × vCores; detalhe abaixo; refazer com a métrica de capacidade na F8).
 - Documentação de premissas/limitações e handoff.
 
