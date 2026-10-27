@@ -240,7 +240,7 @@ Tarefa T13 do BACKLOG.md. Leia AGENTS.md e a Etapa 3 de docs_fabric/12 (item hie
 ## Bloco C — Modelagem com dados reais
 
 ### T14 · Tabela-base por entidade e mês
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** T03, T07
 - **Ambiente:** fabric
