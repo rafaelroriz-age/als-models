@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forecast de Consumo ALS</title>
+<style>
+:root{--bg:#fafaf9;--card:#fff;--fg:#1c1917;--mut:#6b6560;--line:#e7e5e4;--real:#2563eb;--pot:#d97706;--band:rgba(37,99,235,.16);--bad:#b91c1c;--warn:#a16207}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1f1e1c;--fg:#f5f5f4;--mut:#a8a29e;--line:#34312e;--real:#60a5fa;--pot:#fbbf24;--band:rgba(96,165,250,.2);--bad:#f87171;--warn:#facc15}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;margin:0 0 8px}
+.aviso{background:#fef3c7;color:#78350f;border:1px solid #f59e0b;border-radius:6px;padding:8px 12px;margin:8px 0}
+.barra{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:2px}
+select{padding:5px 8px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
+.kpi b{display:block;font-size:22px}.kpi span{font-size:12px;color:var(--mut)}
+svg{width:100%;height:auto;display:block}
+.leg{display:flex;gap:16px;font-size:12px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+.leg i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+.tag{font-size:11px;padding:1px 6px;border-radius:10px;border:1px solid currentColor}
+.queda{color:var(--bad)}.churn{color:var(--warn)}
+.tabela{overflow-x:auto}
+</style>
+</head>
+<body>
+<main>
+<h1>Forecast de consumo de amostras</h1>
+<div id="aviso"></div>
+<div class="barra">
+  <label>Segmento<select id="fSeg"></select></label>
+  <label>Granularidade<select id="fGran"><option value="mes">Mês</option><option value="semana">Semana</option></select></label>
+  <label>De<select id="fDe"></select></label>
+  <label>Até<select id="fAte"></select></label>
+  <label>Nível da tabela<select id="fNivel"><option value="cliente">Cliente</option><option value="equipamento">Equipamento</option></select></label>
+</div>
+<div class="kpis" id="kpis"></div>
+<div class="card"><h2>Consumo Real × Potencial (soma do filtro)</h2><div id="graf"></div>
+<div class="leg"><span><i style="background:var(--real)"></i>Realizado / previsto (p50)</span><span><i style="background:var(--band)"></i>Intervalo p10–p90</span><span><i style="background:var(--pot)"></i>Potencial</span></div></div>
+<div class="card"><h2>Alertas abertos</h2><div class="tabela" id="alertas"></div></div>
+<div class="card"><h2 id="tTit"></h2><div class="tabela" id="tab"></div></div>
+</main>
+<script id="dados" type="application/json">__DADOS__</script>
+<script>
+const D=JSON.parse(document.getElementById('dados').textContent);
+const mk=t=>t.rows.map(r=>Object.fromEntries(t.cols.map((c,i)=>[c,r[i]])));
+const F=mk(D.forecast),A=mk(D.alertas);
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>v==null?'–':v.toLocaleString('pt-BR',{maximumFractionDigits:d});
+const soma=(a,k)=>a.some(r=>r[k]!=null)?a.reduce((s,r)=>s+(r[k]||0),0):null;
+if(D.sintetico)$('aviso').innerHTML='<div class="aviso"><b>DADOS SINTÉTICOS</b> — protótipo H3a (T20). Os números não vêm do Fabric nem do backtest da T15.</div>';
+const segs=[...new Set(F.filter(r=>r.nivel==='segmento').map(r=>r.entidade_id))].sort();
+$('fSeg').innerHTML='<option value="">Todos</option>'+segs.map(s=>`<option>${s}</option>`).join('');
+function periodos(){const g=$('fGran').value;return [...new Set(F.filter(r=>r.granularidade===g).map(r=>r.periodo))].sort()}
+function preencherPeriodos(){const p=periodos(),de=$('fDe'),ate=$('fAte');
+  const o=p.map(x=>`<option>${x}</option>`).join('');de.innerHTML=o;ate.innerHTML=o;de.value=p[0];ate.value=p[p.length-1]}
+function filtroSeg(r){const s=$('fSeg').value;return !s||r.segmento===s}
+function agrupar(rows,k){const m=new Map();rows.forEach(r=>{if(!m.has(r[k]))m.set(r[k],[]);m.get(r[k]).push(r)});return m}
+function render(){
+  const g=$('fGran').value,de=$('fDe').value,ate=$('fAte').value;
+  const base=F.filter(r=>r.granularidade===g&&r.periodo>=de&&r.periodo<=ate&&filtroSeg(r));
+  const cli=base.filter(r=>r.nivel==='cliente');
+  const porP=[...agrupar(cli,'periodo')].sort((a,b)=>a[0]<b[0]?-1:1).map(([p,a])=>({p,real:soma(a,'realizado'),p10:soma(a,'prev_p10'),p50:soma(a,'prev_p50'),p90:soma(a,'prev_p90'),pot:soma(a,'potencial')}));
+  const realizado=soma(cli,'realizado'),potPas=soma(cli.filter(r=>r.realizado!=null),'potencial');
+  const fut=cli.filter(r=>r.prev_p50!=null);
+  $('kpis').innerHTML=[
+    ['Realizado no período',fmt(realizado)],['% Achieved (realizado ÷ potencial)',potPas?fmt(100*realizado/potPas,1)+'%':'–'],
+    ['Previsto (p50)',fmt(soma(fut,'prev_p50'))],['Intervalo p10–p90',fmt(soma(fut,'prev_p10'))+' – '+fmt(soma(fut,'prev_p90'))]
+  ].map(([t,v])=>`<div class="card kpi"><b>${v}</b><span>${t}</span></div>`).join('');
+  grafico(porP);
+  const al=A.filter(filtroSeg);
+  $('alertas').innerHTML=al.length?'<table><tr><th>Tipo</th><th>Entidade</th><th>Segmento</th><th>Atual</th><th>Base</th><th>Variação</th><th>Detalhe</th></tr>'+
+    al.map(a=>`<tr><td><span class="tag ${a.tipo}">${a.tipo==='queda'?'queda >20%':'churn compart.'}</span></td><td>${a.entidade_nome}</td><td>${a.segmento}</td><td>${fmt(a.valor_atual)}${a.tipo==='churn'?' h':''}</td><td>${fmt(a.valor_base)}${a.tipo==='churn'?' h':''}</td><td>${a.variacao_pct==null?'–':'−'+fmt(100*a.variacao_pct,1)+'%'}</td><td>${a.detalhe}</td></tr>`).join('')+'</table>':'Nenhum alerta.';
+  const niv=$('fNivel').value;$('tTit').textContent='Por '+niv+' (soma do período filtrado)';
+  const linhas=[...agrupar(base.filter(r=>r.nivel===niv),'entidade_id')].map(([id,a])=>{
+    const re=soma(a,'realizado'),pp=soma(a.filter(r=>r.realizado!=null),'potencial'),f=a.filter(r=>r.prev_p50!=null);
+    return {n:a[0].entidade_nome,s:a[0].segmento,re,pot:soma(a,'potencial'),ach:pp?100*re/pp:null,p10:soma(f,'prev_p10'),p50:soma(f,'prev_p50'),p90:soma(f,'prev_p90')}}).sort((a,b)=>(b.p50||0)-(a.p50||0)).slice(0,25);
+  $('tab').innerHTML='<table><tr><th>Entidade</th><th>Segmento</th><th>Realizado</th><th>Potencial</th><th>% Achieved</th><th>Prev. p10</th><th>Prev. p50</th><th>Prev. p90</th></tr>'+
+    linhas.map(l=>`<tr><td>${l.n}</td><td>${l.s}</td><td>${fmt(l.re)}</td><td>${fmt(l.pot)}</td><td>${l.ach==null?'–':fmt(l.ach,1)+'%'}</td><td>${fmt(l.p10)}</td><td>${fmt(l.p50)}</td><td>${fmt(l.p90)}</td></tr>`).join('')+'</table>';
+}
+function grafico(d){
+  const W=900,H=300,m={l:48,r:12,t:10,b:28},n=d.length;if(!n){$('graf').textContent='Sem dados no período.';return}
+  const ys=d.flatMap(x=>[x.real,x.p90,x.pot].filter(v=>v!=null)),mx=Math.max(...ys,1)*1.08;
+  const X=i=>m.l+(n<2?0:i*(W-m.l-m.r)/(n-1)),Y=v=>H-m.b-v*(H-m.t-m.b)/mx;
+  const lin=k=>d.map((x,i)=>x[k]==null?null:[X(i),Y(x[k])]).filter(Boolean).map(([a,b],i)=>(i?'L':'M')+a.toFixed(1)+' '+b.toFixed(1)).join('');
+  const pf=d.map((x,i)=>[x,i]).filter(([x])=>x.p10!=null);
+  const band=pf.length?'M'+pf.map(([x,i])=>X(i).toFixed(1)+' '+Y(x.p90).toFixed(1)).join('L')+'L'+pf.slice().reverse().map(([x,i])=>X(i).toFixed(1)+' '+Y(x.p10).toFixed(1)).join('L')+'Z':'';
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Consumo real, previsto e potencial por período">`;
+  for(let k=0;k<=4;k++){const v=mx*k/4;s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${fmt(v)}</text>`}
+  const passo=Math.ceil(n/8);d.forEach((x,i)=>{if(i%passo===0)s+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--mut)">${x.p.slice(0,10)}</text>`});
+  s+=`<path d="${band}" fill="var(--band)"/><path d="${lin('pot')}" fill="none" stroke="var(--pot)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  s+=`<path d="${lin('real')}" fill="none" stroke="var(--real)" stroke-width="2.5"/><path d="${lin('p50')}" fill="none" stroke="var(--real)" stroke-width="2.5" stroke-dasharray="2 3"/>`;
+  d.forEach((x,i)=>{const v=x.real??x.p50;if(v!=null)s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="var(--real)"><title>${x.p}: ${x.real!=null?'realizado '+fmt(x.real):'p50 '+fmt(x.p50)+' (p10 '+fmt(x.p10)+' – p90 '+fmt(x.p90)+')'}; potencial ${fmt(x.pot)}</title></circle>`});
+  $('graf').innerHTML=s+'</svg>';
+}
+$('fGran').onchange=()=>{preencherPeriodos();render()};
+['fSeg','fDe','fAte','fNivel'].forEach(i=>$(i).onchange=render);
+preencherPeriodos();render();
+</script>
+</body>
+</html>

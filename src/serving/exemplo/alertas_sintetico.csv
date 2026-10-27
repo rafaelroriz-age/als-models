@@ -1,0 +1,39 @@
+tipo,nivel,entidade_id,entidade_nome,cliente_id,segmento,periodo,valor_atual,valor_base,variacao_pct,detalhe
+queda,cliente,C02,Cliente 02,C02,Construção,2026-10-01,72.0,152.0,0.5263157894736843,base: mesmo mês do ano anterior
+queda,cliente,C07,Cliente 07,C07,Mineração,2026-10-01,150.0,224.0,0.3303571428571429,base: mesmo mês do ano anterior
+churn,equipamento,C01-E1,Cliente 01 · EQ1,C01,Mineração,2026-11-01,495.0,250.0,,compartimento hidraulico
+churn,equipamento,C01-E1,Cliente 01 · EQ1,C01,Mineração,2026-11-01,346.0,250.0,,compartimento motor
+churn,equipamento,C01-E2,Cliente 01 · EQ2,C01,Mineração,2026-11-01,380.0,250.0,,compartimento motor
+churn,equipamento,C01-E3,Cliente 01 · EQ3,C01,Mineração,2026-11-01,520.0,250.0,,compartimento hidraulico
+churn,equipamento,C01-E3,Cliente 01 · EQ3,C01,Mineração,2026-11-01,284.0,250.0,,compartimento motor
+churn,equipamento,C02-E1,Cliente 02 · EQ1,C02,Construção,2026-11-01,483.0,250.0,,compartimento motor
+churn,equipamento,C02-E2,Cliente 02 · EQ2,C02,Construção,2026-11-01,312.0,250.0,,compartimento hidraulico
+churn,equipamento,C02-E2,Cliente 02 · EQ2,C02,Construção,2026-11-01,599.0,250.0,,compartimento motor
+churn,equipamento,C02-E3,Cliente 02 · EQ3,C02,Construção,2026-11-01,258.0,250.0,,compartimento hidraulico
+churn,equipamento,C03-E1,Cliente 03 · EQ1,C03,Agro,2026-11-01,537.0,250.0,,compartimento hidraulico
+churn,equipamento,C03-E1,Cliente 03 · EQ1,C03,Agro,2026-11-01,565.0,250.0,,compartimento motor
+churn,equipamento,C03-E2,Cliente 03 · EQ2,C03,Agro,2026-11-01,382.0,250.0,,compartimento hidraulico
+churn,equipamento,C03-E3,Cliente 03 · EQ3,C03,Agro,2026-11-01,475.0,250.0,,compartimento hidraulico
+churn,equipamento,C04-E1,Cliente 04 · EQ1,C04,Mineração,2026-11-01,429.0,250.0,,compartimento hidraulico
+churn,equipamento,C05-E1,Cliente 05 · EQ1,C05,Construção,2026-11-01,583.0,250.0,,compartimento hidraulico
+churn,equipamento,C05-E2,Cliente 05 · EQ2,C05,Construção,2026-11-01,281.0,250.0,,compartimento hidraulico
+churn,equipamento,C06-E1,Cliente 06 · EQ1,C06,Agro,2026-11-01,294.0,250.0,,compartimento hidraulico
+churn,equipamento,C06-E2,Cliente 06 · EQ2,C06,Agro,2026-11-01,492.0,250.0,,compartimento motor
+churn,equipamento,C06-E3,Cliente 06 · EQ3,C06,Agro,2026-11-01,428.0,250.0,,compartimento motor
+churn,equipamento,C07-E1,Cliente 07 · EQ1,C07,Mineração,2026-11-01,487.0,250.0,,compartimento hidraulico
+churn,equipamento,C07-E2,Cliente 07 · EQ2,C07,Mineração,2026-11-01,383.0,250.0,,compartimento hidraulico
+churn,equipamento,C08-E1,Cliente 08 · EQ1,C08,Construção,2026-11-01,433.0,250.0,,compartimento hidraulico
+churn,equipamento,C08-E1,Cliente 08 · EQ1,C08,Construção,2026-11-01,571.0,250.0,,compartimento motor
+churn,equipamento,C08-E2,Cliente 08 · EQ2,C08,Construção,2026-11-01,369.0,250.0,,compartimento hidraulico
+churn,equipamento,C08-E3,Cliente 08 · EQ3,C08,Construção,2026-11-01,449.0,250.0,,compartimento motor
+churn,equipamento,C09-E1,Cliente 09 · EQ1,C09,Agro,2026-11-01,572.0,250.0,,compartimento motor
+churn,equipamento,C09-E2,Cliente 09 · EQ2,C09,Agro,2026-11-01,319.0,250.0,,compartimento hidraulico
+churn,equipamento,C09-E3,Cliente 09 · EQ3,C09,Agro,2026-11-01,284.0,250.0,,compartimento motor
+churn,equipamento,C10-E1,Cliente 10 · EQ1,C10,Mineração,2026-11-01,289.0,250.0,,compartimento motor
+churn,equipamento,C10-E2,Cliente 10 · EQ2,C10,Mineração,2026-11-01,294.0,250.0,,compartimento hidraulico
+churn,equipamento,C10-E2,Cliente 10 · EQ2,C10,Mineração,2026-11-01,487.0,250.0,,compartimento motor
+churn,equipamento,C11-E1,Cliente 11 · EQ1,C11,Construção,2026-11-01,314.0,250.0,,compartimento motor
+churn,equipamento,C11-E2,Cliente 11 · EQ2,C11,Construção,2026-11-01,567.0,250.0,,compartimento motor
+churn,equipamento,C12-E1,Cliente 12 · EQ1,C12,Agro,2026-11-01,465.0,250.0,,compartimento hidraulico
+churn,equipamento,C12-E1,Cliente 12 · EQ1,C12,Agro,2026-11-01,350.0,250.0,,compartimento motor
+churn,equipamento,C12-E2,Cliente 12 · EQ2,C12,Agro,2026-11-01,312.0,250.0,,compartimento motor
