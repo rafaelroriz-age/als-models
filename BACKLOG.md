@@ -180,7 +180,7 @@ Tarefa T09 do BACKLOG.md. Leia AGENTS.md, a Fase 1b de docs_fabric/06, data/plan
 ```
 
 ### T10 · Modelos estatísticos plugáveis no harness
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
