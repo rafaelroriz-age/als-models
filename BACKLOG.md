@@ -50,7 +50,7 @@ Tarefa T01 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_probe.py, src/pipeline/
 ```
 
 ### T02 · Rodar o perfil de qualidade das tabelas-chave
-- **Status:** doing
+- **Status:** done
 - **Papel:** @analista-dados
 - **Depende:** T01
 - **Ambiente:** fabric
