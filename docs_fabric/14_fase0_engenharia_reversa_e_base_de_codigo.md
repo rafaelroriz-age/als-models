@@ -29,7 +29,7 @@
 |---|---|---|
 | Protheus `notassaida` | `cod_cliente` + `loja` | = ERP ID do Customer Status |
 | Zoho `accounts` | `erp_id`, `id_protheus`, `cnpj` | ponte Zoho ↔ Protheus |
-| S360 `cliente` | `codigo_legado`, `id_cigam`, `sam_id` | **sem CNPJ**; candidato a ERP ID: `codigo_legado` |
+| S360 `cliente` | `codigo_legado`, `id_cigam`, `sam_id` | **sem CNPJ**; ERP ID = `id_cigam` (casa 2.339 de 2.388 ERPs do Customer Status; `codigo_legado` só 1.328; T05, doc 13 §3) |
 | S360 `equipamento` | `familia_equipamento_id` | **sem `cliente_id`**: o vínculo com o cliente sai de amostra → compartimento → equipamento; não há tabela de nome da família |
 
 ## 3. Base de código (pronta para rodar local e no Fabric)
