@@ -296,7 +296,7 @@ Tarefa T17 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §1 (Forecast 27), docs
 ```
 
 ### T18 · KPI 2: cross-check com Zoho sem dupla contagem
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @especialista-dados
 - **Depende:** T17
 - **Ambiente:** fabric
@@ -310,7 +310,7 @@ Tarefa T18 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §2 (hipótese sobre op
 ```
 
 ### T19 · Documento de decisão de modelos
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** T15, T17
 - **Ambiente:** offline
@@ -356,7 +356,7 @@ Tarefa T21 do BACKLOG.md. Leia AGENTS.md, docs_fabric/07, docs_fabric/13 §2 (H3
 ```
 
 ### T22 · FinOps: custo em CU por experimento
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** T15
 - **Ambiente:** fabric
