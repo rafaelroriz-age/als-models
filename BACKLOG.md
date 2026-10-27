@@ -194,7 +194,7 @@ Tarefa T10 do BACKLOG.md. Leia AGENTS.md, src/models/baselines.py, src/backtest/
 ```
 
 ### T11 · Modelo ML global com quantis
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T07
 - **Ambiente:** offline
