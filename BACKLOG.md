@@ -152,7 +152,7 @@ Tarefa T07 do BACKLOG.md. Leia AGENTS.md, src/features/regras.py, src/models/bas
 ```
 
 ### T08 · Alertas de queda >20% e compartimento churn
-- **Status:** doing
+- **Status:** done
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
