@@ -36,7 +36,7 @@ Atue como @organizador (AGENTS.md). Rode `git status` e `git log` para ver o que
 ## Bloco A — Acesso e Fase 0 (dados reais)
 
 ### T01 · Diagnosticar a conectividade com o SQL endpoint
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
@@ -106,7 +106,7 @@ Tarefa T05 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §3, docs_fabric/10 (RN
 ```
 
 ### T25 · Executor de notebooks no Fabric via API (sem depender da porta 1433)
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** fabric
@@ -124,7 +124,7 @@ Tarefa T25 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_deploy.py, scripts/fabr
 ## Bloco B — Código que não depende de dados reais
 
 ### T06 · Testes e contrato de dados dos gates G0/G1
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
@@ -152,7 +152,7 @@ Tarefa T07 do BACKLOG.md. Leia AGENTS.md, src/features/regras.py, src/models/bas
 ```
 
 ### T08 · Alertas de queda >20% e compartimento churn
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
@@ -166,7 +166,7 @@ Tarefa T08 do BACKLOG.md. Leia AGENTS.md, docs_fabric/10 (RN-05 e RN-06), docs_f
 ```
 
 ### T09 · Classificação de clientes (Fase 1b) sobre o Customer Status
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
@@ -180,7 +180,7 @@ Tarefa T09 do BACKLOG.md. Leia AGENTS.md, a Fase 1b de docs_fabric/06, data/plan
 ```
 
 ### T10 · Modelos estatísticos plugáveis no harness
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
@@ -208,7 +208,7 @@ Tarefa T11 do BACKLOG.md. Leia AGENTS.md, src/features/series.py (T07), src/back
 ```
 
 ### T12 · Snapshot mensal e reconstrução retroativa
-- **Status:** doing
+- **Status:** todo
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
