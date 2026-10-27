@@ -24,6 +24,7 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 | [12_plano_trabalho_esboco.md](12_plano_trabalho_esboco.md) | Plano: dados → requisitos → modelos → notebooks |
 | [13_revisao_alinhamento_reuniao_2026-10-21.md](13_revisao_alinhamento_reuniao_2026-10-21.md) | Decisões, hipóteses por protótipo e descobertas por dados |
 | [14_fase0_engenharia_reversa_e_base_de_codigo.md](14_fase0_engenharia_reversa_e_base_de_codigo.md) | Regras extraídas das planilhas, chaves entre fontes, base de código e como rodar |
+| [15_pauta_decisoes_time.md](15_pauta_decisoes_time.md) | Pauta para o time: 7 decisões pendentes, com opções, recomendação e quem decide (T23) |
 | [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 24 tarefas com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
 | [../PROGRESSO.md](../PROGRESSO.md) | Dashboard de status do backlog e lotes rodados; atualizado por `scripts/run_backlog.py status` |
 | `documentacao-tecnica.md` | Documentação técnica de origem (Icaro Guerra) |
