@@ -374,7 +374,7 @@ Tarefa T22 do BACKLOG.md. Leia AGENTS.md e a Fase 5 de docs_fabric/06. Meça tem
 ## Bloco E — Decisões e comunicação
 
 ### T23 · Pauta de decisões para o time
-- **Status:** doing
+- **Status:** done
 - **Papel:** @gestor-projetos
 - **Depende:** —
 - **Ambiente:** humano
