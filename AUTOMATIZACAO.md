@@ -103,7 +103,16 @@ Para guardar a saída do `auto` em arquivo: `python -u scripts/run_backlog.py au
 | Parar e apagar sessão, worktree e estado | `claude rm <id>` |
 | Fazer a tarefa voltar para a fila | `python scripts/backlog.py set T07 todo` |
 
-Para reiniciar tarefas travadas: `claude stop <id>`, `claude rm <id>`, `backlog.py set Txx todo` e, na `main`, `git commit -am "backlog: reinicia Txx"`. Depois rode `run` ou `auto`. O trabalho parcial do worktree é descartado.
+**Reiniciar tarefas travadas** (sessão que morreu, ficou `waiting`, `blocked` ou terminou sem commit):
+
+```powershell
+python scripts/run_backlog.py restart --dry      # mostra o que seria reiniciado
+python scripts/run_backlog.py restart            # reinicia as doing/blocked que NÃO estão trabalhando
+python scripts/run_backlog.py restart T18 T20    # reinicia só essas
+python scripts/run_backlog.py restart --auto     # reinicia e já retoma o fluxo automático
+```
+
+O `restart` encerra a sessão, apaga o worktree e o branch, devolve a tarefa para `todo` e commita o backlog. O trabalho parcial é descartado (ele avisa quantos commits não integrados serão perdidos). Sessões `busy` são poupadas, a menos que você cite o id ou use `--forcar`. Tarefa `done` não pode ser reiniciada.
 
 ## 7. Problemas comuns
 
