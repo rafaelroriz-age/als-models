@@ -64,7 +64,7 @@ Tarefa T02 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §3. Execute notebooks
 ```
 
 ### T03 · Validar as chaves entre fontes
-- **Status:** doing
+- **Status:** done
 - **Papel:** @analista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
