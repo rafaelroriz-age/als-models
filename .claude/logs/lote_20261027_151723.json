@@ -1,0 +1,8 @@
+[
+  {
+    "tarefa": "T20",
+    "modelo": "sonnet",
+    "effort": "medium",
+    "retorno": "backgrounded · 9820a873 · backlog-T20\n  claude agents             list sessions\n  claude attach 9820a873    open in this terminal\n  claude logs 9820a873      show recent output\n  claude stop 9820a873      stop this session"
+  }
+]
