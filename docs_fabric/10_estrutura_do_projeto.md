@@ -75,6 +75,53 @@ Pandas puro, sem acesso ao Fabric; cada função devolve `list[dict]` com `gate,
 
 `minimo_pct` e os limites de nulos são provisórios até a T03 medir as taxas reais de casamento. Pendentes (não cobertos aqui): frescor da carga, tipos de coluna, horímetro não decrescente/saltos (G1 aviso), G2–G5.
 
+### 3.2 Tabela-base entidade × mês (T14, 2026-10-27)
+
+Notebook `notebooks/10_preprocessamento/10_base_amostras.py`, com a lógica testada em `src/features/base.py` (`tests/test_base.py`, 10 casos). Ele lê o LakehouseOel em modo somente leitura, com 8 consultas SELECT agregadas no endpoint, e o cache fica em `<dados>/base/bruto/`. Saídas em `data/base/`, fora do git:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `base_cliente_mes.parquet` | 482.744 linhas, 7.424 entidades, de 2010-01 a 2026-09 (último mês completo). Colunas: `amostras` (alvo do KPI 1, sem avulsas), `avulsas`, `faturamento`, `faturamento_servico` (CFOP x933), `oport_abertas_n/valor/valor_ponderado`, `oport_ganhas_n/valor`, `oport_perdidas_n`, `tem_*`, `segmento` (moda Zoho, 2.689 entidades) |
+| `base_equipamento_mes.parquet` | 2.681.891 linhas esparsas, uma por equipamento × mês com coleta. 619.270 equipamentos, `amostras` e `compartimentos` por linha; a entidade é a do cliente que mais coletou (4 equipamentos têm mais de uma) |
+| `mapa_s360.parquet`, `mapa_protheus.parquet` | ponte `cliente_id` → entidade e `cod_cliente` → entidade, com a regra usada em cada linha |
+| `relatorio.json` | descartes, cobertura e as 24 checagens G1 |
+
+**Entidade = raiz do CNPJ** (8 dígitos, via Zoho `accounts.cnpj`). A ponte foi descoberta nos dados e substitui a hipótese "`codigo_legado` = ERP ID" da §2 do [14](14_fase0_engenharia_reversa_e_base_de_codigo.md):
+- S360 `cliente.id_cigam`/`codigo_legado` = Zoho `erp_id`, que guarda o código legado CIGAM (`192936`) ou o código Protheus (`A63989`);
+- Protheus `notassaida.cod_cliente` = Zoho `erp_id` no formato `A99999`, **ou o sufixo do nome da conta** (`"RUMO - MALHA NORTE - SAO PAULO/SP - A19079"`, às vezes com a loja, `A5680901`). O `id_protheus` do Zoho está 100% nulo;
+- o Protheus sem código no Zoho cai na razão social: `contasreceber.nome_cliente` = Zoho `razao_social`, normalizada (sem acento, pontuação e sufixo societário). O casamento só é aceito quando o nome aponta para uma única entidade;
+- sem ponte, a entidade fica `s360:<id>`, `protheus:<cod>` (S360 e Protheus com o mesmo código `A99999` caem juntos) ou `zoho:<id>`, este para conta sem CNPJ válido.
+
+**Cobertura de join:**
+
+| Ponte | Chaves com ponte | Peso coberto | Por regra (% do peso) |
+|---|---|---|---|
+| S360 cliente → Zoho | 5.400/8.567 clientes com amostra (63,0%) | **93,0% das amostras** | `zoho_erp` 93,0; `protheus_direto` 0,01; sem ponte 7,0 |
+| Protheus → entidade | 2.573/2.822 códigos (91,2%) | **87,7% do faturamento** | `zoho` 41,4; `nome_zoho` 46,3; `s360` 0,07; sem ponte 12,3 |
+
+Na janela comum (2024-08 a 2026-09), 80,0% das amostras estão em entidades com faturamento e 82,9% do faturamento em entidades com amostras. São 1.315 entidades com as duas fontes. Só código ou só nome não bastam: o casamento direto `cod_cliente` ↔ `erp_id` cobre 12,5% do faturamento, e a razão social sozinha, 50,8%.
+
+**Amostras descartadas** (8.665.715 linhas brutas):
+
+| Motivo | Linhas | Regra |
+|---|---|---|
+| sem data de coleta **e** de entrada no laboratório | 1.905.116 | não consumida: 1,80 mi têm `status_amostra = 1`, sem coleta nem entrada (pré-registro/kit não usado, **hipótese a confirmar**) |
+| data fora de 2010-01-01..hoje | 1.549 | anos 1, 19, 201, 2115... quando a entrada também é implausível |
+| mês corrente (2026-10, incompleto) | 56.100 | fora da base até fechar o mês |
+| `id` duplicado | 143 | mantida uma |
+| `excluido = 1` | 60 | — |
+| cliente inexistente no cadastro | 13 | — |
+| **avulsas (D9)** | **235.995** | sem compartimento ou com compartimento/equipamento inexistente: ficam fora de `amostras` e só são contadas em `avulsas` |
+| mantidas em `amostras` | **6.466.739** | 328.794 delas datadas pela entrada no laboratório (coleta nula/implausível) |
+
+**Faturamento:** Protheus `silver_protheus.notassaida` desde 2024-08. Ficam de fora R$ 6,33 mi de CFOP x554 (remessa de ativo), x557 (uso e consumo) e x922 (simples faturamento de entrega futura, que reaparece em x116/x117). Sobram R$ 179,1 mi até 2026-09; na base entram R$ 176,7 mi, porque 2026-10 está incompleto. Antes do 1º mês de cada fonte (faturamento 2024-08, oportunidades 2024-01) as colunas são **NaN, não zero**. O CFOP x949 ("outra saída", R$ 54 mi) continua dentro e deve ser examinado na T17.
+
+**Oportunidades:** `silver_zoho.deals` por `conta_id` → conta Zoho → entidade. Todas as contas casaram. Ganhas e perdidas vão pelo mês do fechamento real; abertas, pelo previsto. O valor ponderado usa `probabilidade/100`. Os deals vêm em `moeda = USD`, e `Closed Won` soma US$ 1,2 bi contra R$ 179 mi faturados: o campo `valor` não é comparável ao faturamento sem validação (T18).
+
+**G1 (22/24):** passam as checagens de chave única, ausência de negativos, ausência de nulos e meses contínuos em `amostras`, `faturamento` e `oport_ganhas_valor`, cada uma na janela da sua fonte. Passam também as chaves sem nulos e sem duplicatas dos mapas e da tabela de equipamento, e as datas no intervalo. **Falham as duas `cobertura_join` com mínimo de 90%**, medidas em linhas agregadas: S360 → ponte 86,1% e Protheus → ponte 89,7%. A cobertura ponderada (93,0% das amostras e 87,7% do faturamento) é a medida a usar.
+
+**Limites e próximos passos:** a base de compartimento × mês não foi gerada (5,5 mi linhas esparsas); a T15 pode derivá-la com a mesma consulta trocando o nível. Faltam a confirmação do significado de `status_amostra = 1` com o time do S360, a lista de intercompany (ex.: `A58483` ALS Tribology, R$ 0,92 mi) e o resíduo de 12,3% do faturamento sem ponte, cujo maior código é `ZOAG81`, com R$ 3,99 mi e sem nome no `contasreceber`.
+
 ## 4. Plano de testes (resumo para `specs/04_plano_testes.md`)
 
 - **Unitários (pytest):** cada regra RN-xx com casos de borda (ex.: exatamente 6 meses, exatamente 90 dias, queda de 20,0% vs. 20,1%).
