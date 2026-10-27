@@ -40,7 +40,7 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 ### Fase 0 — Descoberta e auditoria de dados (antes de comprometer)
 - [x] Probe: S360, Protheus e Zoho acessíveis no `LakehouseOel` (ver discovery).
 - [x] Mapear schemas/tabelas ([08 discovery](08_dicionario_de_dados_discovery.md)).
-- [ ] Validar chaves (CNPJ, ERP ID, ID equipamento, setor/segmento): mapeadas em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §2, falta confirmar no perfil de dados.
+- [x] Validar chaves (CNPJ, ERP ID, ID equipamento, setor/segmento): medidas em 27/10 (T03) em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §2. Protheus ↔ S360 casa 50,5% com a regra de grupo (pendente de confirmação pelo time de dados, [13](13_revisao_alinhamento_reuniao_2026-10-21.md) §5); cadeia amostra → equipamento 97,7%.
 - [x] Revisar as 3 planilhas + dicionário de dados; regras extraídas em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §1.
 - [ ] Relatório de qualidade (missingness, outliers, sanidade de horímetro/timestamps): código pronto (`notebooks/00_validacao/01_perfil_qualidade.py`), bloqueado pela porta 1433.
 - [x] Base de código inicial (`src/`, baselines, harness de backtest, gates, 24 testes).
@@ -53,12 +53,12 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 
 ### Fase 1b — Classificação de clientes (proposta do Rafael, a validar)
 - Classificar clientes (recorrente, não recorrente ativo, menor atividade etc.) antes da previsão, em série temporal, para dar manutenibilidade ao modelo. Critério a definir a partir dos dados (pirâmide faturamento × nº de máquinas × potencial).
-- Modelo de vida útil/abandono de equipamento por período e segmento, para filtrar cadastrados inativos.
+- Modelo de vida útil/abandono de equipamento por período e segmento, para filtrar cadastrados inativos. **27/10 (T05):** regra proposta de equipamento ativo (flag = 1 + coleta nos últimos 12 meses), que deixa 85,9% do cadastro inativo; vida útil por família não melhora o corte ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) §3, R3). Modelo ainda não implementado.
 
 ### Fase 2 — KPI 1: consumo de amostras
 - Features: horímetro, meses/ano, intervalo de coleta, tipo de equipamento, segmento, sazonalidade.
 - Modelo de volume por cliente/equipamento/compartimento (Real).
-- Modelo de **Potencial** via benchmark de clientes similares e % achieved.
+- Modelo de **Potencial** via benchmark de clientes similares e % achieved. **27/10 (T05):** o potencial atual é valor colado sem fonte nos dados; a base proposta é frota ativa × taxa anual da família, a calibrar pelo benchmark (T16). Fórmula original segue com o Bahia.
 - Sinais de ação: queda >20%, compartimento churn.
 
 ### Fase 3 — KPI 2: vendas (faturamento)

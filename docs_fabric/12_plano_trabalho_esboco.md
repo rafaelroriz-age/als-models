@@ -9,7 +9,7 @@
 - Lakehouses conhecidos ([11](11_conexoes_fabric.md)): `LakehouseOel`, `Ontology_OeL_lh_…`, `s360`. Protheus e Zoho estão no `LakehouseOel`.
 - Ponto de partida adicional: [Dicionario_de_Dados_Projeto_Ciencia_de_Dados.xlsx](Dicionario_de_Dados_Projeto_Ciencia_de_Dados.xlsx).
 - Decisões, hipóteses e descobertas: ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md).
-- Status em 27/10/2026: Fase 0 com base de código pronta ([14](14_fase0_engenharia_reversa_e_base_de_codigo.md)). Na etapa 4, já existem `00_validacao/01_perfil_qualidade` (cobertura e perfil; aguarda porta 1433), `00_validacao/02_engenharia_reversa_planilhas` e `40_backtest/01_backtest_baselines`; os baselines de KPI 1 e 2 estão em `src/models/baselines.py`. Backlog por fase em [06](06_plano_execucao.md).
+- Status em 27/10/2026: Fase 0 com base de código pronta ([14](14_fase0_engenharia_reversa_e_base_de_codigo.md)). Chaves entre fontes medidas (T03, [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §2); origem do potencial e regra de equipamento ativo propostas (T05, [13](13_revisao_alinhamento_reuniao_2026-10-21.md) §3). Na etapa 4, já existem `00_validacao/01_perfil_qualidade` (cobertura e perfil; aguarda porta 1433), `00_validacao/02_engenharia_reversa_planilhas` e `40_backtest/01_backtest_baselines`; os baselines de KPI 1 e 2 estão em `src/models/baselines.py`. Backlog por fase em [06](06_plano_execucao.md).
 
 ---
 
@@ -30,7 +30,7 @@
 | Pedidos pendentes | 2 | Protheus | Existe? Frescor |
 | Oportunidades abertas | 2 | Zoho CRM | Estágio, valor, cliente |
 | Segmento do cliente (Cana, MT, Indústria, Locomotiva) | 1 e 2 | S360/Zoho | Preenchimento |
-| Annual Sample Potential | 1 (visão Potencial) | **Origem a descobrir** (RN-07) | Planilhas, artefatos e dados |
+| Annual Sample Potential | 1 (visão Potencial) | **Sem fonte nos dados** (RN-07, T05): valor colado no Customer Status; proposta frota ativa × taxa da família | Planilhas, artefatos e dados; fórmula original com o Bahia |
 | Ticket médio e conversão atuais | 2 | **Defasado** (RN-11) | Recalcular a partir do faturamento |
 | Calendário / sazonalidade | 1 e 2 | Derivado | Meses parados por segmento |
 
@@ -60,7 +60,7 @@
 |---|---|---|
 | RN-03/04 (recorrente, churn) | Bahia / Keli | Aplicar a regra a clientes conhecidos e pedir confirmação do enquadramento |
 | RN-05/06 (alertas) | Negócio | Definir a base de comparação da queda de 20% |
-| RN-07 (potencial) | Negócio + dados | Decidir a origem do Annual Sample Potential |
+| RN-07 (potencial) | Negócio + dados | Confirmar com o Bahia a fórmula do Annual Sample Potential; dados não a reproduzem (T05, [13](13_revisao_alinhamento_reuniao_2026-10-21.md) §3 R1) |
 | RN-11 (ticket, conversão) | Financeiro | Recalcular com faturamento atual |
 | RN-01/02 (intervalos e consumo) | Operação | Reproduzir a Calculadora v8 em amostra conhecida |
 
@@ -167,12 +167,12 @@ Etapa 1 + 2 ──► Etapa 3 ─────────────┘
 | Risco | Impacto | Mitigação |
 |---|---|---|
 | Horímetro ausente ou irregular | KPI 1 real perde a base determinística | Estimar uso por intervalo entre coletas; marcar confiança |
-| Annual Sample Potential sem origem | Visão Potencial bloqueada | Derivar de benchmark por segmento; decidir com o negócio |
+| Annual Sample Potential sem origem reproduzível | Visão Potencial depende de base alternativa | Base proposta: frota ativa × taxa da família (T05), calibrada pelo benchmark de similares; confirmar com o negócio |
 | Regras não aprovadas a tempo | Retrabalho de features | Implementar por parâmetro; congelar só após aprovação |
 | Histórico curto por cliente/equipamento | Modelos individuais instáveis | Modelo global + hierárquico |
 | Custo de CU acima do orçamento F8 | Inviabiliza a produção | Medir CU desde os primeiros experimentos |
 | Amostras avulsas sem equipamento; frota em sistema externo; frota superdeclarada | KPI 1 subestima ou superestima o potencial desses clientes | Identificar e limpar avulsas no pré-processamento; medir cobertura por cliente |
-| Equipamentos cadastrados já inativos | Potencial superestimado | Engenharia reversa: coluna de ativo, intervalos entre coletas, vida útil por família |
+| Equipamentos cadastrados já inativos | Potencial superestimado | Medido (T05): flag `ativo` marca 96% como ativos; regra flag + coleta em 12 meses deixa 85,9% do cadastro inativo (27/10/2026). Vida útil por família não melhora o corte |
 
 ## Pontos em aberto para a próxima rodada
 

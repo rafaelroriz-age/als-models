@@ -245,7 +245,7 @@ Tarefa T13 do BACKLOG.md. Leia AGENTS.md e a Etapa 3 de docs_fabric/12 (item hie
 - **Depende:** T03, T07
 - **Ambiente:** fabric
 - **Dificuldade:** alta
-- **Toca:** notebooks/10_preprocessamento/10_base_amostras.py
+- **Toca:** notebooks/10_preprocessamento/10_base_amostras.py, docs_fabric/10_estrutura_do_projeto.md
 - **Doc:** docs_fabric/10_estrutura_do_projeto.md
 - **Pronto:** tabela mensal por entidade com amostras, faturamento e oportunidades, passando em G1; amostras avulsas identificadas e limpas.
 - **Prompt:**
@@ -273,7 +273,7 @@ Tarefa T15 do BACKLOG.md. Leia AGENTS.md, src/backtest/harness.py, notebooks/40_
 - **Depende:** T05, T14
 - **Ambiente:** fabric
 - **Dificuldade:** alta
-- **Toca:** notebooks/20_kpi1_consumo/23_potencial.py, src/models/potencial.py, tests/test_potencial.py
+- **Toca:** notebooks/20_kpi1_consumo/23_potencial.py, src/models/potencial.py, tests/test_potencial.py, docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §3
 - **Pronto:** potencial por cliente via similares, com a definição de "similar" explícita e % Achieved calculado pela definição unificada (D6).
 - **Prompt:**
@@ -287,7 +287,7 @@ Tarefa T16 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 (D6 e §3), docs_fabric
 - **Depende:** T14
 - **Ambiente:** fabric
 - **Dificuldade:** alta
-- **Toca:** notebooks/30_kpi2_vendas, src/features/receita.py, tests/test_receita.py
+- **Toca:** notebooks/30_kpi2_vendas, src/features/receita.py, tests/test_receita.py, docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2–3
 - **Pronto:** receita por amostra (kit vs análise) medida, e a receita decomposta em recorrente, não recorrente ativa e churn, reproduzindo o Forecast 27 como baseline.
 - **Prompt:**
@@ -301,7 +301,7 @@ Tarefa T17 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §1 (Forecast 27), docs
 - **Depende:** T17
 - **Ambiente:** fabric
 - **Dificuldade:** media
-- **Toca:** notebooks/30_kpi2_vendas/32_crosscheck_zoho.py
+- **Toca:** notebooks/30_kpi2_vendas/32_crosscheck_zoho.py, docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2
 - **Pronto:** comparação das oportunidades acima de 80% somadas versus descontadas do forecast, com o efeito em erro de previsão.
 - **Prompt:**
@@ -333,7 +333,7 @@ Tarefa T19 do BACKLOG.md. Leia AGENTS.md, a Etapa 3 de docs_fabric/12 e os resul
 - **Depende:** T15
 - **Ambiente:** offline
 - **Dificuldade:** media
-- **Toca:** src/serving, docs_fabric/07_integracao_mcp.md
+- **Toca:** src/serving, docs_fabric/07_integracao_mcp.md, docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2 (H3)
 - **Pronto:** HTML estático com forecast de consumo (Real e Potencial), alertas e filtros por segmento, mais as consultas SQL que o alimentam.
 - **Prompt:**
