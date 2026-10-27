@@ -208,7 +208,7 @@ Tarefa T11 do BACKLOG.md. Leia AGENTS.md, src/features/series.py (T07), src/back
 ```
 
 ### T12 · Snapshot mensal e reconstrução retroativa
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
