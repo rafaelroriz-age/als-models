@@ -2,7 +2,7 @@
 
 > Gerado por `python scripts/run_backlog.py status` a partir do [BACKLOG.md](BACKLOG.md). Não edite à mão.
 
-Atualizado em 27/10/2026 13:46 · **12/25 concluídas** · 3 em andamento · 10 a fazer · 0 bloqueadas
+Atualizado em 27/10/2026 14:16 · **13/25 concluídas** · 2 em andamento · 10 a fazer · 0 bloqueadas
 
 ## Próximo lote (pode rodar em paralelo)
 
@@ -10,9 +10,7 @@ Atualizado em 27/10/2026 13:46 · **12/25 concluídas** · 3 em andamento · 10 
 
 ## Sessões em background agora
 
-- backlog-T11: idle
-- backlog-T03: busy
-- backlog-T05: busy
+- backlog-T05: idle
 
 ## Bloco A — Acesso e Fase 0 (dados reais) (3/6)
 
@@ -25,7 +23,7 @@ Atualizado em 27/10/2026 13:46 · **12/25 concluídas** · 3 em andamento · 10 
 | 🔄 | **T05** Descobrir a origem do Annual Sample Potential e o status ativo do equipamento | @especialista-dados | fabric | alta | T02 |
 | ✅ | **T25** Executor de notebooks no Fabric via API (sem depender da porta 1433) | @engenheiro-software | fabric | alta | — |
 
-## Bloco B — Código que não depende de dados reais (7/8)
+## Bloco B — Código que não depende de dados reais (8/8)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
@@ -34,7 +32,7 @@ Atualizado em 27/10/2026 13:46 · **12/25 concluídas** · 3 em andamento · 10 
 | ✅ | **T08** Alertas de queda >20% e compartimento churn | @especialista-dados | offline | baixa | — |
 | ✅ | **T09** Classificação de clientes (Fase 1b) sobre o Customer Status | @cientista-dados | offline | media | — |
 | ✅ | **T10** Modelos estatísticos plugáveis no harness | @cientista-dados | offline | media | — |
-| 🔄 | **T11** Modelo ML global com quantis | @cientista-dados | offline | alta | T07 |
+| ✅ | **T11** Modelo ML global com quantis | @cientista-dados | offline | alta | T07 |
 | ✅ | **T12** Snapshot mensal e reconstrução retroativa | @engenheiro-software | offline | media | — |
 | ✅ | **T13** Reconciliação hierárquica Cliente → Equipamento → Compartimento | @cientista-dados | offline | alta | — |
 
