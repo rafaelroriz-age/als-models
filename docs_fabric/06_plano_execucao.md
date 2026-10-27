@@ -64,7 +64,7 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 ### Fase 3 — KPI 2: vendas (faturamento)
 - Quantificar a correlação consumo→venda (projeção por amostra).
 - Modelar componentes (recorrente, não recorrente ativa, churn; novos e reativados fora do escopo por ora).
-- Cross-check Zoho (evitar dupla contagem).
+- [x] Cross-check Zoho (evitar dupla contagem): **T18 (27/10)** — 4 variantes no Forecast 27 (só base, soma opportunities >80%, desconta escopo, desconta parcial); código + testes prontos; execução em dados reais interrompida por falta de memória ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2, H1).
 - Forecast semanal + mensal de faturamento e de EBIT (targets separados).
 
 ### Fase 4 — Validação (snapshot + reconstrução retroativa)

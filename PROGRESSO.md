@@ -2,7 +2,7 @@
 
 > Gerado por `python scripts/run_backlog.py status` a partir do [BACKLOG.md](BACKLOG.md). Não edite à mão.
 
-Atualizado em 27/10/2026 15:01 · **20/25 concluídas** · 4 em andamento · 1 a fazer · 0 bloqueadas
+Atualizado em 27/10/2026 18:08 · **24/25 concluídas** · 1 em andamento · 0 a fazer · 0 bloqueadas
 
 ## Próximo lote (pode rodar em paralelo)
 
@@ -10,10 +10,7 @@ Atualizado em 27/10/2026 15:01 · **20/25 concluídas** · 4 em andamento · 1 a
 
 ## Sessões em background agora
 
-- backlog-T20: ?
-- backlog-T22: ?
-- backlog-T18: ?
-- backlog-T19: ?
+- backlog-T21: busy
 
 ## Bloco A — Acesso e Fase 0 (dados reais) (6/6)
 
@@ -39,7 +36,7 @@ Atualizado em 27/10/2026 15:01 · **20/25 concluídas** · 4 em andamento · 1 a
 | ✅ | **T12** Snapshot mensal e reconstrução retroativa | @engenheiro-software | offline | media | — |
 | ✅ | **T13** Reconciliação hierárquica Cliente → Equipamento → Compartimento | @cientista-dados | offline | alta | — |
 
-## Bloco C — Modelagem com dados reais (4/6)
+## Bloco C — Modelagem com dados reais (6/6)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
@@ -47,16 +44,16 @@ Atualizado em 27/10/2026 15:01 · **20/25 concluídas** · 4 em andamento · 1 a
 | ✅ | **T15** Backtest do KPI 1 com os candidatos em dados reais | @cientista-dados | fabric | alta | T10, T11, T14 |
 | ✅ | **T16** KPI 1 Potencial: benchmark por similares e % Achieved | @cientista-dados | fabric | alta | T05, T14 |
 | ✅ | **T17** KPI 2: correlação consumo → venda e composição da receita | @cientista-dados | fabric | alta | T14 |
-| 🔄 | **T18** KPI 2: cross-check com Zoho sem dupla contagem | @especialista-dados | fabric | media | T17 |
-| 🔄 | **T19** Documento de decisão de modelos | @cientista-dados | offline | media | T15, T17 |
+| ✅ | **T18** KPI 2: cross-check com Zoho sem dupla contagem | @especialista-dados | fabric | media | T17 |
+| ✅ | **T19** Documento de decisão de modelos | @cientista-dados | offline | media | T15, T17 |
 
-## Bloco D — Entrega (0/3)
+## Bloco D — Entrega (2/3)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
-| 🔄 | **T20** Protótipo H1: dashboard HTML + SQL | @engenheiro-ia | offline | media | T15 |
-| ⬜ | **T21** Comparativo das opções de entrega | @gestor-projetos | offline | baixa | T20 |
-| 🔄 | **T22** FinOps: custo em CU por experimento | @engenheiro-software | fabric | media | T15 |
+| ✅ | **T20** Protótipo H1: dashboard HTML + SQL | @engenheiro-ia | offline | media | T15 |
+| 🔄 | **T21** Comparativo das opções de entrega | @gestor-projetos | offline | baixa | T20 |
+| ✅ | **T22** FinOps: custo em CU por experimento | @engenheiro-software | fabric | media | T15 |
 
 ## Bloco E — Decisões e comunicação (2/2)
 
