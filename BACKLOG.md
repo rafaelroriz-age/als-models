@@ -356,7 +356,7 @@ Tarefa T21 do BACKLOG.md. Leia AGENTS.md, docs_fabric/07, docs_fabric/13 §2 (H3
 ```
 
 ### T22 · FinOps: custo em CU por experimento
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** T15
 - **Ambiente:** fabric
