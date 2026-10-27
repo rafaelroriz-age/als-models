@@ -36,7 +36,7 @@ Atue como @organizador (AGENTS.md). Rode `git status` e `git log` para ver o que
 ## Bloco A — Acesso e Fase 0 (dados reais)
 
 ### T01 · Diagnosticar a conectividade com o SQL endpoint
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
