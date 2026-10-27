@@ -310,7 +310,7 @@ Tarefa T18 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §2 (hipótese sobre op
 ```
 
 ### T19 · Documento de decisão de modelos
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T15, T17
 - **Ambiente:** offline
