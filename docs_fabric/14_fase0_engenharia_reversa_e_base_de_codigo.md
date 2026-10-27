@@ -50,6 +50,7 @@
 Execução local: `python -m pytest`, depois `python notebooks/00_validacao/02_engenharia_reversa_planilhas.py`. O perfil exige a porta 1433 liberada. Extrações de dados vão para `data/`, que fica fora do git.
 
 ## 4. Bloqueios e pendências
-- **Porta 1433 bloqueada na rede atual.** O DNS resolve e a 443 abre, mas o SQL endpoint dá timeout. O perfil roda de outra rede/VPN ou dentro do Fabric.
+- **Conectividade (T01, 2026-10-27, 13:23, rede atual):** `Test-NetConnection` ao endpoint `j2qfysdun5iebf3ezw2l7ke4eu-vpyatc664ptezeejap7oap22qu.datawarehouse.fabric.microsoft.com` (IP 191.235.225.198) retornou `TcpTestSucceeded: True` nas portas **1433** e **443**. A 1433 não está bloqueada nesta rede; o perfil de T02 pode rodar daqui com `scripts/fabric_probe.py` ou `src/pipeline/fabric.py`. A ressalva anterior ("1433 bloqueada, timeout") não se confirmou hoje: se voltar a ocorrer em outra rede, as alternativas são VPN/outra rede, pedido de liberação ao TI ou execução dentro do Fabric via `scripts/fabric_deploy.py` sem `--aplicar`.
+- **Testes:** `python -m pytest` com 24 testes passando (2026-10-27). A tarefa não tem código novo.
 - **Publicação no Fabric:** o único workspace com acesso é `O&L Global - Prod - DA` (produção). Publicar cria 3 notebooks `als_*` e grava em `Files/als_oilmodel/` do `LakehouseOeL`. Decidir com o Caio se vai para lá ou para um workspace/lakehouse de desenvolvimento (`lh_forecast`).
 - Confirmar com Diego/Keli a fórmula de março no Forecast 27 e se o status manual (os ~9% fora da regra) deve ser preservado.
