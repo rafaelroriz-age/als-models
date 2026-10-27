@@ -66,5 +66,43 @@ def avaliar_g1(base: pd.DataFrame, chave: list[str], valor: str) -> list[dict]:
     return [asdict(r) for r in out]
 
 
+def avaliar_g1_limpo(df: pd.DataFrame, chaves_nao_nulas: list[str], unico: list[str],
+                     datas: list[str], hoje: pd.Timestamp | None = None,
+                     data_min: pd.Timestamp = DATA_MIN_PLAUSIVEL) -> list[dict]:
+    """Tabela limpa (Bronze/Silver → limpo): nulos em chaves, duplicatas e datas fora do intervalo plausível."""
+    hoje = hoje or pd.Timestamp.now()
+    out: list[Resultado] = []
+    for col in chaves_nao_nulas:
+        if col not in df:
+            out.append(Resultado("G1", "chave_sem_nulos", col, False, "coluna ausente"))
+            continue
+        n = int(df[col].isna().sum())
+        out.append(Resultado("G1", "chave_sem_nulos", col, n == 0, f"{n} nulos"))
+    if all(c in df for c in unico):
+        n = int(df.duplicated(unico).sum())
+        out.append(Resultado("G1", "sem_duplicatas", "+".join(unico), n == 0, f"{n} duplicadas"))
+    else:
+        out.append(Resultado("G1", "sem_duplicatas", "+".join(unico), False, "coluna ausente"))
+    for col in datas:
+        if col not in df:
+            out.append(Resultado("G1", "datas_no_intervalo", col, False, "coluna ausente"))
+            continue
+        d = pd.to_datetime(df[col], errors="coerce").dropna()
+        fora = int(((d < data_min) | (d > hoje + pd.Timedelta(days=1))).sum())
+        out.append(Resultado("G1", "datas_no_intervalo", col, fora == 0, f"{fora} fora de {data_min.date()}..{hoje.date()}"))
+    return [asdict(r) for r in out]
+
+
+def cobertura_join(esquerda: pd.DataFrame, direita: pd.DataFrame, chave: str, minimo_pct: float = 90.0,
+                   nome: str | None = None) -> list[dict]:
+    """% de linhas (não nulas) de `esquerda[chave]` com par em `direita[chave]`; falha abaixo de `minimo_pct`."""
+    alvo = nome or chave
+    if chave not in esquerda or chave not in direita:
+        return [asdict(Resultado("G1", "cobertura_join", alvo, False, "coluna ausente"))]
+    k = esquerda[chave].dropna()
+    pct = 0.0 if k.empty else round(100 * k.isin(set(direita[chave].dropna())).mean(), 2)
+    return [asdict(Resultado("G1", "cobertura_join", alvo, pct >= minimo_pct, f"{pct}% (mín {minimo_pct}%)"))]
+
+
 def resumo(resultados: list[dict]) -> pd.DataFrame:
     return pd.DataFrame(resultados)
