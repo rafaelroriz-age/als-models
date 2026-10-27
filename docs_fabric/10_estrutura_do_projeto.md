@@ -62,6 +62,19 @@ Cada gate é um conjunto de expectations (Great Expectations) que **bloqueia** a
 | G4 | Modelo → saída | p10 ≤ p50 ≤ p90; sem negativos; sem NaN; cross-check não gera total negativo; contrato (entidade, data_ref, período) completo | Bloqueia publicação |
 | G5 | Saída → consumo | Calibração do intervalo (cobertura ≈ declarada); CU medido na F8 dentro do orçamento | Aviso / bloqueia |
 
+### 3.1 Contrato implementado em `src/gates/checks.py` (T06)
+
+Pandas puro, sem acesso ao Fabric; cada função devolve `list[dict]` com `gate, checagem, alvo, ok, detalhe` (grava em `dq_resultados`). Testes: `tests/test_gates.py` (30 casos: um válido e um que falha por verificação).
+
+| Função | Entrada | Regras (falha quando) |
+|---|---|---|
+| `avaliar_g0(perfis, hoje)` | lista de perfis `{tabela, n_linhas, nulos_pct{col}, datas{col:(min,max)}}` | tabela de `CHAVES_OBRIGATORIAS` sem perfil; `n_linhas == 0`; `% nulos` da chave > limite (ou coluna sem perfil); data mín < 2010-01-01 ou máx > hoje+1 dia (ou ilegível) |
+| `avaliar_g1(base, chave, valor)` | tabela entidade × mês (`periodo` = `Timestamp` do 1º dia) | chave duplicada; `valor` negativo; `valor` nulo; mês faltando dentro do intervalo de uma entidade |
+| `avaliar_g1_limpo(df, chaves_nao_nulas, unico, datas, hoje)` | tabela limpa | nulo em qualquer chave obrigatória; duplicatas em `unico`; datas < 2010-01-01 ou > hoje+1 dia; coluna ausente conta como falha |
+| `cobertura_join(esq, dir, chave, minimo_pct=90)` | duas tabelas com a coluna-chave | % de `esq[chave]` não nulo presente em `dir[chave]` < `minimo_pct` (esquerda vazia = 0%) |
+
+`minimo_pct` e os limites de nulos são provisórios até a T03 medir as taxas reais de casamento. Pendentes (não cobertos aqui): frescor da carga, tipos de coluna, horímetro não decrescente/saltos (G1 aviso), G2–G5.
+
 ## 4. Plano de testes (resumo para `specs/04_plano_testes.md`)
 
 - **Unitários (pytest):** cada regra RN-xx com casos de borda (ex.: exatamente 6 meses, exatamente 90 dias, queda de 20,0% vs. 20,1%).
