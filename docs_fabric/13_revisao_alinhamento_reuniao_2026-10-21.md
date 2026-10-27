@@ -25,8 +25,8 @@ Todas as hipóteses abaixo serão prototipadas e comparadas por acurácia (backt
 
 | # | Hipótese | Alternativas a comparar |
 |---|----------|-------------------------|
-| H1 | Papel das oportunidades >80% do Zoho no forecast | (a) somam ao forecast, como no Power BI atual; (b) só descontam, no cross-check |
-| H2 | O que a receita representa | (a) venda de kit/pacote; (b) análise processada |
+| H1 | Papel das oportunidades >80% do Zoho no forecast | (a) somam ao forecast, como no Power BI atual; (b) só descontam, no cross-check. **27/10 (T17, parcial):** `src/features/receita.py` separa o realizado total do realizado em escopo (recorrente + não recorrente ativo no corte), que é a base para medir a dupla contagem na T18 |
+| H2 | O que a receita representa | (a) venda de kit/pacote; (b) análise processada. **27/10 (T17, parcial, dados da T14 em `data/base`):** no Protheus (ago/24–out/26), CFOP x933 (serviço/análise) = R$ 83,1 mi, x949 (outras saídas) = R$ 55,1 mi e x102 (venda de mercadoria/kit) = R$ 31,4 mi. Só 1.315 de 7.424 entidades têm amostras e faturamento. Funções prontas: kit × análise por CFOP, R$/amostra, correlação defasada consumo × receita. **Falta rodar a correlação e o backtest do Forecast 27 (notebook 30_kpi2_vendas)**. EBIT sem fonte na tabela-base (D2) |
 | H3 | Formato de entrega | (a) dashboard HTML + acesso SQL às tabelas de saída; (b) modelo semântico (DirectLake); (c) API/MCP |
 | H4 | Regra de recorrência: última compra <90 dias é E ou OU | **Resolvida: E** (texto do Forecast 27; Customer Status dá 233 só com ≥6 meses vs 231 com E). Ver [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) |
 
