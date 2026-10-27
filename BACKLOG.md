@@ -78,7 +78,7 @@ Tarefa T03 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §2. Com os dados reai
 ```
 
 ### T04 · Preencher a matriz de cobertura dos insumos
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @analista-dados
 - **Depende:** T02, T03
 - **Ambiente:** fabric
@@ -240,7 +240,7 @@ Tarefa T13 do BACKLOG.md. Leia AGENTS.md e a Etapa 3 de docs_fabric/12 (item hie
 ## Bloco C — Modelagem com dados reais
 
 ### T14 · Tabela-base por entidade e mês
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** T03, T07
 - **Ambiente:** fabric
