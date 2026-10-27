@@ -8,3 +8,15 @@ build/
 *.egg-info/
 .ipynb_checkpoints/
 .claude/worktrees/
+
+# Dados sensíveis: o repositório é público. Planilhas de clientes/vendas,
+# propostas comerciais, saídas de probe do Fabric (endpoint + schema) e logs locais.
+*.xlsx
+*.xlsm
+*.xls
+propostas/
+docs_fabric/Customer Status*
+docs_fabric/Forecast 27.md
+docs_fabric/Calculadora de amostras*
+docs_fabric/fabric_probe_results.json
+.claude/logs/

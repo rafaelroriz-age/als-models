@@ -1,6 +1,0 @@
-[
-  {
-    "tarefa": "T25",
-    "retorno": "backgrounded · 015bf957 · backlog-T25\n  claude agents             list sessions\n  claude attach 015bf957    open in this terminal\n  claude logs 015bf957      show recent output\n  claude stop 015bf957      stop this session"
-  }
-]
