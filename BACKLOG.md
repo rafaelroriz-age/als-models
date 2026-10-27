@@ -388,7 +388,7 @@ Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §
 ```
 
 ### T24 · Regerar a apresentação executiva com o escopo atual
-- **Status:** doing
+- **Status:** done
 - **Papel:** @organizador
 - **Depende:** T23
 - **Ambiente:** offline
