@@ -98,3 +98,10 @@ Se o MCP for escolhido, adicionar à **Fase 5 — Entrega e handoff**:
 4. Configurar o MCP client no agente (arquivo de configuração + segredos).
 5. Testar o fluxo ponta-a-ponta: pergunta do usuário → DAX/SQL → previsão + intervalo.
 6. Validar custo (CU) das consultas na F8 e ajustar agregações se necessário.
+
+## Protótipo H3a: dashboard HTML + SQL (T20, 27/10)
+
+- **Gerador:** `python -m src.serving.dashboard [--forecast f.csv --alertas a.csv] [--saida x.html]`; sem argumentos usa dados **sintéticos** (aviso fixo no HTML) e grava os CSVs em `src/serving/exemplo/`.
+- **Contrato:** `COLUNAS_FORECAST` (nível segmento/cliente/equipamento × mês/semana: `realizado`, `prev_p10/p50/p90`, `potencial`) e `COLUNAS_ALERTAS` (queda RN-05 e churn RN-06) em `src/serving/dashboard.py`; aceita CSV ou parquet.
+- **SQL:** `src/serving/sql/01_forecast_consumo.sql` (T-SQL de leitura; tabelas `als_*` de entrada são propostas, ainda inexistentes no Fabric).
+- **Testes:** `tests/test_serving.py`. Pendente: ligar à saída real da T15/T16 quando existir.
