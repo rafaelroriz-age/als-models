@@ -16,6 +16,9 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fabric_guard import violacoes  # noqa: E402
+
 RAIZ = Path(__file__).resolve().parents[1]
 DIST = RAIZ / "dist"
 NOTEBOOKS = {
@@ -122,6 +125,9 @@ def main() -> None:
     saida.mkdir(parents=True, exist_ok=True)
     defs = {}
     for nome, py in NOTEBOOKS.items():
+        achados = violacoes(py.read_text(encoding="utf-8"))
+        if achados:
+            sys.exit(f"{py.name} bloqueado pela barreira do Fabric ({', '.join(achados)}); ver scripts/fabric_guard.py")
         nb = para_ipynb(py, wheel.name, lakehouse)
         (saida / f"{nome}.ipynb").write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
         defs[nome] = base64.b64encode(json.dumps(nb, ensure_ascii=False).encode("utf-8")).decode()

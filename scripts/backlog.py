@@ -19,11 +19,13 @@ CAMPO = re.compile(r"^- \*\*(\w+):\*\* ?(.*)$")
 
 def ler():
     linhas = BACKLOG.read_text(encoding="utf-8").splitlines()
-    tarefas, atual, em_prompt = {}, None, False
+    tarefas, atual, em_prompt, bloco = {}, None, False, ""
     for i, linha in enumerate(linhas):
+        if linha.startswith("## Bloco"):
+            bloco = linha[3:].strip()
         m = TITULO.match(linha)
         if m:
-            atual = {"id": m.group(1), "titulo": m.group(2), "linha_status": None, "prompt": ""}
+            atual = {"id": m.group(1), "titulo": m.group(2), "linha_status": None, "prompt": "", "bloco": bloco}
             tarefas[atual["id"]] = atual
             em_prompt = False
             continue
@@ -112,22 +114,28 @@ def cmd_show(tarefas, args):
     print(t["prompt"].rstrip())
 
 
-def cmd_set(linhas, tarefas, args):
-    t = tarefas.get(args.id)
+def gravar_status(linhas, tarefas, tid, status):
+    t = tarefas.get(tid)
     if not t:
-        sys.exit(f"Tarefa {args.id} não existe.")
-    if args.status not in STATUS:
+        sys.exit(f"Tarefa {tid} não existe.")
+    if status not in STATUS:
         sys.exit(f"Status deve ser um de {STATUS}.")
     pendentes = [d for d in lista(t["depende"]) if tarefas[d]["status"] != "done"]
-    if args.status == "done" and pendentes:
+    if status == "done" and pendentes:
         print(f"Aviso: dependências ainda não concluídas: {', '.join(pendentes)}")
-    linhas[t["linha_status"]] = f"- **Status:** {args.status}"
+    linhas[t["linha_status"]] = f"- **Status:** {status}"
+    t["status"] = status
     BACKLOG.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+
+
+def cmd_set(linhas, tarefas, args):
+    gravar_status(linhas, tarefas, args.id, args.status)
     print(f'{args.id} -> {args.status}')
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sys.stdout.reconfigure(encoding="utf-8")
+    ap =argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     for nome in ("list", "next"):
         p = sub.add_parser(nome)

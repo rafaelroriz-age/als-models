@@ -25,7 +25,8 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 | [13_revisao_alinhamento_reuniao_2026-10-21.md](13_revisao_alinhamento_reuniao_2026-10-21.md) | Decisões, hipóteses por protótipo e descobertas por dados |
 | [14_fase0_engenharia_reversa_e_base_de_codigo.md](14_fase0_engenharia_reversa_e_base_de_codigo.md) | Regras extraídas das planilhas, chaves entre fontes, base de código e como rodar |
 | [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 24 tarefas com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
-| [../PROGRESSO.md](../PROGRESSO.md) | Dashboard de status do backlog e lotes rodados; atualizado por `scripts/run_backlog.py status` |
+| [../PROGRESSO.md](../PROGRESSO.md) | Status do backlog por bloco e próximo lote; gerado por `scripts/run_backlog.py status` |
+| [../AUTOMATIZACAO.md](../AUTOMATIZACAO.md) | Como disparar o backlog no PC e pelo celular, e a barreira de escrita no Fabric |
 | `documentacao-tecnica.md` | Documentação técnica de origem (Icaro Guerra) |
 | `Revisando KPIs e métricas…md` | Transcrição da reunião de validação de 21/10/2026 |
 | `Apresentacao_Executiva_…v2.md/.pptx`, `Plano_Executivo_…v2.pdf` | Versão anterior à reunião de 21/10 (escopo, EBIT, % Achieved e entrega desatualizados; ver 13) |

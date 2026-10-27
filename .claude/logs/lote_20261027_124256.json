@@ -1,0 +1,34 @@
+[
+  {
+    "tarefa": "T01",
+    "retorno": "backgrounded · bd6ce48f · backlog-T01\n  claude agents             list sessions\n  claude attach bd6ce48f    open in this terminal\n  claude logs bd6ce48f      show recent output\n  claude stop bd6ce48f      stop this session\nStarting background service…"
+  },
+  {
+    "tarefa": "T06",
+    "retorno": "backgrounded · fc4b28ef · backlog-T06\n  claude agents             list sessions\n  claude attach fc4b28ef    open in this terminal\n  claude logs fc4b28ef      show recent output\n  claude stop fc4b28ef      stop this session"
+  },
+  {
+    "tarefa": "T07",
+    "retorno": "backgrounded · bbf93db1 · backlog-T07\n  claude agents             list sessions\n  claude attach bbf93db1    open in this terminal\n  claude logs bbf93db1      show recent output\n  claude stop bbf93db1      stop this session"
+  },
+  {
+    "tarefa": "T08",
+    "retorno": "backgrounded · a962e524 · backlog-T08\n  claude agents             list sessions\n  claude attach a962e524    open in this terminal\n  claude logs a962e524      show recent output\n  claude stop a962e524      stop this session"
+  },
+  {
+    "tarefa": "T09",
+    "retorno": "backgrounded · f7bd0ccb · backlog-T09\n  claude agents             list sessions\n  claude attach f7bd0ccb    open in this terminal\n  claude logs f7bd0ccb      show recent output\n  claude stop f7bd0ccb      stop this session"
+  },
+  {
+    "tarefa": "T10",
+    "retorno": "backgrounded · cb17eefb · backlog-T10\n  claude agents             list sessions\n  claude attach cb17eefb    open in this terminal\n  claude logs cb17eefb      show recent output\n  claude stop cb17eefb      stop this session"
+  },
+  {
+    "tarefa": "T12",
+    "retorno": "backgrounded · 93dcb431 · backlog-T12\n  claude agents             list sessions\n  claude attach 93dcb431    open in this terminal\n  claude logs 93dcb431      show recent output\n  claude stop 93dcb431      stop this session"
+  },
+  {
+    "tarefa": "T13",
+    "retorno": "backgrounded · 0cb3e5aa · backlog-T13\n  claude agents             list sessions\n  claude attach 0cb3e5aa    open in this terminal\n  claude logs 0cb3e5aa      show recent output\n  claude stop 0cb3e5aa      stop this session"
+  }
+]

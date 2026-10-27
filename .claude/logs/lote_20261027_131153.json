@@ -1,0 +1,6 @@
+[
+  {
+    "tarefa": "T01",
+    "retorno": "backgrounded · 0367d45c · backlog-T01\n  claude agents             list sessions\n  claude attach 0367d45c    open in this terminal\n  claude logs 0367d45c      show recent output\n  claude stop 0367d45c      stop this session"
+  }
+]

@@ -1,119 +1,40 @@
-# Automação do Backlog — Guia Rápido
+# Rodar o backlog de forma automatizada (PC e celular)
 
-Tudo pronto para disparar o backlog de forma totalmente automatizada.
+## Pré-requisito único (uma vez)
 
-## 3 comandos para rodar tudo
+Sessões em background só iniciam em pastas confiáveis. Abra `claude` na raiz do projeto, aceite o aviso "Workspace not trusted" e saia. Sem isso, `run_backlog.py run` falha com essa mensagem.
 
-```bash
-# 1. Ver o status atual
-python scripts/run_backlog.py status
+## Comandos
 
-# 2. Disparar o próximo lote (primeiros 9 agentes em background, worktree isolado)
-python scripts/run_backlog.py run --ambiente offline
+| Quero | Comando |
+|---|---|
+| Ver o que seria disparado | `python scripts/run_backlog.py run --ambiente offline --dry` |
+| Disparar o lote (uma sessão `--bg` por tarefa, cada uma em worktree próprio) | `python scripts/run_backlog.py run --ambiente offline` |
+| Ver onde estamos (regenera o [PROGRESSO.md](PROGRESSO.md)) | `python scripts/run_backlog.py status` |
+| Integrar o que terminou (commit no worktree se faltar, merge na main, marca `done`, encerra a sessão) | `python scripts/run_backlog.py colher` (`--dry` para simular) |
+| Tudo automático: colher + disparar o próximo lote, em loop até acabar | `python scripts/run_backlog.py auto --ambiente offline` |
 
-# 3. Acompanhar o progresso
-cat PROGRESSO.md    # dashboard visual
-python scripts/backlog.py list   # tabela detalhada
-```
+**Roteamento de modelos:** o campo `Dificuldade` de cada tarefa no BACKLOG define modelo, esforço e teto de gasto por sessão: `baixa` → haiku/low/US$1, `media` → sonnet/medium/US$3, `alta` → opus/high/US$8 (tabela `ROTA` em `scripts/run_backlog.py`; `--model` força um modelo para o lote).
 
----
+**Aprovação automática:** as sessões rodam com `--permission-mode bypassPermissions`, sem pedir aprovação. A proteção que continua valendo é o hook `fabric_guard` (PreToolUse), que bloqueia alteração de dados existentes no Fabric mesmo nesse modo, e o isolamento em worktree. O `colher` exige a main sem mudanças não commitadas; conflito de merge fora de BACKLOG/PROGRESSO aborta o merge e deixa a tarefa `doing` para resolução manual.
+| Acompanhar / entrar / parar uma sessão | `claude agents`, `claude logs <id>`, `claude attach <id>`, `claude stop <id>` |
+| Marcar status à mão | `python scripts/backlog.py set T07 done` |
 
-## O que acontece ao rodar
+O `run` marca cada tarefa disparada como `doing`. Ao fim do lote: confira os commits nos worktrees, marque `done` o que passou, rode o "Fechamento de lote" do [BACKLOG.md](BACKLOG.md) e repita.
 
-```
-python scripts/run_backlog.py run --ambiente offline
-```
+## Pelo celular
 
-- Identifica o próximo lote de tarefas que podem rodar em paralelo (sem conflito de arquivos).
-- Dispara um agente para cada tarefa em background, em worktree isolado.
-- Salva PID, logs e metadados em `.claude/logs/`.
-- Imprime na tela o status de cada disparo.
+| Caminho | Serve para | Limite |
+|---|---|---|
+| **Controle remoto da sessão do PC** (`remoteControlAtStartup` já está `true` em `~/.claude/settings.json`; ou `claude --remote-control <nome>`) | Tudo, inclusive Fabric: a sessão roda no PC, com o login Azure em cache. Do celular você diz "rode o lote offline" e ela executa `run_backlog.py`. | O PC precisa estar ligado e com a sessão aberta. Confirme no app que a sessão aparece; isso não dá para verificar daqui. |
+| **Sessão na nuvem** (`claude --cloud "<tarefa>"`, a partir do repositório GitHub `rafaelroriz-age/als-models`) | Só tarefas `offline` (bloco B), sem PC ligado. | Precisa de `git push` antes (hoje só existe o commit inicial; nada do que foi feito está no GitHub). Não enxerga o Fabric: o login é interativo e não há credencial na nuvem. |
 
-**Lote 1 (agora):** T01, T06–T13, T23 (9 tarefas)
-- ~3–4 horas se rodarem em paralelo
-- Cada agente roda num worktree separado, sem conflito
+Para o Fabric sem depender da rede (porta 1433 bloqueada), a T25 cria `scripts/fabric_run.py`: executa notebooks pela API na 443 e aceita login por device code, que você completa no navegador do celular quando o cache expirar.
 
----
+## O que vai para você
 
-## Depois que o Lote 1 terminar
+Só o que depende de pessoas: aprovar regras de negócio (RN-02/03/04/07), responder a pauta da T23, liberar a porta 1433 ou a publicação em outro workspace, e qualquer escrita em dados existentes (`ALS_FABRIC_ESCRITA=1`). O resto o Claude executa; para e-mail e mensagens, deixa rascunho.
 
-1. **Rode o "Fechamento de lote":**
-   ```bash
-   # Cole o prompt de Fechamento de Lote do BACKLOG.md
-   # (atualiza docs_fabric/06, 12 e 13)
-   ```
+## Segurança no Fabric
 
-2. **Veja o progresso:**
-   ```bash
-   python scripts/run_backlog.py status
-   cat PROGRESSO.md
-   ```
-
-3. **Dispare o Lote 2:**
-   ```bash
-   python scripts/run_backlog.py run --ambiente fabric
-   # (Lote 2 é T02–T05, depende de T01 estar ok)
-   ```
-
----
-
-## Para acompanhar sem disparar nada
-
-```bash
-# Simular: ver o que seria disparado sem disparar
-python scripts/run_backlog.py run --ambiente offline --dry
-
-# Ver todas as tarefas e status
-python scripts/backlog.py list
-
-# Ver só as pendentes (liberadas)
-python scripts/backlog.py next --ambiente offline
-
-# Ver prompts de um lote específico
-python scripts/backlog.py next --ambiente offline --prompts
-```
-
----
-
-## Se algo der errado
-
-**Um agente falhou?**
-- Log fica em `.claude/logs/lote_*.log` ou `.claude/logs/XXXXXX.log`.
-- Copie o prompt: `python scripts/backlog.py show T07`
-- Rode manualmente ou ajuste e tente novamente.
-- Marque o status: `python scripts/backlog.py set T07 done`
-
-**Precisa mudar uma tarefa?**
-- Edite direto no [BACKLOG.md](BACKLOG.md) (coluna `Prompt`, etc.)
-- O script lê tudo do zero toda vez.
-
-**Porta 1433 bloqueada?**
-- T01 vai dizer. Enquanto isso, rode só `--ambiente offline`.
-- Lote 2 fica bloqueado.
-
----
-
-## Status do projeto em tempo real
-
-Veja [PROGRESSO.md](PROGRESSO.md) para:
-- Qual lote está rodando agora
-- Status de cada tarefa (todo/doing/done/blocked)
-- Próximas etapas desbloqueadas
-- Checklist para começar
-
----
-
-## Resumo
-
-| Ação | Comando |
-|------|---------|
-| Disparar Lote 1 agora | `python scripts/run_backlog.py run --ambiente offline` |
-| Acompanhar | `cat PROGRESSO.md` ou `python scripts/run_backlog.py status` |
-| Depois, disparar Lote 2 | `python scripts/run_backlog.py run --ambiente fabric` |
-| Manual: ver próximo | `python scripts/backlog.py next` |
-| Manual: copiar prompt | `python scripts/backlog.py show T07` |
-| Manual: marcar pronto | `python scripts/backlog.py set T07 done` |
-
----
-
-**Tudo está em:** [BACKLOG.md](BACKLOG.md) (tarefas) e [PROGRESSO.md](PROGRESSO.md) (dashboard).
+Ler é livre; gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. A barreira [scripts/fabric_guard.py](scripts/fabric_guard.py) roda como hook antes de cada edição ou comando e dentro do `fabric_deploy.py`, e bloqueia DML/DDL, `saveAsTable`/`insertInto`, operações Delta de escrita e gravação em `Tables/`. Limite: ela lê o texto do comando ou do arquivo escrito, então não pega escrita construída dinamicamente. Por isso o preâmbulo dos agentes repete a regra, e vale revisar notebooks novos antes de publicar.

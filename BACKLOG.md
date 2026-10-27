@@ -13,14 +13,14 @@ Visão geral e ordem automática: `python scripts/backlog.py list` e `python scr
 | Atualizar status | `python scripts/backlog.py set T07 done` (`todo`, `doing`, `done`, `blocked`) |
 | Rodar o lote em background aqui no Code | Peça: "execute em background o lote offline do `backlog.py next`, um agente por tarefa, cada um em worktree isolado" |
 
-**Campos:** `Depende` = tarefas que precisam estar `done`. `Ambiente` = `offline` (roda sem Fabric, seguro em background), `fabric` (precisa do SQL endpoint, porta 1433) ou `humano` (depende de decisão ou ação externa). `Toca` = arquivos/pastas que a tarefa escreve; duas tarefas com `Toca` sobreposto não entram no mesmo lote.
+**Campos:** `Depende` = tarefas que precisam estar `done`. `Ambiente` = `offline` (roda sem Fabric, seguro em background), `fabric` (precisa de acesso ao Fabric: API na 443 ou SQL endpoint na 1433; exige o login Azure em cache nesta máquina) ou `humano` (depende de decisão de pessoas; o Claude prepara o material e deixa rascunho, não envia). `Toca` = arquivos/pastas que a tarefa escreve; duas tarefas com `Toca` sobreposto não entram no mesmo lote.
 
 ## Regra de pronto (vale para toda tarefa)
 
 1. Com código: `python -m pytest` verde, com testes novos para o que foi criado.
 2. Registrar o resultado no doc indicado em `Doc` (fatos, números, caminhos). Sem opinião sem dado.
 3. Em lote paralelo, **não editar `BACKLOG.md` nem os docs 06/12/13**: o status é atualizado com `backlog.py set` e o **Fechamento de lote** (abaixo) consolida.
-4. Dados reais ficam em `data/` (fora do git). Nunca publicar no workspace de produção do Fabric sem confirmação (`scripts/fabric_deploy.py --aplicar`).
+4. Dados reais ficam em `data/` (fora do git). No Fabric: ler à vontade e gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. **Nunca alterar dados que já existem** (tabelas, schemas, views): a barreira `scripts/fabric_guard.py` bloqueia isso nos hooks e no `fabric_deploy.py`; só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`.
 5. Não reintroduzir TAT nem perguntas já resolvidas ([13](docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md)).
 
 ## Fechamento de lote (Organizador)
@@ -36,10 +36,11 @@ Atue como @organizador (AGENTS.md). Rode `git status` e `git log` para ver o que
 ## Bloco A — Acesso e Fase 0 (dados reais)
 
 ### T01 · Diagnosticar a conectividade com o SQL endpoint
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** baixa
 - **Toca:** docs_fabric/14_fase0_engenharia_reversa_e_base_de_codigo.md
 - **Doc:** docs_fabric/14_fase0_engenharia_reversa_e_base_de_codigo.md §4
 - **Pronto:** 1433 e 443 testadas na rede atual, com caminho recomendado para rodar o perfil (outra rede/VPN, pedido ao TI ou execução dentro do Fabric).
@@ -53,12 +54,13 @@ Tarefa T01 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_probe.py, src/pipeline/
 - **Papel:** @analista-dados
 - **Depende:** T01
 - **Ambiente:** fabric
+- **Dificuldade:** media
 - **Toca:** data/perfil, docs_fabric/08_dicionario_de_dados_discovery.md
 - **Doc:** docs_fabric/08_dicionario_de_dados_discovery.md, docs_fabric/04_notas_dados.md
 - **Pronto:** `data/perfil/` preenchido e achados resumidos (nulos, duplicatas, datas fora do intervalo, volume e período por tabela).
 - **Prompt:**
 ```text
-Tarefa T02 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §3. Execute notebooks/00_validacao/01_perfil_qualidade.py com acesso ao Fabric (somente leitura). Resuma em docs_fabric/08_dicionario_de_dados_discovery.md e docs_fabric/04_notas_dados.md: volume, período, nulos, duplicatas e outliers de horímetro por tabela-chave, e liste os achados que afetam KPI 1 e KPI 2. Rascunhe quais verificações viram gates G0/G1. Siga a "Regra de pronto" do BACKLOG.md.
+Tarefa T02 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §3. Execute notebooks/00_validacao/01_perfil_qualidade.py com acesso ao Fabric (somente leitura): direto pelo SQL endpoint se a 1433 estiver liberada (T01) ou, se não, pelo executor de notebooks via API da T25 (conclua a T25 antes). Resuma em docs_fabric/08_dicionario_de_dados_discovery.md e docs_fabric/04_notas_dados.md: volume, período, nulos, duplicatas e outliers de horímetro por tabela-chave, e liste os achados que afetam KPI 1 e KPI 2. Rascunhe quais verificações viram gates G0/G1. Siga a "Regra de pronto" do BACKLOG.md.
 ```
 
 ### T03 · Validar as chaves entre fontes
@@ -66,6 +68,7 @@ Tarefa T02 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §3. Execute notebooks
 - **Papel:** @analista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
+- **Dificuldade:** media
 - **Toca:** docs_fabric/14_fase0_engenharia_reversa_e_base_de_codigo.md
 - **Doc:** docs_fabric/14_fase0_engenharia_reversa_e_base_de_codigo.md §2
 - **Pronto:** taxa de casamento medida para cada chave, com os casos que não casam quantificados.
@@ -79,6 +82,7 @@ Tarefa T03 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §2. Com os dados reai
 - **Papel:** @analista-dados
 - **Depende:** T02, T03
 - **Ambiente:** fabric
+- **Dificuldade:** media
 - **Toca:** docs_fabric/15_matriz_cobertura.md
 - **Doc:** docs_fabric/15_matriz_cobertura.md (novo)
 - **Pronto:** nenhuma linha da matriz com ❓; lacunas com plano (derivar, pedir ao time de dados ou aceitar).
@@ -92,6 +96,7 @@ Tarefa T04 do BACKLOG.md. Leia AGENTS.md e a Etapa 1 de docs_fabric/12_plano_tra
 - **Papel:** @especialista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
+- **Dificuldade:** alta
 - **Toca:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §3
 - **Pronto:** origem do potencial (RN-07) e critério de equipamento ativo definidos por dados, com exemplos numéricos.
@@ -100,15 +105,30 @@ Tarefa T04 do BACKLOG.md. Leia AGENTS.md e a Etapa 1 de docs_fabric/12_plano_tra
 Tarefa T05 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §3, docs_fabric/10 (RN-07) e data/planilhas/engenharia_reversa.json. Com os dados reais, procure a origem do Annual Sample Potential (coluna no S360/Zoho, planilha Customer Status ou derivável de frota × intervalos) e defina por dados quando um equipamento é ativo (coluna de ativo, tempo desde a última coleta, vida útil por família). Entregue a regra proposta com 3 exemplos numéricos e a % de equipamentos cadastrados que ficam inativos. Registre em docs_fabric/13 §3. Siga a "Regra de pronto" do BACKLOG.md.
 ```
 
+### T25 · Executor de notebooks no Fabric via API (sem depender da porta 1433)
+- **Status:** doing
+- **Papel:** @engenheiro-software
+- **Depende:** —
+- **Ambiente:** fabric
+- **Dificuldade:** alta
+- **Toca:** scripts/fabric_run.py, tests/test_fabric_run.py, docs_fabric/09_conexao_e_consumo_fabric.md
+- **Doc:** docs_fabric/09_conexao_e_consumo_fabric.md
+- **Pronto:** `python scripts/fabric_run.py <notebook als_*>` publica (via fabric_deploy), executa o notebook no Fabric pela API (443), espera terminar e baixa as saídas de `Files/als_oilmodel/` para `data/`; reautenticação possível pelo celular (device code).
+- **Prompt:**
+```text
+Tarefa T25 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_deploy.py, scripts/fabric_guard.py e docs_fabric/09. Crie scripts/fabric_run.py: (1) executa um notebook `als_*` já publicado pela API de jobs do Fabric (POST /workspaces/{id}/items/{itemId}/jobs/instances?jobType=RunNotebook), acompanha o status pelo header Location até concluir e imprime o resultado; (2) baixa de Files/als_oilmodel/ no OneLake os arquivos de saída para data/; (3) recusa qualquer notebook que não comece com `als_` ou que a barreira fabric_guard bloqueie; (4) aceita ALS_AUTH=device para autenticar por device code (login pelo navegador do celular) além do login interativo em cache. Só leitura de dados existentes; escreva apenas em Files/als_oilmodel/. Teste com mocks de requests em tests/test_fabric_run.py. Valide a execução real somente com o notebook de perfil já publicado e documente o resultado e o tempo em docs_fabric/09. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
 ---
 
 ## Bloco B — Código que não depende de dados reais
 
 ### T06 · Testes e contrato de dados dos gates G0/G1
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/gates, tests/test_gates.py
 - **Doc:** docs_fabric/10_estrutura_do_projeto.md
 - **Pronto:** G0 (fontes) e G1 (tabela-base) com fixtures sintéticas cobrindo passa/falha de cada verificação.
@@ -118,10 +138,11 @@ Tarefa T06 do BACKLOG.md. Leia AGENTS.md, src/gates/checks.py e a seção de gat
 ```
 
 ### T07 · Features de série temporal por entidade e mês
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/features/series.py, tests/test_series.py
 - **Doc:** docs_fabric/10_estrutura_do_projeto.md
 - **Pronto:** função que recebe a tabela mensal e devolve lags 1/2/3/12, médias móveis, sazonalidade, segmento e status, com teste que prova ausência de vazamento.
@@ -131,10 +152,11 @@ Tarefa T07 do BACKLOG.md. Leia AGENTS.md, src/features/regras.py, src/models/bas
 ```
 
 ### T08 · Alertas de queda >20% e compartimento churn
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** baixa
 - **Toca:** src/features/alertas.py, tests/test_alertas.py
 - **Doc:** docs_fabric/10_estrutura_do_projeto.md
 - **Pronto:** alertas calculados com base de comparação parametrizável, testados em casos de borda.
@@ -144,10 +166,11 @@ Tarefa T08 do BACKLOG.md. Leia AGENTS.md, docs_fabric/10 (RN-05 e RN-06), docs_f
 ```
 
 ### T09 · Classificação de clientes (Fase 1b) sobre o Customer Status
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/features/classificacao.py, tests/test_classificacao.py, notebooks/10_preprocessamento/12_classificacao_clientes.py
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §3
 - **Pronto:** protótipo classificando os 2.388 clientes em recorrente, não recorrente ativo e menor atividade, com a distribuição e a concordância com o status manual.
@@ -157,10 +180,11 @@ Tarefa T09 do BACKLOG.md. Leia AGENTS.md, a Fase 1b de docs_fabric/06, data/plan
 ```
 
 ### T10 · Modelos estatísticos plugáveis no harness
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/models/estatisticos.py, tests/test_estatisticos.py, pyproject.toml
 - **Doc:** docs_fabric/12_plano_trabalho_esboco.md (Etapa 3)
 - **Pronto:** ETS, Theta e Croston/SBA/TSB funcionando com a mesma interface dos baselines, rodando no harness em série sintética.
@@ -174,6 +198,7 @@ Tarefa T10 do BACKLOG.md. Leia AGENTS.md, src/models/baselines.py, src/backtest/
 - **Papel:** @cientista-dados
 - **Depende:** T07
 - **Ambiente:** offline
+- **Dificuldade:** alta
 - **Toca:** src/models/ml_global.py, tests/test_ml_global.py, pyproject.toml
 - **Doc:** docs_fabric/12_plano_trabalho_esboco.md (Etapa 3)
 - **Pronto:** LightGBM global gerando p10/p50/p90 com as features de T07, plugado no harness, sem vazamento.
@@ -183,10 +208,11 @@ Tarefa T11 do BACKLOG.md. Leia AGENTS.md, src/features/series.py (T07), src/back
 ```
 
 ### T12 · Snapshot mensal e reconstrução retroativa
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/backtest/snapshot.py, tests/test_snapshot.py
 - **Doc:** docs_fabric/05_criterios_sucesso.md
 - **Pronto:** snapshot do forecast por data de corte e reconstrução retroativa sobre histórico, com MAPE por mês/segmento/cliente.
@@ -196,10 +222,11 @@ Tarefa T12 do BACKLOG.md. Leia AGENTS.md, docs_fabric/05_criterios_sucesso.md e 
 ```
 
 ### T13 · Reconciliação hierárquica Cliente → Equipamento → Compartimento
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** —
 - **Ambiente:** offline
+- **Dificuldade:** alta
 - **Toca:** src/models/hierarquia.py, tests/test_hierarquia.py
 - **Doc:** docs_fabric/12_plano_trabalho_esboco.md (Etapa 3)
 - **Pronto:** bottom-up e top-down por proporções históricas, com teste de coerência (os níveis somam).
@@ -217,6 +244,7 @@ Tarefa T13 do BACKLOG.md. Leia AGENTS.md e a Etapa 3 de docs_fabric/12 (item hie
 - **Papel:** @engenheiro-software
 - **Depende:** T03, T07
 - **Ambiente:** fabric
+- **Dificuldade:** alta
 - **Toca:** notebooks/10_preprocessamento/10_base_amostras.py
 - **Doc:** docs_fabric/10_estrutura_do_projeto.md
 - **Pronto:** tabela mensal por entidade com amostras, faturamento e oportunidades, passando em G1; amostras avulsas identificadas e limpas.
@@ -230,6 +258,7 @@ Tarefa T14 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §2–3, src/pipeline/f
 - **Papel:** @cientista-dados
 - **Depende:** T10, T11, T14
 - **Ambiente:** fabric
+- **Dificuldade:** alta
 - **Toca:** notebooks/20_kpi1_consumo, docs_fabric/12_plano_trabalho_esboco.md
 - **Doc:** docs_fabric/12_plano_trabalho_esboco.md (Etapa 3)
 - **Pronto:** tabela modelo × nível × segmento (WAPE, viés, cobertura) comparando baselines, estatísticos e ML global.
@@ -243,6 +272,7 @@ Tarefa T15 do BACKLOG.md. Leia AGENTS.md, src/backtest/harness.py, notebooks/40_
 - **Papel:** @cientista-dados
 - **Depende:** T05, T14
 - **Ambiente:** fabric
+- **Dificuldade:** alta
 - **Toca:** notebooks/20_kpi1_consumo/23_potencial.py, src/models/potencial.py, tests/test_potencial.py
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §3
 - **Pronto:** potencial por cliente via similares, com a definição de "similar" explícita e % Achieved calculado pela definição unificada (D6).
@@ -256,6 +286,7 @@ Tarefa T16 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 (D6 e §3), docs_fabric
 - **Papel:** @cientista-dados
 - **Depende:** T14
 - **Ambiente:** fabric
+- **Dificuldade:** alta
 - **Toca:** notebooks/30_kpi2_vendas, src/features/receita.py, tests/test_receita.py
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2–3
 - **Pronto:** receita por amostra (kit vs análise) medida, e a receita decomposta em recorrente, não recorrente ativa e churn, reproduzindo o Forecast 27 como baseline.
@@ -269,6 +300,7 @@ Tarefa T17 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §1 (Forecast 27), docs
 - **Papel:** @especialista-dados
 - **Depende:** T17
 - **Ambiente:** fabric
+- **Dificuldade:** media
 - **Toca:** notebooks/30_kpi2_vendas/32_crosscheck_zoho.py
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2
 - **Pronto:** comparação das oportunidades acima de 80% somadas versus descontadas do forecast, com o efeito em erro de previsão.
@@ -282,6 +314,7 @@ Tarefa T18 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §2 (hipótese sobre op
 - **Papel:** @cientista-dados
 - **Depende:** T15, T17
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** docs_fabric/16_decisao_modelos.md
 - **Doc:** docs_fabric/16_decisao_modelos.md (novo)
 - **Pronto:** tabela modelo × critério e uma recomendação por problema (KPI 1 real, potencial, KPI 2, alertas), com experimentos seguintes priorizados.
@@ -299,6 +332,7 @@ Tarefa T19 do BACKLOG.md. Leia AGENTS.md, a Etapa 3 de docs_fabric/12 e os resul
 - **Papel:** @engenheiro-ia
 - **Depende:** T15
 - **Ambiente:** offline
+- **Dificuldade:** media
 - **Toca:** src/serving, docs_fabric/07_integracao_mcp.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2 (H3)
 - **Pronto:** HTML estático com forecast de consumo (Real e Potencial), alertas e filtros por segmento, mais as consultas SQL que o alimentam.
@@ -312,6 +346,7 @@ Tarefa T20 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §2 (H3), docs_fabric/0
 - **Papel:** @gestor-projetos
 - **Depende:** T20
 - **Ambiente:** offline
+- **Dificuldade:** baixa
 - **Toca:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2 (H3)
 - **Pronto:** quadro HTML+SQL × modelo semântico × MCP/API com esforço, custo em CU, manutenção e aderência ao agente do CRM, para o cliente escolher.
@@ -325,6 +360,7 @@ Tarefa T21 do BACKLOG.md. Leia AGENTS.md, docs_fabric/07, docs_fabric/13 §2 (H3
 - **Papel:** @engenheiro-software
 - **Depende:** T15
 - **Ambiente:** fabric
+- **Dificuldade:** media
 - **Toca:** docs_fabric/06_plano_execucao.md
 - **Doc:** docs_fabric/06_plano_execucao.md (Fase 5)
 - **Pronto:** custo em CU e tempo por modelo e por execução completa, com a janela estimada para agendar na F8.
@@ -342,12 +378,13 @@ Tarefa T22 do BACKLOG.md. Leia AGENTS.md e a Fase 5 de docs_fabric/06. Meça tem
 - **Papel:** @gestor-projetos
 - **Depende:** —
 - **Ambiente:** humano
+- **Dificuldade:** baixa
 - **Toca:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §5
 - **Pronto:** pauta de uma página com cada decisão, opções, recomendação e quem decide.
 - **Prompt:**
 ```text
-Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §4. Redija para o time (Caio, Diego, Keli e demais) uma pauta de uma página com as decisões pendentes: meta numérica de MAPE por KPI e horizontes, cadência semanal obrigatória ou desejável, hierarquia matriz/filial do Zoho, janela de CU na F8, fórmula de março no Forecast 27 e preservação do status manual (~9%), e destino da publicação (produção ou workspace de desenvolvimento). Para cada uma: contexto em duas linhas, opções, recomendação e quem decide. Não invente respostas. Siga a "Regra de pronto" do BACKLOG.md.
+Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §4. Redija para o time (Caio, Diego, Keli e demais) uma pauta de uma página com as decisões pendentes: meta numérica de MAPE por KPI e horizontes, cadência semanal obrigatória ou desejável, hierarquia matriz/filial do Zoho, janela de CU na F8, fórmula de março no Forecast 27 e preservação do status manual (~9%), e destino da publicação (produção ou workspace de desenvolvimento). Para cada uma: contexto em duas linhas, opções, recomendação e quem decide. Não invente respostas. Salve a pauta em docs_fabric/ e, se o conector do Outlook estiver disponível, crie um rascunho de e-mail para o time (nunca envie). Siga a "Regra de pronto" do BACKLOG.md.
 ```
 
 ### T24 · Regerar a apresentação executiva com o escopo atual
@@ -355,6 +392,7 @@ Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §
 - **Papel:** @organizador
 - **Depende:** T23
 - **Ambiente:** offline
+- **Dificuldade:** baixa
 - **Toca:** docs_fabric/Apresentacao_Executiva_Forecast_Amostras_Vendas_Fabric-v2.md
 - **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §4
 - **Pronto:** apresentação em markdown sem os pontos desatualizados (6 componentes, EBIT único, % Achieved antigo, entrega via semântico + MCP).
