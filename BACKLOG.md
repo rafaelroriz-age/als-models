@@ -138,7 +138,7 @@ Tarefa T06 do BACKLOG.md. Leia AGENTS.md, src/gates/checks.py e a seção de gat
 ```
 
 ### T07 · Features de série temporal por entidade e mês
-- **Status:** doing
+- **Status:** done
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
