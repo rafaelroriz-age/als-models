@@ -268,7 +268,7 @@ Tarefa T15 do BACKLOG.md. Leia AGENTS.md, src/backtest/harness.py, notebooks/40_
 ```
 
 ### T16 · KPI 1 Potencial: benchmark por similares e % Achieved
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T05, T14
 - **Ambiente:** fabric
