@@ -282,7 +282,7 @@ Tarefa T16 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 (D6 e §3), docs_fabric
 ```
 
 ### T17 · KPI 2: correlação consumo → venda e composição da receita
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T14
 - **Ambiente:** fabric
