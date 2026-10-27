@@ -25,6 +25,7 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 | [13_revisao_alinhamento_reuniao_2026-10-21.md](13_revisao_alinhamento_reuniao_2026-10-21.md) | Decisões, hipóteses por protótipo e descobertas por dados |
 | [14_fase0_engenharia_reversa_e_base_de_codigo.md](14_fase0_engenharia_reversa_e_base_de_codigo.md) | Regras extraídas das planilhas, chaves entre fontes, base de código e como rodar |
 | [15_matriz_cobertura.md](15_matriz_cobertura.md) | Matriz insumo × fonte da Etapa 1 (✅/⚠️/❌) com tabela real, granularidade e plano para cada lacuna (T04) |
+| [16_decisao_modelos.md](16_decisao_modelos.md) | Modelo × critério, candidatos provisórios por problema, protocolo de avaliação e experimentos priorizados (T19) |
 | [15_pauta_decisoes_time.md](15_pauta_decisoes_time.md) | Pauta para o time: 7 decisões pendentes, com opções, recomendação e quem decide (T23) |
 | [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 24 tarefas com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
 | [../PROGRESSO.md](../PROGRESSO.md) | Status do backlog por bloco e próximo lote; gerado por `scripts/run_backlog.py status` |
