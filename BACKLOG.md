@@ -254,7 +254,7 @@ Tarefa T14 do BACKLOG.md. Leia AGENTS.md, docs_fabric/14 §2–3, src/pipeline/f
 ```
 
 ### T15 · Backtest do KPI 1 com os candidatos em dados reais
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T10, T11, T14
 - **Ambiente:** fabric
