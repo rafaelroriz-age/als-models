@@ -328,7 +328,7 @@ Tarefa T19 do BACKLOG.md. Leia AGENTS.md, a Etapa 3 de docs_fabric/12 e os resul
 ## Bloco D — Entrega
 
 ### T20 · Protótipo H1: dashboard HTML + SQL
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-ia
 - **Depende:** T15
 - **Ambiente:** offline
