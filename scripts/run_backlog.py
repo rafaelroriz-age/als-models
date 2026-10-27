@@ -11,11 +11,13 @@ Acompanhar: `claude agents`, `claude logs <id>`, `claude attach <id>`, `claude s
 import argparse
 import glob
 import json
+import os
 import shutil
 import subprocess
 import sys
 import time
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -43,8 +45,27 @@ PREAMBULO = (
 )
 
 
+@lru_cache(maxsize=1)
+def _identidade():
+    ok = all(subprocess.run(["git", "config", "--get", k], capture_output=True, text=True, cwd=RAIZ).stdout.strip()
+             for k in ("user.name", "user.email"))
+    return [] if ok else ["-c", "user.name=backlog-auto", "-c", "user.email=backlog-auto@localhost"]
+
+
 def git(*a, cwd=RAIZ):
-    return subprocess.run(["git", *a], capture_output=True, text=True, encoding="utf-8", cwd=cwd)
+    # Commits automáticos não dependem de chave de assinatura, agente GPG/SSH nem credenciais (nunca há push).
+    sem_chave = ["-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false", *_identidade()]
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+    return subprocess.run(["git", *sem_chave, *a], capture_output=True, text=True, encoding="utf-8", cwd=cwd, env=env)
+
+
+def salvar_pendentes():
+    """Commita as mudanças em arquivos já rastreados da main (não toca em arquivos novos)."""
+    if not git("status", "--porcelain", "--untracked-files=no").stdout.strip():
+        return False
+    git("add", "-u")
+    git("commit", "-m", "backlog: salva mudanças pendentes antes de integrar")
+    return True
 
 
 def achar_claude():
@@ -145,8 +166,11 @@ def cmd_colher(args):
     if not doing:
         print("Nada em andamento.")
         return 0
-    if not args.dry and git("status", "--porcelain", "--untracked-files=no").stdout.strip():
-        sys.exit("A main tem mudanças não commitadas; commite ou guarde (git stash) antes de colher.")
+    if not args.dry:
+        if salvar_pendentes():
+            print("  main: mudanças pendentes commitadas automaticamente.")
+        if git("status", "--porcelain", "--untracked-files=no").stdout.strip():
+            sys.exit("A main continua com mudanças que não puderam ser commitadas (merge em andamento ou hook recusou); verifique `git status`.")
     feitas = 0
     for t in doing:
         s = sessoes.get(f"backlog-{t['id']}")
