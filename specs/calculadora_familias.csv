@@ -1,0 +1,51 @@
+aba,setor,familia,detalhe,variante,maquinas,horas_ano,km_ano,meses_ano,n_compartimentos,amostras_ano_planilha,amostras_ano_python,amostras_3_por_comp_planilha,reproduz
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,,sem_diesel,1.0,1000.0,,12.0,6,13.0,13.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,,sem_diesel,1.0,500.0,,12.0,6,6.0,6.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,,sem_diesel,556.0,2000.0,,,5,12232.0,12232.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,,sem_diesel,0.0,,,,6,0.0,0.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,todos os modelos,sem_diesel,1.0,1000.0,,12.0,7,15.0,15.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,,sem_diesel,0.0,,,,9,0.0,0.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,genérico,sem_diesel,0.0,,,9.0,7,0.0,0.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,genérico,sem_diesel,1.0,1000.0,,9.0,7,13.0,13.0,,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,modelo/horimetro específico,com_diesel,1.0,1000.0,,12.0,7,14.0,14.0,21.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,modelo/horimetro específico,com_diesel,1.0,500.0,,12.0,7,6.0,6.0,21.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,modelo/horimetro específico,com_diesel,556.0,2000.0,,0.0,6,13344.0,13344.0,10008.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,modelo/horimetro específico,com_diesel,0.0,0.0,,0.0,7,0.0,0.0,0.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,modelo/horimetro específico,com_diesel,1.0,1000.0,,12.0,8,16.0,16.0,24.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,modelo/horimetro específico,com_diesel,0.0,0.0,,0.0,10,0.0,0.0,0.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,genérico,com_diesel,0.0,0.0,,9.0,7,0.0,0.0,0.0,True
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,genérico,com_diesel,1.0,1000.0,,9.0,7,14.0,14.0,21.0,True
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,modelo/horimetro específico,sem_diesel,9.0,3000.0,,9.0,8,540.0,540.0,,True
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU (5000),,sem_diesel,9.0,3000.0,,3.0,3,189.0,189.0,,True
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,4 X 4 - >1000h/ano,sem_diesel,3.0,1500.0,,7.0,6,57.0,57.0,,True
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,,sem_diesel,3.0,300.0,,6.0,6,3.0,3.0,,True
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,,sem_diesel,1.0,800.0,,9.0,7,8.0,8.0,,True
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,todos os modelos,sem_diesel,0.0,,,9.0,8,0.0,0.0,,True
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,horimetro até 800h,sem_diesel,0.0,,,,4,0.0,0.0,,True
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,genérico,sem_diesel,15.0,3000.0,,7.0,6,495.0,495.0,,True
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,km (comum 65mil km/safra),sem_diesel,15.0,3000.0,,12.0,5,810.0,810.0,,True
+AGRO-Calc Real base preventiva,Agro,MOTO-BOMBA,genérico,sem_diesel,1.0,3080.0,,7.0,1,12.0,12.0,,True
+AGRO-Calc Real base preventiva,Agro,Manipulador,,sem_diesel,1.0,600.0,,12.0,3,3.0,3.0,,True
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,modelo/horimetro específico,com_diesel,9.0,3000.0,,9.0,9,567.0,567.0,243.0,True
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,4 X 2,com_diesel,9.0,3000.0,,3.0,4,216.0,216.0,108.0,True
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,4 X 4 - >1000h/ano,com_diesel,3.0,1500.0,,7.0,7,60.0,60.0,63.0,True
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,todos os modelos,com_diesel,1.0,300.0,,6.0,7,1.0,1.0,21.0,True
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,todos os modelos,com_diesel,1.0,800.0,,9.0,8,8.0,8.0,24.0,True
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,todos os modelos,com_diesel,0.0,0.0,,9.0,8,0.0,0.0,0.0,True
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,horimetro até 800h,com_diesel,0.0,0.0,,0.0,4,0.0,0.0,0.0,True
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,genérico,com_diesel,15.0,3000.0,,7.0,7,405.0,675.0,315.0,False
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,km (comum 65mil km/safra),com_diesel,15.0,3000.0,0.0,12.0,6,810.0,675.0,270.0,False
+AGRO-Calc Real base preventiva,Agro,MOTO-BOMBA,genérico,com_diesel,1.0,3080.0,,7.0,2,15.0,15.0,6.0,True
+AGRO-Calc Real base preventiva,Agro,Manipulador,4 X 2,com_diesel,1.0,600.0,,12.0,4,3.0,3.0,12.0,True
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,PONSSE,sem_diesel,1.0,1600.0,,12.0,10,15.0,15.0,,True
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,-,sem_diesel,1.0,1200.0,,3.0,8,17.0,17.0,,True
+FLORESTA-Calc Real base prevent,Florestal,FELLER,-,sem_diesel,1.0,1000.0,,7.0,5,11.0,11.0,,True
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,-,sem_diesel,1.0,1000.0,,6.0,10,15.0,15.0,,True
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,PONSSE,sem_diesel,1.0,1600.0,,9.0,11,16.0,16.0,,True
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,-,sem_diesel,1.0,1200.0,,9.0,8,17.0,17.0,,True
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,PONSSE,com_diesel,1.0,1600.0,,12.0,11,16.0,16.0,27.0,True
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,-,com_diesel,1.0,1200.0,,3.0,9,18.0,18.0,27.0,True
+FLORESTA-Calc Real base prevent,Florestal,FELLER,-,com_diesel,1.0,1000.0,,7.0,6,12.0,12.0,18.0,True
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,-,com_diesel,1.0,1000.0,,6.0,11,16.0,16.0,33.0,True
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,PONSSE,com_diesel,1.0,1600.0,,9.0,12,17.0,17.0,36.0,True
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,-,com_diesel,1.0,1200.0,,9.0,9,18.0,18.0,27.0,True

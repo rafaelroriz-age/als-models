@@ -31,7 +31,7 @@ Registrar, em um só lugar, os campos que alimentam os dois KPIs do projeto: de 
 | Sistema / Fonte | O que contém | Usado em | Acesso | Tabela/Local no Fabric | Status |
 |-----------------|--------------|----------|--------|------------------------|--------|
 | LIMS / S360 | Amostras processadas, equipamentos cadastrados e monitorados, compartimentos, setor e segmento do cliente | Consumo de amostras | Lakehouse Fabric | *(preencher)* | A validar |
-| ERP / Proteus | Faturamento e vendas (via API em tempo real) | Forecast de vendas | Lakehouse Fabric | *(preencher)* | A validar |
+| ERP / Protheus | Faturamento e vendas (via API em tempo real) | Forecast de vendas | Lakehouse Fabric | *(preencher)* | A validar |
 | Zoho CRM | Segmentação de cliente, oportunidades e pedidos em aberto | Forecast de vendas (cross-check) | API Zoho | *(preencher)* | A validar |
 | Calculadora de amostras (Bahia) | Amostras/ano por tipo de equipamento, horas e coleta por compartimento; conversão em faturamento | Consumo de amostras | Planilha (out/2022) | *(preencher)* | A validar |
 | Customer Status 2026 | Base de clientes com venda, amostra, potencial e % atingido por cliente | Ambos | Planilha | *(preencher)* | A validar |
@@ -85,7 +85,7 @@ Colunas: Campo · Descrição · Tipo · KPI/Área · Fonte · Origem · Tabela 
 | Previsão real de amostras | Amostras/ano e /mês esperadas por consumo | Número | Derivado | Calculadora | Não | A validar | Saída da calculadora |
 | Ticket médio por serviço | Valor médio por serviço/amostra | Moeda | Parâmetro | Calculadora | Não | A validar | Parâmetro de 2022 — revisar |
 | Taxa de conversão em serviço | % de amostra que vira serviço faturado | Percentual | Parâmetro | Calculadora | Não | A validar | Parâmetro de 2022 — revisar |
-| Potencial anual de amostras | Quanto o cliente poderia gerar (potencial) | Número | A definir | Customer Status · Annual Sample Potential | Não | Em aberto | Origem a confirmar: calculadora ou benchmark de similares |
+| Potencial anual de amostras | Quanto o cliente poderia gerar (potencial) | Número | A definir | Customer Status · Annual Sample Potential | Não | A descobrir | Origem será descoberta nas planilhas, artefatos e dados |
 | % atingido | Amostras realizadas / potencial anual | Percentual | Derivado | Customer Status · % Achieved | Não | A validar | |
 
 ### Forecast de vendas
@@ -97,8 +97,8 @@ Colunas: Campo · Descrição · Tipo · KPI/Área · Fonte · Origem · Tabela 
 | Flag cliente recorrente | Comprou em 6+ meses/12 e última compra < 90 dias | Booleano | Derivado | Forecast (regra) | Não | A validar | Sem a taxa de 70% |
 | Receita recorrente estimada | Receita esperada dos clientes recorrentes | Moeda | Derivado | Forecast · Receita Recorrente | Não | A validar | |
 | Receita não recorrente ativa | Clientes que compram poucas vezes | Moeda | Derivado | Forecast · Não Recorrente Ativa | Não | A validar | |
-| Receita novos clientes | Valor médio do 1º faturamento | Moeda | Derivado | Forecast · Novos Clientes | Não | A validar | |
-| Receita clientes reativados | Voltaram a comprar após +1 ano | Moeda | Derivado | Forecast · Reativados | Não | A validar | |
+| Receita novos clientes | Valor médio do 1º faturamento | Moeda | Derivado | Forecast · Novos Clientes | Não | Fora do escopo (fase 1) | |
+| Receita clientes reativados | Voltaram a comprar após +1 ano | Moeda | Derivado | Forecast · Reativados | Não | Fora do escopo (fase 1) | |
 | Perda de receita (churn) | Receita perdida de quem parou de comprar | Moeda | Derivado | Forecast · Churn | Não | A validar | >6 meses sem comprar |
 | Variável de mercado/cenário | Ajuste mensal por cenário e sazonalidade | Percentual | Manual/externo | Forecast · Variáveis de Mercado | Não | A validar | |
 | Receita total estimada | Soma dos componentes antes do ajuste | Moeda | Derivado | Forecast · Receita Total | Não | A validar | |
@@ -111,7 +111,8 @@ Colunas: Campo · Descrição · Tipo · KPI/Área · Fonte · Origem · Tabela 
 
 ## Pontos em aberto (do dicionário)
 
-- **Tabela/Local no Fabric** de todas as fontes ainda não preenchida (células amarelas).
-- **ID de equipamento (S360)** — campo exato do join a confirmar.
-- **Potencial anual de amostras (Annual Sample Potential)** — status **Em aberto**: origem a confirmar (calculadora vs benchmark de similares).
-- **Ticket médio** e **taxa de conversão** — parâmetros de 2022, revisar.
+- **Tabela/Local no Fabric** das fontes: preencher a partir do [discovery](08_dicionario_de_dados_discovery.md) (células amarelas).
+- **ID de equipamento (S360):** a descobrir (candidato `equipamento_id`).
+- **Potencial anual de amostras:** origem a descobrir nas planilhas, artefatos e dados.
+- **Ticket médio e taxa de conversão:** parâmetros de 2022; recalcular a partir do faturamento Protheus.
+- **Novos e reativados:** fora do escopo da fase 1.

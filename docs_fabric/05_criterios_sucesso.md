@@ -15,7 +15,8 @@ Hoje **não há medição de assertividade** do forecast. O sucesso passa a ser 
 | KPI | Métrica |
 |-----|---------|
 | Consumo de amostras | MAPE / MAE por mês, por segmento e por cliente |
-| Vendas (faturamento) | MAPE / MAE por mês, por segmento e por cliente |
+| Vendas: faturamento | MAPE / MAE por mês, por segmento e por cliente |
+| Vendas: EBIT (target separado) | MAPE / MAE por mês e por segmento |
 | Convergência | Acompanhar o erro ao longo do mês (a planilha atual converge perto do dia 20) |
 
 ## Critérios complementares

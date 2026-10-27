@@ -1,3 +1,5 @@
+> **Versão anterior à reunião de 21/10/2026.** Escopo (novos/reativados), EBIT, definição de % Achieved e formato de entrega foram atualizados; ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md).
+
 <!-- Slide number: 1 -->
 
 PROJETO DE CIÊNCIA DE DADOS — ALS / LS

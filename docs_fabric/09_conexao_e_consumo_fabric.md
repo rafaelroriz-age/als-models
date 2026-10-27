@@ -27,9 +27,11 @@
 
 Contrato: `entidade, data_ref, período → previsão + incerteza`.
 
+As formas abaixo são **hipóteses a prototipar**; o cliente escolhe (ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md)). Inclui-se o acesso direto por SQL às tabelas Delta de `lh_forecast` e um dashboard HTML.
+
 1. **Modelo semântico DirectLake** sobre as tabelas de saída (DAX simples). Base do Power BI.
 2. **Fabric Data Agent** nativo sobre o semântico — perguntas em linguagem natural, menor manutenção.
-3. **MCP fino próprio** (Python/FastMCP, recomendado para contrato estável): tools `get_forecast_consumo`, `get_forecast_vendas`, `get_backtest_mape`, com SQL parametrizado somente-leitura no SQL endpoint de `lh_forecast` (ou DAX no semântico). Retorno: `{valor, p10, p90, data_ref, snapshot}`.
+3. **MCP fino próprio** (Python/FastMCP, para contrato estável): tools `get_forecast_consumo`, `get_forecast_vendas`, `get_backtest_mape`, com SQL parametrizado somente-leitura no SQL endpoint de `lh_forecast` (ou DAX no semântico). Retorno: `{valor, p10, p90, data_ref, snapshot}`.
    - Alternativas: `Fabric-Analytics-MCP` (comunidade, DAX) ou Data Agent como ponte.
    - **A verificar (Fase 0/5):** existência de MCP oficial Microsoft atual para semantic models que dispense servidor próprio.
 

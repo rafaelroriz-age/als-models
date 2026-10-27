@@ -1,10 +1,12 @@
 # Integração via MCP (Model Context Protocol)
 
 > Como conectar o "agente" da ALS ao modelo entregue no Microsoft Fabric, usando MCP como camada fina de integração.
+>
+> **Status:** o MCP é uma das hipóteses de entrega a prototipar, junto de dashboard HTML + SQL e modelo semântico. O cliente escolhe após os protótipos (ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md)).
 
 ## Contexto
 
-O modelo de forecast (consumo + vendas) será entregue como **modelo semântico do Fabric** e/ou **API/endpoint**. O agente precisa consultá-lo sob demanda e devolver um número + intervalo de confiança para o usuário final. O **MCP (Model Context Protocol)** é o protocolo padrão que permite ao agente chamar "ferramentas" externas — no caso, consultar o Fabric.
+Se o cliente escolher a entrega via MCP, o modelo de forecast (consumo + vendas) ficará disponível como **modelo semântico do Fabric** e/ou **API/endpoint**. O agente precisa consultá-lo sob demanda e devolver um número + intervalo de confiança. O **MCP (Model Context Protocol)** é o protocolo padrão que permite ao agente chamar "ferramentas" externas — no caso, consultar o Fabric.
 
 **Princípio**: o MCP é "cola", não o core. Primeiro define-se o entregável (semântico vs endpoint); depois adiciona-se o MCP por cima.
 
@@ -46,7 +48,7 @@ Decidir na reunião de validação o formato de entrega, depois escolher:
 | API/endpoint sob demanda | `microsoft_fabric_mcp` (REST) + endpoint próprio | controle fino, menos acoplamento |
 | Alertas/eventos (Eventhouse) | `microsoft/fabric-rti-mcp` | KQL/streaming |
 
-**Recomendação para este projeto**: entregar **modelo semântico (DirectLake)** com as previsões materializadas na camada Gold, e usar o **Fabric data agent nativo** (ou `Fabric-Analytics-MCP`) como ponte. É o caminho de menor custo e menor manutenção, alinhado ao FinOps da capacidade F8.
+**Se o MCP for escolhido:** modelo semântico (DirectLake) com as previsões materializadas + Fabric data agent nativo (ou `Fabric-Analytics-MCP`) é o caminho de menor custo e manutenção; MCP próprio (FastMCP) é a opção para contrato estável (ver [09](09_conexao_e_consumo_fabric.md)).
 
 ## Exemplo de configuração (MCP client → servidor)
 
@@ -75,7 +77,8 @@ Configuração típica de um cliente MCP (formato JSON, `stdio`):
 - Autenticar via **service principal** (Entra ID) com escopo mínimo (leitura do semântico/lakehouse).
 - Nunca expor segredos no repo; usar cofre/segredo do agente.
 - MCP só lê as **tabelas de saída do Forecast** (`lh_forecast`; nunca Bronze/Silver nem a Gold do agente atual), limitando superfície de dados sensíveis. Detalhes em [09_conexao_e_consumo_fabric.md](09_conexao_e_consumo_fabric.md).
-- Opção recomendada para contrato estável: MCP fino próprio (FastMCP) com tools de leitura parametrizada.
+- Contrato estável: MCP fino próprio (FastMCP) com tools de leitura parametrizada ([09](09_conexao_e_consumo_fabric.md)).
+- O MCP só entra se o cliente o escolher após a prototipagem ([13](13_revisao_alinhamento_reuniao_2026-10-21.md)).
 - Auditar chamadas (quem consultou o quê) via logs do agente/Fabric.
 
 ## FinOps (capacidade F8)
@@ -87,9 +90,9 @@ Configuração típica de um cliente MCP (formato JSON, `stdio`):
 
 ## Integração ao plano de execução (novo item)
 
-Adicionar à **Fase 5 — Entrega e handoff**:
+Se o MCP for escolhido, adicionar à **Fase 5 — Entrega e handoff**:
 
-1. Definir formato de entrega (semântico vs endpoint) na reunião de validação.
+1. Comparar os protótipos de entrega com o cliente e registrar a escolha.
 2. Escolher o MCP correspondente (tabela acima).
 3. Provisionar service principal + escopos mínimos no Fabric.
 4. Configurar o MCP client no agente (arquivo de configuração + segredos).

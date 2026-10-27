@@ -15,7 +15,7 @@
 | 7 | Modelos | `notebooks/20_kpi1_consumo/`, `30_kpi2_vendas/` | Fases 2-3 | **Entregável 2** modelos MLflow (`src/models/`) |
 | 8 | Gateways de validação | `src/gates/` | Great Expectations | Travas entre etapas (seção 3) |
 | 9 | Backtest e snapshots | `notebooks/40_backtest/` | Fase 4 | **Entregável 4** (`src/backtest/`) |
-| 10 | Exposição | `src/serving/` | Fase 5 | **Entregável 3** semântico + MCP |
+| 10 | Exposição | `src/serving/` | Fase 5 | **Entregável 3** protótipos de entrega (HTML + SQL, semântico, MCP) |
 
 Layout de pastas:
 
@@ -33,15 +33,21 @@ scripts/      fabric_probe.py (descoberta local)
 |----|-------|--------|
 | RN-01 | Intervalo de coleta: motor 250h; hidráulico e transmissão 500h; arrefecimento 1000h; preventiva vs. meia preventiva | A validar |
 | RN-02 | Consumo real = horas (horímetro) × meses trabalhados/ano ÷ intervalo, por compartimento | A validar |
-| RN-03 | Recorrente: compras em ≥6 meses distintos dos últimos 12 **e** última compra <90 dias (sem redutor de 70%) | A validar (item 5 do checklist) |
-| RN-04 | Churn: >6 meses sem compra. Reativado: volta após >1 ano | A validar |
+| RN-03 | Recorrente: compras em ≥6 meses distintos dos últimos 12 **e** última compra <90 dias (sem redutor de 70%). Comprador de alto volume e poucas compras = não recorrente ativo | Confirmada (Diego, Keli); E/OU da última compra conferido nos dados (H4) |
+| RN-04 | Churn: >6 meses sem compra. Reativado: volta após >1 ano | Churn: a validar. Reativados: fora do escopo da fase 1 |
 | RN-05 | Alerta de queda: amostras do cliente caem >20% | A validar (base de comparação a definir) |
 | RN-06 | Compartimento churn: compartimento deixa de ser coletado dentro do intervalo esperado | A validar |
-| RN-07 | Potencial = benchmark de similares do mesmo segmento; % Achieved = realizado ÷ potencial | **Em aberto** (item 3) |
-| RN-08 | Inatividade do equipamento inferida por quebra na série do horímetro e intervalos de coleta (S360 não informa venda/parada) | A validar |
+| RN-07 | Potencial = benchmark de similares do mesmo segmento; % Achieved = realizado ÷ potencial | Fórmulas do Annual Sample Potential a descobrir nas planilhas e dados (R1) |
+| RN-08 | Inatividade do equipamento inferida por engenharia reversa: coluna de ativo do S360, intervalos entre coletas e vida útil por família/segmento (ex.: colhedora de cana ~7 anos). O horímetro é uma leitura por coleta, não série contínua | Descoberta por dados (R3) |
 | RN-09 | Sazonalidade: Cana (parada nov-mar), MT (soja/milho/algodão), Indústria (mensal/bimestral), Locomotiva (semanal) | Parcial (item 7) |
-| RN-10 | Cross-check: descontar faturado no mês (Protheus), pedidos pendentes e oportunidades ativas (Zoho) | A validar |
+| RN-10 | Cross-check: descontar faturado no mês (Protheus), pedidos pendentes e oportunidades ativas (Zoho). Hipótese a testar: oportunidades >80% somam ao forecast vs só descontam | Em teste por protótipo (H1) |
 | RN-11 | Ticket médio R$ 1.950 e conversão 5% (out/2022) | **Defasado** (item 4) |
+| RN-12 | Recorrência de amostras distinta da recorrência de faturamento (cliente compra e distribui a unidades/concessionárias que processam) | A descobrir nos dados (R6) |
+| RN-13 | Calculadora cobre ~20–30 famílias (estimativa do Bahia) de >400 no S360 | Cobertura exata a descobrir (R2) |
+| RN-14 | Taxa de retorno kit→amostra (histórico informal ~70–80%) como elo venda→consumo | A derivar dos dados (R4) |
+| RN-15 | Potencial é sobre a frota conhecida (cadastrada + benchmark); não inclui filiais não cadastradas | Nova (Keli, Diego, 21/10) |
+| RN-16 | Amostra avulsa (sem equipamento): identificar e limpar no pré-processamento; tratamento adicional é descoberta futura | Definida (D9) |
+| RN-17 | Faturamento e EBIT são targets separados. Receita como venda de kit vs análise processada: testar ambas | Em teste por protótipo (H2) |
 
 ## 3. Gateways de validação de dados
 
@@ -68,12 +74,11 @@ Cada gate é um conjunto de expectations (Great Expectations) que **bloqueia** a
 ## 5. Ordem de execução
 
 1. Fase 0: `scripts/fabric_probe.py` → preencher `specs/01_origens_dados.md` e [08](08_dicionario_de_dados.md); notebooks `00_validacao` definem os G0/G1 reais.
-2. Fechar `specs/02` e `03` com Bahia/Keli (checklist do plano executivo) antes de escrever feature alguma.
+2. Fechar `specs/02` e `03` a partir das planilhas, artefatos e dados (descoberta); levar ao Bahia/Keli apenas o que os dados não resolverem.
 3. Fases 1-3: notebook → função testada em `src/` → pipeline. Nada vai para `src/` sem teste e gate.
 4. Fases 4-5: backtest, snapshots, semântico/MCP, medição de CU.
 
-## Pendências que bloqueiam o início
+## Pendências
 
-- Acesso de leitura ao Bronze/Silver e nomes das tabelas (sem isso o item 1 não sai).
-- Campo exato do ID de equipamento no S360.
-- Origem do Annual Sample Potential e parâmetros atuais de ticket/conversão.
+- Acesso de leitura e nomes das tabelas: resolvidos pelo probe (ver [discovery](08_dicionario_de_dados_discovery.md)).
+- Campo do ID de equipamento, origem do Annual Sample Potential e parâmetros de ticket/conversão: serão descobertos por engenharia reversa na Fase 0.

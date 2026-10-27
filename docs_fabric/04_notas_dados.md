@@ -2,13 +2,13 @@
 
 ## Fontes e acesso
 
-Acesso via **lakehouse no Microsoft Fabric**. O espelhamento do LIMS/S360 é simples (botão nativo do Fabric); ERP (Proteus) e Zoho já estão disponíveis.
+Acesso via lakehouse `LakehouseOel` no Microsoft Fabric. S360, Protheus e Zoho já estão ingeridos (`bronze_*` e `silver_*`); ver [discovery](08_dicionario_de_dados_discovery.md).
 
 | Fonte | Conteúdo | KPI | Ingestão no Fabric |
 |-------|----------|-----|--------------------|
-| LIMS / S360 | amostras processadas, equipamentos cadastrados/monitorados, compartimentos, setor, segmento | Consumo | Espelhamento (mirroring) |
-| ERP / Proteus | faturamento e vendas (API em tempo real) | Vendas | Conector / pipeline / API |
-| Zoho CRM | segmentação, oportunidades, pedidos em aberto | Vendas (cross-check) | Conector / pipeline |
+| LIMS / S360 | amostras processadas, equipamentos cadastrados/monitorados, compartimentos, setor, segmento | Consumo | Já ingerido (bronze/silver) |
+| ERP / Protheus | faturamento e vendas | Vendas | Já ingerido (bronze/silver) |
+| Zoho CRM | segmentação, oportunidades, pedidos em aberto | Vendas (cross-check) | Já ingerido (bronze/silver) |
 
 ## Chaves de ligação
 
@@ -27,7 +27,7 @@ Acesso via **lakehouse no Microsoft Fabric**. O espelhamento do LIMS/S360 é sim
 - O modelo precisa do **histórico cru**:
   - amostras processadas (LIMS/S360);
   - detalhe de equipamento/horímetro (S360);
-  - faturamento/vendas (ERP/Proteus).
+  - faturamento/vendas (ERP/Protheus).
 - As planilhas servem como **referência de lógica** e baseline, não como fonte de treino.
 
 ## Estrutura de referência (planilhas existentes)
@@ -41,16 +41,18 @@ Acesso via **lakehouse no Microsoft Fabric**. O espelhamento do LIMS/S360 é sim
 ## Qualidade esperada e tratamento
 
 - Registros reais: valores ausentes, outliers, erros de digitação.
-- O campo **Annual Sample Potential** aparece colado (sem fórmula) — origem a confirmar.
+- O campo **Annual Sample Potential** aparece colado no Customer Status; a origem será descoberta por engenharia reversa das planilhas, artefatos e dados.
 - Parâmetros (ticket médio, conversão) são de out/2022 — **defasados**.
 - Validação de dados como parte da metodologia: **great expectations** e **pytest** nos notebooks.
 - Sem feedback automático do S360 (máquina vendida/parada/trocou de área) — inferir pelo histórico do equipamento.
+- **Horímetro (confirmado):** uma leitura por coleta (`horas_oleo`, `horimetro_equipado` em `amostra`), não uma série contínua. `silver_s360` é orientada a TAT e não traz `equipamento` nem `compartimento` (só a bronze).
+- Qualidade do S360 (reunião de 21/10): amostras avulsas sem equipamento (identificar e limpar no pré-processamento); equipamentos cadastrados já inativos (engenharia reversa); clientes que superdeclaram frota; frota de alguns grandes clientes em sistema externo.
 
 ## Plano de descoberta de dados
 
-1. Confirmar o espelhamento do S360 no lakehouse e listar schemas/tabelas.
-2. Confirmar conectores do ERP (Proteus) e Zoho; mapear tabelas de faturamento e oportunidades.
+1. Schemas e tabelas já listados no [discovery](08_dicionario_de_dados_discovery.md); validar conteúdo, frescor e cobertura.
+2. Mapear as tabelas de faturamento (Protheus) e de oportunidades (Zoho) já ingeridas.
 3. Validar as chaves de ligação (CNPJ, ERP ID, ID de equipamento, setor/segmento) campo a campo.
 4. Traçar o ciclo de vida do equipamento → compartimento → amostra → faturamento.
-5. Desenhar a arquitetura medallion (bronze/silver/gold) e as tabelas fato/dimensão.
+5. Mapear as camadas medallion **já existentes** (`bronze_*` e `silver_*` de protheus, s360 e zoho no `LakehouseOel`) e desenhar apenas as tabelas fato/dimensão de saída do Forecast.
 6. Gerar relatório de qualidade (missingness, outliers, sanidade de timestamps e horímetro).

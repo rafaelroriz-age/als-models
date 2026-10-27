@@ -1,0 +1,346 @@
+aba,setor,familia,variante,linha,compartimento,intervalo,coletas_planilha,coletas_python
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,14,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,15,ARREFECIMENTO,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,16,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,17,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,18,EIXO DIANTEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,sem_diesel,19,EIXO TRASEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,14,MOTOR,250.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,15,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,16,TRANSMISSÃO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,17,SISTEMA HIDRÁULICO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,18,EIXO DIANTEIRO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,sem_diesel,19,EIXO TRASEIRO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,sem_diesel,14,MOTOR,250.0,8.0,8.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,sem_diesel,15,ARREFECIMENTO,1000.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,sem_diesel,16,SISTEMA HIDRÁULICO,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,sem_diesel,17,REDUÇÃO FINAL ESQUERDA,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,sem_diesel,18,REDUÇÃO FINAL DIREITA,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,14,MOTOR,250.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,15,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,16,SISTEMA HIDRÁULICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,17,SISTEMA HIDROSTÁTICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,18,REDUÇÃO FINAL ESQUERDA,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,sem_diesel,19,REDUÇÃO FINAL DIREITA,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,14,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,15,ARREFECIMENTO,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,16,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,17,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,18,EIXO TRASEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,19,TANDEM DIREITO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,sem_diesel,20,TANDEM ESQUERDO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,14,MOTOR,250.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,15,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,16,TRANSMISSÃO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,17,SISTEMA HIDRÁULICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,18,EIXO TRASEIRO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,19,TANDEM DIREITO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,20,TANDEM ESQUERDO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,22,REDUÇÃO FINAL ESQUERDA (se equipado com 6WD),500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,sem_diesel,23,REDUÇÃO FINAL DIREITA (se equipado com 6WD),500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,14,MOTOR,15000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,15,TRANSMISSÃO,,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,16,DIFERENCIAL Dianteiro,30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,17,DIFERENCIAL Traseiro,30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,18,RADIADOR (ARREFECIMENTO),30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,19,COMANDOS,,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,sem_diesel,20,DIESEL,,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,14,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,15,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,16,DIFERENCIAL Dianteiro,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,17,DIFERENCIAL Traseiro,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,18,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,19,Hidraulico,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,sem_diesel,20,DIESEL,,,
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,33,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,34,ARREFECIMENTO,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,35,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,36,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,37,EIXO DIANTEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,38,EIXO TRASEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Retroescavadeira,com_diesel,39,ÓLEO DIESEL,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,33,MOTOR,250.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,34,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,35,TRANSMISSÃO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,36,SISTEMA HIDRÁULICO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,37,EIXO DIANTEIRO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,38,EIXO TRASEIRO,500.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Pá carregadeira,com_diesel,39,ÓLEO DIESEL,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,33,MOTOR,250.0,8.0,8.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,34,ARREFECIMENTO,1000.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,35,SISTEMA HIDRÁULICO,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,36,REDUÇÃO FINAL ESQUERDA,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,37,REDUÇÃO FINAL DIREITA,500.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Escavadeira,com_diesel,38,ÓLEO DIESEL,1000.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,33,MOTOR,250.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,34,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,35,SISTEMA HIDRÁULICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,36,SISTEMA HIDROSTÁTICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,37,REDUÇÃO FINAL ESQUERDA,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,38,REDUÇÃO FINAL DIREITA,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Tratores de esteira,com_diesel,39,DIESEL,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,33,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,34,ARREFECIMENTO,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,35,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,36,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,37,EIXO TRASEIRO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,38,TANDEM DIREITO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,39,TANDEM ESQUERDO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora,com_diesel,40,DIESEL,1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,33,MOTOR,250.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,34,ARREFECIMENTO,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,35,TRANSMISSÃO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,36,SISTEMA HIDRÁULICO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,37,EIXO TRASEIRO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,38,TANDEM DIREITO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,39,TANDEM ESQUERDO,500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,40,DIESEL,1000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,41,REDUÇÃO FINAL ESQUERDA (se equipado com 6WD),500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,Motoniveladora com 6WD,com_diesel,42,REDUÇÃO FINAL DIREITA (se equipado com 6WD),500.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,33,MOTOR,15000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,34,TRANSMISSÃO,0.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,35,DIFERENCIAL Dianteiro,30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,36,DIFERENCIAL Traseiro,30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,37,RADIADOR (ARREFECIMENTO),30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,38,COMANDOS,30000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,CAMINHÕES,com_diesel,39,DIESEL,60000.0,0.0,0.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,33,MOTOR,250.0,4.0,4.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,34,TRANSMISSÃO,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,35,DIFERENCIAL Dianteiro,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,36,DIFERENCIAL Traseiro,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,37,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,38,Hidraulico,500.0,2.0,2.0
+CONST-MIN-Calc Real base prevt,Construção/Mineração,PLATAFORMAS?,com_diesel,39,DIESEL,1000.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,14,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,15,REDUÇÃO FINAL DIREITA,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,16,REDUÇÃO FINAL ESQUERDA,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,17,SISTEMA HIDRÁULICO,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,18,CAIXA 4 FUROS,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,19,CAIXA PICADOR,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,20,CORTADOR DE BASE,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,sem_diesel,21,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU (5000),sem_diesel,14,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU (5000),sem_diesel,15,TRANSMISSÃO / HIDRÁULICO/DIF.T,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU (5000),sem_diesel,16,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,14,MOTOR,250.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,15,TRANSMISSÃO / HIDRÁULICO / DIF.T,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,16,DIFERENCIAL DIANTEIRO,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,17,REDUÇÃO FINAL DIANTEIRA DIREITA,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,18,REDUÇÃO FINAL DIANTEIRA ESQUERDA,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,sem_diesel,19,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,14,MOTOR,250.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,15,TRANSMISSÃO / HIDRÁULICO,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,16,DIFERENCIAL,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,17,REDUÇÃO FINAL DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,18,REDUÇÃO FINAL ESQUERDA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,sem_diesel,19,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,14,MOTOR,250.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,15,REDUÇÃO DIANTEIRA DIREITA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,16,REDUÇÃO DIANTEIRA ESQUERDA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,17,REDUÇÃO TRASEIRA DIREITA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,18,REDUÇÃO TRASEIRA ESQUERDA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,19,SISTEMA HIDRÁULICO,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,sem_diesel,20,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,14,MOTOR,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,15,TRANSMISSÃO / HIDRÁULICO,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,16,REDUÇÃO FINAL DIANTEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,17,REDUÇÃO FINAL DIANTEIRA ESQUERDA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,18,REDUÇÃO FINAL TRASEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,19,REDUÇÃO FINAL TRASEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,20,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,sem_diesel,21,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,sem_diesel,14,MOTOR,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,sem_diesel,15,TRANSMISSÃO / DIFERENCIAL,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,sem_diesel,16,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,sem_diesel,17,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,14,MOTOR,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,15,TRANSMISSÃO,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,16,DIFERENCIAL Dianteiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,17,DIFERENCIAL Traseiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,18,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,sem_diesel,19,COMANDOS,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,sem_diesel,14,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,sem_diesel,15,TRANSMISSÃO,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,sem_diesel,16,DIFERENCIAL Dianteiro,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,sem_diesel,17,DIFERENCIAL Traseiro,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,sem_diesel,18,RADIADOR (ARREFECIMENTO),500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,MOTO-BOMBA,sem_diesel,14,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,sem_diesel,14,MOTOR,250.0,2.0,2.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,sem_diesel,15,TRANSMISSÃO / HIDRÁULICO/DIF.T,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,sem_diesel,16,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,33,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,34,REDUÇÃO FINAL DIREITA,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,35,REDUÇÃO FINAL ESQUERDA,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,36,SISTEMA HIDRÁULICO,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,37,CAIXA 4 FUROS,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,38,CAIXA PICADOR,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,39,CORTADOR DE BASE,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,40,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,COLHEDORA DE CANA,com_diesel,41,DIESEL,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,33,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,34,TRANSMISSÃO / HIDRÁULICO/DIF.T,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,35,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,36,DIESEL,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,33,MOTOR,250.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,34,TRANSMISSÃO / HIDRÁULICO / DIF.T,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,35,DIFERENCIAL DIANTEIRO,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,36,REDUÇÃO FINAL DIANTEIRA DIREITA,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,37,REDUÇÃO FINAL DIANTEIRA ESQUERDA,500.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,38,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,TRATOR DE PNEU,com_diesel,39,DIESEL,1000.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,33,MOTOR,250.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,34,TRANSMISSÃO / HIDRÁULICO,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,35,DIFERENCIAL,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,36,REDUÇÃO FINAL DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,37,REDUÇÃO FINAL ESQUERDA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,38,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COLHEITADEIRA,com_diesel,39,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,33,MOTOR,250.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,34,REDUÇÃO DIANTEIRA DIREITA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,35,REDUÇÃO DIANTEIRA ESQUERDA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,36,REDUÇÃO TRASEIRA DIREITA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,37,REDUÇÃO TRASEIRA ESQUERDA,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,38,SISTEMA HIDRÁULICO,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,39,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,PULVERIZADOR,com_diesel,40,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,33,MOTOR,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,34,TRANSMISSÃO / HIDRÁULICO,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,35,REDUÇÃO FINAL DIANTEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,36,REDUÇÃO FINAL DIANTEIRA ESQUERDA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,37,REDUÇÃO FINAL TRASEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,38,REDUÇÃO FINAL TRASEIRA DIREITA,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,39,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,COTTON PICKER,com_diesel,40,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,com_diesel,33,MOTOR,250.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,com_diesel,34,TRANSMISSÃO / DIFERENCIAL,500.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,com_diesel,35,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,UTILITÁRIO,com_diesel,36,DIESEL,1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,33,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,34,TRANSMISSÃO,250.0,0.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,35,DIFERENCIAL Dianteiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,36,DIFERENCIAL Traseiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,37,RADIADOR (ARREFECIMENTO),1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,38,COMANDOS,1000.0,0.0,3.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES,com_diesel,39,DIESEL,1000.0,0.0,3.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,33,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,34,TRANSMISSÃO,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,35,DIFERENCIAL Dianteiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,36,DIFERENCIAL Traseiro,500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,37,RADIADOR (ARREFECIMENTO),500.0,6.0,6.0
+AGRO-Calc Real base preventiva,Agro,CAMINHÕES CANA,com_diesel,39,DIESEL,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,MOTO-BOMBA,com_diesel,33,MOTOR,250.0,12.0,12.0
+AGRO-Calc Real base preventiva,Agro,MOTO-BOMBA,com_diesel,34,DIESEL,1000.0,3.0,3.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,com_diesel,33,MOTOR,250.0,2.0,2.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,com_diesel,34,TRANSMISSÃO / HIDRÁULICO/DIF.T,500.0,1.0,1.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,com_diesel,35,RADIADOR (ARREFECIMENTO),1000.0,0.0,0.0
+AGRO-Calc Real base preventiva,Agro,Manipulador,com_diesel,36,DIESEL,1000.0,0.0,0.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,14,MOTOR,350.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,15,CAIXA DE TRANSMISSÃO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,16,DIFERENCIAL DIANTEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,17,DIFERENCIAL TRASEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,18,BOOGIE DIANT. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,19,BOOGIE DIANT. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,20,BOOGIE TRAS. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,21,BOOGIE TRAS. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,22,SISTEMA HIDRAULICO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,23,RADIADOR,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,14,MOTOR,300.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,15,CAIXA DE TRANSMISSÃO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,16,DIFERENCIAL DIANTEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,17,DIFERENCIAL TRASEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,18,CUBO DA RODA (PLANETARIA),600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,19,SISTEMA HIDRÁULICO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,20,TANDEM,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,sem_diesel,21,RADIADOR,1200.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,sem_diesel,14,MOTOR,250.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,sem_diesel,15,HIDRÁULICO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,sem_diesel,16,COMANDO FINAL DIREITO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,sem_diesel,17,COMANDO FINAL ESQUERDO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,sem_diesel,18,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,14,MOTOR,250.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,15,TRANSMISSÃO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,16,DIFERENCIAL DIANTEIRO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,17,DIFERENCIAL TRASEIRO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,18,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,19,COMANDO FINAL DIANTEIRO DIREITO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,20,COMANDO FINAL DIANTEIRO ESQUERDO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,21,COMANDO FINAL TRASEIRO DIREITO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,22,COMANDO FINAL TRASEIRO ESQUERDO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,sem_diesel,23,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,14,MOTOR,350.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,15,CAIXA DE TRANSMISSÃO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,16,DIFERENCIAL DIANTEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,17,DIFERENCIAL TRASEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,18,BOOGIE DIANT. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,19,BOOGIE DIANT. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,20,BOOGIE TRAS. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,21,BOOGIE TRAS. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,22,SISTEMA HIDRAULICO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,23,RADIADOR,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,24,CAIXA DIVISORA DAS BOMBAS,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,14,MOTOR,300.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,15,CAIXA DE TRANSMISSÃO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,16,DIFERENCIAL DIANTEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,17,DIFERENCIAL TRASEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,18,CUBO DA RODA (PLANETARIA),600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,19,SISTEMA HIDRÁULICO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,20,TANDEM,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,sem_diesel,21,RADIADOR,1200.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,34,MOTOR,350.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,35,CAIXA DE TRANSMISSÃO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,36,DIFERENCIAL DIANTEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,37,DIFERENCIAL TRASEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,38,BOOGIE DIANT. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,39,BOOGIE DIANT. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,40,BOOGIE TRAS. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,41,BOOGIE TRAS. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,42,SISTEMA HIDRAULICO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,43,RADIADOR,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,44,DIESEL,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,34,MOTOR,300.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,35,CAIXA DE TRANSMISSÃO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,36,DIFERENCIAL DIANTEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,37,DIFERENCIAL TRASEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,38,CUBO DA RODA (PLANETARIA),600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,39,SISTEMA HIDRÁULICO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,40,TANDEM,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,41,RADIADOR,1200.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FORWARDER,com_diesel,42,DIESEL,1200.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,34,MOTOR,250.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,35,HIDRÁULICO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,36,COMANDO FINAL DIREITO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,37,COMANDO FINAL ESQUERDO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,38,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,FELLER,com_diesel,39,DIESEL,1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,34,MOTOR,250.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,35,TRANSMISSÃO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,36,DIFERENCIAL DIANTEIRO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,37,DIFERENCIAL TRASEIRO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,38,SISTEMA HIDRÁULICO,500.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,39,COMANDO FINAL DIANTEIRO DIREITO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,40,COMANDO FINAL DIANTEIRO ESQUERDO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,41,COMANDO FINAL TRASEIRO DIREITO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,42,COMANDO FINAL TRASEIRO ESQUERDO,750.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,43,RADIADOR (ARREFECIMENTO),1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,SKIDDER,com_diesel,44,DIESEL,1000.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,34,MOTOR,350.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,35,CAIXA DE TRANSMISSÃO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,36,DIFERENCIAL DIANTEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,37,DIFERENCIAL TRASEIRO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,38,BOOGIE DIANT. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,39,BOOGIE DIANT. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,40,BOOGIE TRAS. DIREITO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,41,BOOGIE TRAS. ESQUERDO,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,42,SISTEMA HIDRAULICO,650.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,43,RADIADOR,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,44,DIESEL,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,45,CAIXA DIVISORA DAS BOMBAS,1250.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,34,MOTOR,300.0,4.0,4.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,35,CAIXA DE TRANSMISSÃO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,36,DIFERENCIAL DIANTEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,37,DIFERENCIAL TRASEIRO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,38,CUBO DA RODA (PLANETARIA),600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,39,SISTEMA HIDRÁULICO,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,40,TANDEM,600.0,2.0,2.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,41,RADIADOR,1200.0,1.0,1.0
+FLORESTA-Calc Real base prevent,Florestal,HARVESTER,com_diesel,42,DIESEL,1200.0,1.0,1.0

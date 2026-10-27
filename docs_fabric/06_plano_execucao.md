@@ -7,15 +7,16 @@
 Dois modelos encadeados, atrás de uma camada de dados medallion no lakehouse:
 
 1. **Consumo de amostras** — previsão de volume por cliente/equipamento/compartimento, a partir de horas trabalhadas (horímetro), meses/ano e intervalos de coleta, com sazonalidade por segmento. Entrega as visões **Real** e **Potencial**.
-2. **Vendas** — previsão de faturamento **derivada do consumo**, composta pelos componentes da planilha Forecast (recorrente, não recorrente ativa, novos, reativados, churn, variável de mercado) e com cross-check Zoho.
+2. **Vendas** — previsão de **faturamento** e de **EBIT** (targets separados), **derivada do consumo**. Componentes da fase 1: recorrente, não recorrente ativa, churn e variável de mercado, com cross-check Zoho. Novos e reativados ficam fora do escopo por ora.
+   - Hipóteses testadas por protótipo: (a) oportunidades >80% somam ou só descontam; (b) receita como venda de kit ou como análise processada (ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md)).
 
-Ambos com **intervalos de incerteza**, validados por **snapshot mensal + reconstrução retroativa**, e entregues como **modelo semântico do Fabric (DirectLake) e/ou API/endpoint**.
+Ambos com **intervalos de incerteza**, validados por **snapshot mensal + reconstrução retroativa**, e entregues por **protótipos comparáveis** (dashboard HTML + SQL, modelo semântico, API/MCP) para o cliente escolher.
 
 ## Arquitetura no Fabric
 
 ```
 S360 (espelhado) ─┐
-ERP/Proteus ───────┼─► Lakehouse OneLake ─► Bronze ─► Silver ─► Gold ─► Modelo (MLflow) ─► Modelo Semântico / API
+ERP/Protheus ───────┼─► Lakehouse OneLake ─► Bronze ─► Silver ─► Gold ─► Modelo (MLflow) ─► Modelo Semântico / API
 Zoho CRM ──────────┘    (Delta)              (bruto)   (limpo)   (fato/dim)                    (Power BI / agente)
 ```
 
@@ -23,30 +24,36 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 
 | Preocupação | Escolha | Por quê |
 |-------------|---------|---------|
-| Ingestão | Espelhamento S360 + conectores/pipelines do Fabric | espelhamento nativo; sem pipeline de cópia |
+| Ingestão | Já existente (bronze/silver) | reuso; sem nova ingestão |
 | Armazenamento | OneLake Lakehouse (tabelas Delta) | camada única, DirectLake |
-| Arquitetura | Medallion (bronze → silver → gold) | dados brutos → limpos → pronto para consumo |
+| Arquitetura | Medallion já existente (bronze, silver) | novas camadas só se o escopo exigir |
 | Transformação | Spark (PySpark) + SQL (analytics endpoint) | joins faturamento × amostras no pré-processamento |
 | Séries temporais (consumo/vendas) | `statsforecast` / `prophet` / `scikit-learn` + `XGBoost`/`LightGBM` | ML clássico de menor custo (FinOps) |
 | Sazonalidade/features | pandas, numpy, `holidays` (feriados BR) | sazonalidade por segmento |
 | Rastreamento/registro | MLflow (nativo no Fabric) | experimentos e registro de modelos |
 | Validação de dados | Great Expectations + pytest | parte da metodologia |
-| Entrega | Modelo semântico (DirectLake) e/ou API/endpoint | consumível pelo Power BI / agente |
+| Entrega | Protótipos: dashboard HTML + SQL, modelo semântico (DirectLake), API/MCP | o cliente escolhe após comparação |
 | Orquestração | Data pipelines do Fabric (agendamento) | automação |
 
 ## Fases e tarefas
 
 ### Fase 0 — Descoberta e auditoria de dados (antes de comprometer)
-- Confirmar espelhamento do S360 e conectores ERP/Zoho no lakehouse.
-- Mapear schemas/tabelas; validar chaves (CNPJ, ERP ID, ID equipamento, setor/segmento).
-- Revisar as 3 planilhas + dicionário de dados; levantar pontos em aberto.
-- Relatório de qualidade (missingness, outliers, sanidade de horímetro/timestamps).
+- [x] Probe: S360, Protheus e Zoho acessíveis no `LakehouseOel` (ver discovery).
+- [x] Mapear schemas/tabelas ([08 discovery](08_dicionario_de_dados_discovery.md)).
+- [ ] Validar chaves (CNPJ, ERP ID, ID equipamento, setor/segmento): mapeadas em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §2, falta confirmar no perfil de dados.
+- [x] Revisar as 3 planilhas + dicionário de dados; regras extraídas em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §1.
+- [ ] Relatório de qualidade (missingness, outliers, sanidade de horímetro/timestamps): código pronto (`notebooks/00_validacao/01_perfil_qualidade.py`), bloqueado pela porta 1433.
+- [x] Base de código inicial (`src/`, baselines, harness de backtest, gates, 24 testes).
 - **Saída:** mapa de dados + perguntas resolvidas.
 
 ### Fase 1 — Pipeline de pré-processamento (sobre Bronze/Silver existentes)
 - Medallion já existe: **não** recriar ingestão nem alterar a Gold do agente atual.
 - Criar `lh_forecast` com shortcuts somente leitura para Bronze/Silver (ver [09](09_conexao_e_consumo_fabric.md)).
 - Limpeza complementar, joins em SQL (faturamento × amostras) e tabelas de features; Great Expectations + pytest.
+
+### Fase 1b — Classificação de clientes (proposta do Rafael, a validar)
+- Classificar clientes (recorrente, não recorrente ativo, menor atividade etc.) antes da previsão, em série temporal, para dar manutenibilidade ao modelo. Critério a definir a partir dos dados (pirâmide faturamento × nº de máquinas × potencial).
+- Modelo de vida útil/abandono de equipamento por período e segmento, para filtrar cadastrados inativos.
 
 ### Fase 2 — KPI 1: consumo de amostras
 - Features: horímetro, meses/ano, intervalo de coleta, tipo de equipamento, segmento, sazonalidade.
@@ -56,9 +63,9 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 
 ### Fase 3 — KPI 2: vendas (faturamento)
 - Quantificar a correlação consumo→venda (projeção por amostra).
-- Modelar componentes (recorrente, não recorrente, novos, reativados, churn).
+- Modelar componentes (recorrente, não recorrente ativa, churn; novos e reativados fora do escopo por ora).
 - Cross-check Zoho (evitar dupla contagem).
-- Forecast semanal + mensal mirando EBIT.
+- Forecast semanal + mensal de faturamento e de EBIT (targets separados).
 
 ### Fase 4 — Validação (snapshot + reconstrução retroativa)
 - Snapshot mensal do forecast × realizado.
@@ -67,7 +74,7 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 - Great Expectations / pytest nos pipelines.
 
 ### Fase 5 — Entrega e handoff
-- Modelo semântico (DirectLake) e/ou endpoint; pipeline agendada.
+- Protótipos de entrega (HTML + SQL, semântico, API/MCP) e escolha do cliente; pipeline agendada.
 - FinOps: custo × acurácia dos modelos escolhidos.
 - Documentação de premissas/limitações e handoff.
 
@@ -83,12 +90,14 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 | Fase 5 — Entrega/handoff | 3–4 | 6–8 |
 | **Total** | **~21–30 dias** | **~42–60 dias úteis (~8–12 semanas)** |
 
+**Nota:** a estimativa não inclui a Fase 1b nem a prototipagem comparativa de entregáveis; revisar o prazo.
+
 **Premissas:**
 - Acesso ao lakehouse (S360 espelhado, ERP, Zoho) liberado no início.
 - Histórico de amostras desde 2022 e faturamento disponíveis; ≥ 12 meses para backtesting.
 - Dicionário de dados entregue; chave de equipamento confirmada.
 - Capacidade F8 disponível sem competir com o agente.
-- Integração final é modelo semântico e/ou endpoint simples (request/response).
+- Entrega por protótipos comparáveis; a escolha do cliente define o escopo final.
 
 **Riscos que elevam o prazo:**
 - Descoberta de dados difícil (sem dicionário, chaves ambíguas, horímetro sujo).
@@ -96,15 +105,8 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 - Entrega exigir API real-time em vez de semântico.
 - FinOps: necessidade de otimizar/reduzir modelo por custo.
 
-## Perguntas para o cliente
+## Hipóteses e descobertas
 
-1. Annual Sample Potential vem da calculadora ou do benchmark de similares? Quais parâmetros?
-2. Ticket médio e conversão atuais (vs. R$ 1.950 / 5% de 2022)?
-3. Regra do recorrente confirmada (≥6 meses/12, <90 dias, sem a taxa de 70%)?
-4. Composição do forecast de vendas continua a mesma?
-5. Existe histórico de forecasts salvos para medir acurácia retroativa?
-6. Acesso ao lakehouse (S360, ERP, Zoho) — quais schemas/tabelas?
-7. Chave de equipamento (S360) para o join — qual campo exato?
-8. Sazonalidade por segmento: há curva/dados além de "meses trabalhados/ano"?
-9. Entrega final: modelo semântico, API/endpoint, ou ambos?
-10. Capacidade F8: há headroom de CU para os pipelines/modelo?
+Em vez de perguntas ao cliente, o que estava em aberto virou **hipótese a testar por protótipo** (H1–H4) ou **descoberta por dados** (R1–R7). Ver [13](13_revisao_alinhamento_reuniao_2026-10-21.md).
+
+Ainda sem resposta: meta de MAPE, cadência semanal obrigatória, hierarquia matriz/filial do Zoho e janela de CU na F8.
