@@ -36,14 +36,76 @@ Não dependem de resposta do negócio; saem das planilhas, artefatos e tabelas.
 
 | # | O que descobrir | Onde olhar |
 |---|-----------------|------------|
-| R1 | Fórmulas do Annual Sample Potential (segundo o Bahia: segmento, perfil, família de equipamento, pontos de coleta e similares, sem regressão) | Customer Status, "planilhão", Calculadora. **27/10:** no Customer Status é valor colado (1.314 clientes); fórmula de origem segue com o Bahia |
+| R1 | Fórmulas do Annual Sample Potential (segundo o Bahia: segmento, perfil, família de equipamento, pontos de coleta e similares, sem regressão) | Customer Status, "planilhão", Calculadora. **27/10:** no Customer Status é valor colado (1.314 clientes); fórmula de origem segue com o Bahia. **T05:** sem coluna no S360/Zoho e não reproduzível pelos dados; proposta frota ativa × taxa da família (abaixo) |
 | R2 | Quais famílias a Calculadora cobre (Bahia estima 20–30 de mais de 400) | Calculadora × `equipamento.familia_equipamento_id`. **27/10:** 22 famílias em 3 setores, regra reproduzida em Python (48/50 blocos); falta o de-para com `familia_equipamento_id` |
-| R3 | Confiabilidade da coluna de equipamento ativo e vida útil por família/segmento | `equipamento`, intervalos entre coletas |
+| R3 | Confiabilidade da coluna de equipamento ativo e vida útil por família/segmento | `equipamento`, intervalos entre coletas. **T05:** flag sozinha não serve (96% "ativo"); regra flag = 1 + coleta em 12 meses → 85,9% do cadastro inativo (abaixo) |
 | R4 | Taxa de retorno kit→amostra (histórico informal de 70–80%) | Protheus (vendas) × S360 (amostras) |
 | R5 | Campo-chave do equipamento no S360 | Candidato: `equipamento_id` |
 | R6 | Definição operacional de recorrência de **amostras** (distinta da de faturamento) | `amostra` × `cliente` × Protheus |
 | R7 | Ticket médio e conversão atuais da Calculadora | Faturamento Protheus |
 | R8 | Classificação de clientes antes da previsão (Fase 1b): recorrente, não recorrente ativo, menor atividade, churn | **Hipótese validada por dados parciais (27/10).** Protótipo em [classificacao.py](../src/features/classificacao.py) e [notebook 12](../notebooks/10_preprocessamento/12_classificacao_clientes.py), sobre os 2.388 clientes do Customer Status (ref. 10/08/2026). Regra: churn se sem venda/amostra há >180 dias; recorrente se compra em ≥6 dos 12 meses; senão "não recorrente ativo" se atinge ≥1 de 3 pontos da pirâmide (faturamento 12m ≥ R$ 10 mil, ≥10 máquinas testadas, potencial ≥500 amostras/ano), senão "menor atividade". Distribuição: recorrente 233 (9,8% dos clientes, 59,2% do faturamento 12m), não recorrente ativo 824 (34,5%; 35,5%), menor atividade 690 (28,9%; 3,1%), churn 641 (26,8%; 2,2%). Concordância com o `Real Status` manual (churn × não churn): 93,2%; os 162 divergentes (6,8%) são todos manual Churn com atividade ≤180 dias (34 na classe não recorrente ativo, 128 na menor atividade); a regra nunca marca churn onde o manual diz ativo. Árvore (profundidade 3, CV 5) prevendo o status manual: acurácia 93,8%, só usa recência (corte ~62 dias, 175 dias e meses de compra), sem ganho sobre a regra; não adotada. Limiares da pirâmide são palpite inicial (percentis), a calibrar com o Bahia/Diego; falta validar se as classes têm comportamento temporal distinto (série mensal) |
+
+### T05 (27/10/2026): origem do Annual Sample Potential e equipamento ativo
+
+Leitura somente leitura do LakehouseOel pela 1433 (`bronze_s360.amostra/compartimento/equipamento/cliente`, `bronze_zoho.accounts`, `silver_zoho.accounts`) cruzada com `data/planilhas/customer_status.parquet`. Data de corte das coletas: 27/10/2026. Coletas com data fora de 2000–27/10/2026 descartadas (há datas de 0001 e 2115).
+
+**Origem do potencial (R1, RN-07): não há fonte rastreável nos dados.**
+
+- Não existe coluna de potencial no S360 nem no Zoho. Os campos mais próximos do Zoho estão vazios ou quase: `average_samples_per_month_last_6_months_trend` e `evolution_of_monitoring_coverage` têm 0 de 9.843 contas preenchidas, e `equipment_monitored_in_the_last_24_months_active` tem 3. `initial_quantity_of_active_equipment` tem 5.630 contas preenchidas, mas não explica o potencial: Spearman 0,39 e razão potencial/equipamentos com mediana 2,9 (p10 0,15, p90 35). O potencial vem de outro lugar.
+- No Customer Status o potencial é um inteiro colado (1.314 clientes, 100% inteiros). Nenhum candidato derivado dos dados o reproduz. A tabela mostra Spearman e quanto dos 1.314 fica a até 10% do valor:
+
+  | Candidato (por ERP, S360) | Spearman | Até 10% | Potencial ÷ candidato (mediana) |
+  |---|---|---|---|
+  | Amostras FY25 (abr/24–mar/25) | **0,75** | 16% | 1,39 |
+  | Média FY24–FY26 | 0,72 | 11% | 1,31 |
+  | Máximo anual FY22–FY26 | 0,70 | 10% | 0,91 |
+  | Frota ativa 12m × taxa anual mediana da família | 0,58 | 11% (20% de tolerância) | 0,81 |
+  | Equipamentos com coleta nos últimos 24 meses | 0,67 | 5% | 3,55 |
+
+  O melhor preditor é o realizado do FY25 multiplicado por cerca de 1,4, o que sugere uma meta posta sobre o histórico. Ainda assim, 343 dos 1.314 clientes (26%) têm potencial **abaixo** do que já coletaram no FY25, ou seja, valores defasados. Exemplos de ERP (segmento, potencial, amostras FY25, equipamentos ativos 12m, frota × taxa): 194063 (Generators, 38, 43, 35, 116); 193023 (Preparation, 164, 240, 250, 3.000); 102017 (Mobile, 661, 714, 29, 309).
+- O `% Achieved` da planilha é `Current Samples (abr–jul FY26/27) ÷ Annual Sample Potential` em 86,7% das 1.139 linhas, isto é, 4 meses de realizado contra um potencial anual. Isso confirma a decisão D6 de unificar a definição.
+- **Proposta para RN-07:** não depender do valor colado. A base derivável é **frota ativa (regra abaixo) × taxa anual da família** (12 ÷ intervalo mediano entre coletas da família, no máximo 12 por ano). Essa base é calibrada pelo benchmark de similares na T16. O valor do Customer Status fica só como referência de comparação. Falta o Bahia confirmar a fórmula original (§5).
+- **Chave S360 → ERP:** é `cliente.id_cigam`, não `codigo_legado`. `id_cigam` cobre 2.339 dos 2.388 ERP IDs do Customer Status; `codigo_legado` cobre 1.328. Os totais de abr–jul FY25/26 batem (279.416 na planilha contra 285.276 no S360), mas por cliente só 37% batem exatamente. Uma hipótese é a planilha agrupar contas de outro jeito (filiais, Raiz CNPJ); falta testar.
+
+**Equipamento ativo (R3, RN-08): regra proposta.**
+
+> Um equipamento está **ativo** na data D se `equipamento.ativo = 1` **e** tem coleta válida (amostra não excluída, via compartimento) nos 12 meses até D. Equipamento sem nenhuma coleta é inativo. Só entra na frota do **potencial** como "novo" se `ativo = 1` e foi cadastrado há no máximo 12 meses.
+
+Evidências:
+
+- **Flag `ativo` sozinha não serve.** Marca 1.022.906 dos 1.063.706 equipamentos (96,2%) como ativos, e 463.941 deles nunca tiveram coleta. Os cadastros sem coleta se concentram em 2023 (269.399), o que indica carga em massa. Por outro lado, `ativo = 0` é confiável: de 22.348 equipamentos com flag 0 e histórico, só 392 (1,8%) voltaram a coletar em 12 meses.
+- **Tempo desde a última coleta.** No backtest em 31/07/2025, a chance de coletar nos 12 meses seguintes cai com o tempo parado:
+
+  | Meses parado | Chance de voltar a coletar |
+  |---|---|
+  | ≤3 | 72% |
+  | 3–6 | 46% |
+  | 6–9 | 27% |
+  | 9–12 | 20% |
+  | 12–15 | 12% |
+  | 15–18 | 8% |
+  | 18–24 | 6% |
+  | 24–36 | 3% |
+  | >60 | 0,4% |
+
+  O corte de 12 meses mantém 88,9% dos equipamentos que voltaram, com precisão de 51,9%. O de 18 meses mantém 93,3%, com precisão de 43,6%.
+- **Família não ajuda; vida útil não serve como critério.** Um corte por família (2× o p75 do intervalo da família, entre 12 e 36 meses) chega a precisão 0,480 e recall 0,908, praticamente igual ao corte global de 15 meses (0,475 e 0,916). Há 515 famílias, e o intervalo mediano entre coletas varia de 0,4 a 8,4 meses nas 12 maiores. A "vida" observada (da 1ª à última coleta, equipamentos com 3 ou mais coletas e parados há mais de 24 meses) tem mediana de 0,9 ano e p90 de 3,9 anos. Isso mede a duração do monitoramento, não a vida mecânica, então os ~7 anos da colhedora de cana não são verificáveis com estes dados.
+
+**Inativos sobre o cadastro (1.063.706 equipamentos):**
+
+| Corte | Data | Inativos |
+|---|---|---|
+| 12 meses | 27/10/2026 | **913.280 (85,9%)** |
+| 12 meses | 31/07/2026 | 892.595 (83,9%) |
+| 18 meses | 27/10/2026 | 82,2% |
+
+Composição dos inativos em 27/10/2026: 40.800 com flag 0, 463.941 com flag 1 e nunca coletados, e 408.539 com flag 1 e coleta há mais de 12 meses. Restam 150.426 ativos. Somando os 20.706 novos sem coleta ao potencial, os inativos caem para 83,9%.
+
+**Exemplos numéricos** (D = 27/10/2026, `equipamento_id`):
+
+1. **1026195** (família 4552, flag 1): 19 coletas, a última em 11/09/2026 (1,5 mês), intervalo médio de 1,0 mês. **Ativo.**
+2. **1005786** (família 4751, flag 1): 6 coletas com intervalo médio de 4,7 meses, a última em 07/02/2025 (20,6 meses). Passou de 12 meses, e equipamentos parados entre 18 e 24 meses voltam só em 6% dos casos. **Inativo.**
+3. **1247857** (família 1938, flag 0): 1 coleta em 20/08/2026 (2,2 meses). A flag 0 prevalece, porque só 1,8% dos equipamentos com flag 0 voltam a coletar. **Inativo.** Há 431 casos assim no cadastro, a revisar com o negócio.
 
 ## 4. Correções feitas na documentação
 

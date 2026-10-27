@@ -31,8 +31,8 @@ Medição somente leitura por `notebooks/00_validacao/02_validar_chaves.py` (sa�
 |---|---|---|
 | Protheus `notassaida` | `cod_cliente` (+ `loja`; 99,3% das combinações são loja `01`) | 2.850 códigos; 2.823 no formato `A`+5 dígitos |
 | Zoho `accounts` | `erp_id`, `cnpj`; `id_protheus` | 9.843 contas; `id_protheus` 100% nulo; `erp_id` nulo em 1.824 (18,5%); `cnpj` nulo em 1.776 e inválido/zerado em 1.018 |
-| S360 `cliente` | `codigo_legado`, `id_cigam`, `sam_id` | **sem CNPJ**; 1.675 de 10.232 clientes (16,4%) sem `codigo_legado` nem `id_cigam` |
-| S360 `equipamento` | `familia_equipamento_id` | **sem `cliente_id`**; o cliente vem de `amostra.cliente_id` |
+| S360 `cliente` | `codigo_legado`, `id_cigam`, `sam_id` | **sem CNPJ**; 1.675 de 10.232 clientes (16,4%) sem `codigo_legado` nem `id_cigam`; ERP ID = `id_cigam` (casa 2.339 de 2.388 ERPs do Customer Status; `codigo_legado` só 1.328; T05, doc 13 §3) |
+| S360 `equipamento` | `familia_equipamento_id` | **sem `cliente_id`**; o cliente vem de `amostra.cliente_id` (amostra → compartimento → equipamento); não há tabela de nome da família |
 
 **Casamento medido**
 
