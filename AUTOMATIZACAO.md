@@ -1,40 +1,140 @@
-# Rodar o backlog de forma automatizada (PC e celular)
+# Manual do backlog automatizado
 
-## Pré-requisito único (uma vez)
+Como o fluxo de tarefas do ALS OilModel funciona, como iniciar, acompanhar, parar e consertar. Os comandos rodam no PowerShell, na raiz do projeto.
 
-Sessões em background só iniciam em pastas confiáveis. Abra `claude` na raiz do projeto, aceite o aviso "Workspace not trusted" e saia. Sem isso, `run_backlog.py run` falha com essa mensagem.
+## 1. Como funciona
 
-## Comandos
+```text
+BACKLOG.md ──► run_backlog.py run ──► uma sessão `claude --bg` por tarefa ──► commit no worktree
+ (fila)         (escolhe o lote)        (worktree + modelo próprios)               │
+    ▲                                                                              ▼
+    └──────── marca done ◄──── run_backlog.py colher ◄── merge na main ◄───────────┘
+                                         ▲
+                       `auto` = colher + run em loop até acabar
+```
+
+- **[BACKLOG.md](BACKLOG.md)** é a fila: 25 tarefas (T01–T25) com status, dependências, arquivos que tocam, dificuldade e prompt.
+- **Lote:** `run` pega as tarefas `todo` cujas dependências estão `done` e escolhe as que não tocam nos mesmos arquivos, para rodarem em paralelo sem conflito.
+- **Sessão:** cada tarefa vira uma sessão em background, num worktree próprio (`.claude/worktrees/backlog-Txx`, branch `worktree-backlog-Txx`). O agente trabalha, roda `pytest`, documenta e faz commit lá.
+- **Colheita:** `colher` integra na `main` o que terminou e marca `done`. Só com `done` as tarefas dependentes são liberadas.
+- **Modelo por dificuldade:** o campo `Dificuldade` da tarefa escolhe modelo, esforço e teto de gasto por sessão.
+
+| Dificuldade | Modelo | Esforço | Teto por sessão |
+|---|---|---|---|
+| baixa | haiku | low | US$ 1 |
+| media | sonnet | medium | US$ 3 |
+| alta | opus | high | US$ 8 |
+
+A tabela está em `ROTA`, em [scripts/run_backlog.py](scripts/run_backlog.py). `--model X` força um modelo para o lote inteiro.
+
+## 2. Regras
+
+1. **Aprovação automática:** as sessões rodam em `bypassPermissions`, sem pedir aprovação, e fazem commit local sozinhas. Nunca fazem push.
+2. **Dados da empresa no Fabric:** ler é livre; gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. Alterar ou apagar dado que já existe (tabelas, schemas, views) é bloqueado pelo hook [fabric_guard](scripts/fabric_guard.py) mesmo no modo automático. Só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`. Limite: o guard lê o texto do comando ou do arquivo, então não pega escrita montada dinamicamente; revise notebooks novos antes de publicar.
+3. **Agentes não editam o BACKLOG.md.** O status só muda por `run`, `colher` ou `backlog.py set`.
+4. **Regra de pronto** (vale para toda tarefa, detalhada no topo do BACKLOG.md): testes verdes, resultado registrado no doc indicado, sem TAT.
+5. **Fechamento de lote:** depois que um lote termina, rode o prompt "Fechamento de lote" do BACKLOG.md (o Organizador consolida os docs 06, 12 e 13) antes do próximo.
+6. **O que vai para uma pessoa:** aprovar regras de negócio (RN-02/03/04/07), responder a pauta da T23, liberar a porta 1433 ou outro workspace, e qualquer escrita em dado existente. E-mails e mensagens ficam como rascunho; nunca são enviados.
+
+## 3. Pré-requisitos (uma vez só)
+
+No `claude.exe` da extensão do VS Code (o `claude` não está no PATH):
+
+```powershell
+cd "C:\Users\dynatest\OneDrive - Dynatest Engenharia\Área de Trabalho\Novos_proj\als-oilmodel"
+& "C:\Users\dynatest\.vscode\extensions\anthropic.claude-code-2.1.310-win32-x64\resources\native-binary\claude.exe" --dangerously-skip-permissions
+```
+
+1. Aceite o aviso de **confiança da pasta** ("Workspace not trusted").
+2. Aceite o aviso do **modo sem aprovação** (disclaimer de `bypassPermissions`).
+3. Saia com `/exit`.
+
+Sem isso, os disparos falham com essas mensagens e nada fica marcado como `doing`. Se a extensão atualizar, o número da versão no caminho muda.
+
+Antes de colher, a `main` precisa estar sem mudanças não commitadas (`git status`).
+
+## 4. Como começar
+
+```powershell
+python scripts/run_backlog.py run --dry    # mostra o lote, o modelo e o teto de cada tarefa; não dispara nada
+python scripts/run_backlog.py auto         # modo totalmente automático (recomendado)
+```
+
+Alternativa passo a passo:
+
+```powershell
+python scripts/run_backlog.py run          # dispara um lote
+python scripts/run_backlog.py colher       # depois que terminarem
+```
+
+`--ambiente offline|fabric|humano` filtra por ambiente. Sem o filtro, o `auto` dispara todos. Uma tarefa `humano` só prepara material e rascunho.
+
+## 5. Como saber se está rodando
+
+| Pergunta | Comando |
+|---|---|
+| Quais sessões estão ativas e em que estado? | `claude agents` (em terminal interativo; use `claude agents --json` em script) |
+| O que uma sessão está fazendo? | `claude logs <id>` |
+| Quero ver ou responder dentro dela | `claude attach <id>` |
+| Visão geral por bloco (regenera [PROGRESSO.md](PROGRESSO.md)) | `python scripts/run_backlog.py status` |
+| Status de cada tarefa | `python scripts/backlog.py list` |
+| O que está liberado agora | `python scripts/backlog.py next` |
+| O que a tarefa deve fazer | `python scripts/backlog.py show T07` |
+| O que o agente fez | `git log --oneline worktree-backlog-T07` |
+
+Estados no `claude agents`:
+
+| Estado | Significa | O que fazer |
+|---|---|---|
+| `busy` | trabalhando | nada |
+| `idle` | terminou o turno | o `colher` integra |
+| `waiting` | travada num pedido de permissão | `claude attach <id>` e aprovar, ou parar e redisparar (seção 7) |
+
+Status da tarefa no BACKLOG: `todo` (fila), `doing` (sessão disparada), `done` (integrada na `main`), `blocked` (parada à mão). Cada disparo grava um registro em `.claude/logs/lote_*.json`.
+
+Para guardar a saída do `auto` em arquivo: `python -u scripts/run_backlog.py auto | Tee-Object .claude\logs\auto.log`.
+
+## 6. Como parar
 
 | Quero | Comando |
 |---|---|
-| Ver o que seria disparado | `python scripts/run_backlog.py run --ambiente offline --dry` |
-| Disparar o lote (uma sessão `--bg` por tarefa, cada uma em worktree próprio) | `python scripts/run_backlog.py run --ambiente offline` |
-| Ver onde estamos (regenera o [PROGRESSO.md](PROGRESSO.md)) | `python scripts/run_backlog.py status` |
-| Integrar o que terminou (commit no worktree se faltar, merge na main, marca `done`, encerra a sessão) | `python scripts/run_backlog.py colher` (`--dry` para simular) |
-| Tudo automático: colher + disparar o próximo lote, em loop até acabar | `python scripts/run_backlog.py auto --ambiente offline` |
+| Parar o `auto` (as sessões já disparadas continuam) | `Ctrl+C` na janela dele |
+| Parar uma sessão | `claude stop <id>` |
+| Parar e apagar sessão, worktree e estado | `claude rm <id>` |
+| Fazer a tarefa voltar para a fila | `python scripts/backlog.py set T07 todo` |
 
-**Roteamento de modelos:** o campo `Dificuldade` de cada tarefa no BACKLOG define modelo, esforço e teto de gasto por sessão: `baixa` → haiku/low/US$1, `media` → sonnet/medium/US$3, `alta` → opus/high/US$8 (tabela `ROTA` em `scripts/run_backlog.py`; `--model` força um modelo para o lote).
+Para reiniciar tarefas travadas: `claude stop <id>`, `claude rm <id>`, `backlog.py set Txx todo` e, na `main`, `git commit -am "backlog: reinicia Txx"`. Depois rode `run` ou `auto`. O trabalho parcial do worktree é descartado.
 
-**Aprovação automática:** as sessões rodam com `--permission-mode bypassPermissions`, sem pedir aprovação. A proteção que continua valendo é o hook `fabric_guard` (PreToolUse), que bloqueia alteração de dados existentes no Fabric mesmo nesse modo, e o isolamento em worktree. O `colher` exige a main sem mudanças não commitadas; conflito de merge fora de BACKLOG/PROGRESSO aborta o merge e deixa a tarefa `doing` para resolução manual.
-| Acompanhar / entrar / parar uma sessão | `claude agents`, `claude logs <id>`, `claude attach <id>`, `claude stop <id>` |
-| Marcar status à mão | `python scripts/backlog.py set T07 done` |
+## 7. Problemas comuns
 
-O `run` marca cada tarefa disparada como `doing`. Ao fim do lote: confira os commits nos worktrees, marque `done` o que passou, rode o "Fechamento de lote" do [BACKLOG.md](BACKLOG.md) e repita.
+| Sintoma | Causa e solução |
+|---|---|
+| `Workspace not trusted` | Faltou o passo 1 da seção 3. |
+| `--bg with bypassPermissions requires accepting the disclaimer` | Faltou o passo 2 da seção 3. |
+| `Nenhuma tarefa liberada` | Todas as `todo` dependem de tarefas ainda não `done` (veja `backlog.py list`), ou a que bloqueia está `doing`/`idle` sem ter sido colhida. Rode `colher`. |
+| Tarefa `doing` há muito tempo | `claude agents`: se `waiting`, aprove; se não aparece e o worktree tem commit, rode `colher`; se não tem nada, reinicie (seção 6). |
+| `colher`: "terminou sem nenhuma mudança" | A sessão acabou sem commit. Veja `claude logs <id>`, depois reinicie a tarefa. |
+| `colher`: "main tem mudanças não commitadas" | Faça `git commit` ou `git stash` e rode de novo. |
+| `colher`: "conflito de merge" | O merge foi cancelado e a tarefa continua `doing`. Resolva à mão com `git merge worktree-backlog-Txx` e depois `backlog.py set Txx done`. |
+| Hook bloqueou um comando do agente | O comando mencionava Fabric com escrita (ex.: `DROP`, `saveAsTable`). É falso positivo comum em testes; reescreva ou peça a uma pessoa. |
 
-## Pelo celular
+## 8. Pelo celular
 
 | Caminho | Serve para | Limite |
 |---|---|---|
-| **Controle remoto da sessão do PC** (`remoteControlAtStartup` já está `true` em `~/.claude/settings.json`; ou `claude --remote-control <nome>`) | Tudo, inclusive Fabric: a sessão roda no PC, com o login Azure em cache. Do celular você diz "rode o lote offline" e ela executa `run_backlog.py`. | O PC precisa estar ligado e com a sessão aberta. Confirme no app que a sessão aparece; isso não dá para verificar daqui. |
-| **Sessão na nuvem** (`claude --cloud "<tarefa>"`, a partir do repositório GitHub `rafaelroriz-age/als-models`) | Só tarefas `offline` (bloco B), sem PC ligado. | Precisa de `git push` antes (hoje só existe o commit inicial; nada do que foi feito está no GitHub). Não enxerga o Fabric: o login é interativo e não há credencial na nuvem. |
+| **Controle remoto da sessão do PC** (`remoteControlAtStartup` já é `true` em `~/.claude/settings.json`; ou `claude --remote-control <nome>`) | Tudo, inclusive Fabric: a sessão roda no PC, com o login Azure em cache. Do celular você pede "rode o `auto`". | O PC precisa estar ligado com a sessão aberta. Confirme no app que ela aparece; não dá para verificar daqui. |
+| **Sessão na nuvem** (`claude --cloud "<tarefa>"`, repositório GitHub `rafaelroriz-age/als-models`) | Só tarefas `offline`, sem PC ligado. | Precisa de `git push` antes (o GitHub só tem o commit inicial). Não enxerga o Fabric. |
 
-Para o Fabric sem depender da rede (porta 1433 bloqueada), a T25 cria `scripts/fabric_run.py`: executa notebooks pela API na 443 e aceita login por device code, que você completa no navegador do celular quando o cache expirar.
+Para o Fabric sem depender da porta 1433, a T25 cria `scripts/fabric_run.py`: executa notebooks pela API na 443, com login por device code que você completa no navegador do celular.
 
-## O que vai para você
+## 9. Arquivos
 
-Só o que depende de pessoas: aprovar regras de negócio (RN-02/03/04/07), responder a pauta da T23, liberar a porta 1433 ou a publicação em outro workspace, e qualquer escrita em dados existentes (`ALS_FABRIC_ESCRITA=1`). O resto o Claude executa; para e-mail e mensagens, deixa rascunho.
-
-## Segurança no Fabric
-
-Ler é livre; gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. A barreira [scripts/fabric_guard.py](scripts/fabric_guard.py) roda como hook antes de cada edição ou comando e dentro do `fabric_deploy.py`, e bloqueia DML/DDL, `saveAsTable`/`insertInto`, operações Delta de escrita e gravação em `Tables/`. Limite: ela lê o texto do comando ou do arquivo escrito, então não pega escrita construída dinamicamente. Por isso o preâmbulo dos agentes repete a regra, e vale revisar notebooks novos antes de publicar.
+| Arquivo | Papel |
+|---|---|
+| [BACKLOG.md](BACKLOG.md) | Fila de tarefas e regras de pronto |
+| [PROGRESSO.md](PROGRESSO.md) | Painel gerado; não edite à mão |
+| [scripts/backlog.py](scripts/backlog.py) | Lê o backlog: `list`, `next`, `show`, `set` |
+| [scripts/run_backlog.py](scripts/run_backlog.py) | `run`, `colher`, `auto`, `status` |
+| [scripts/fabric_guard.py](scripts/fabric_guard.py) e `.claude/hooks/fabric_guard_hook.py` | Barreira de escrita no Fabric |
+| `.claude/worktrees/` | Cópias isoladas das sessões (fora do git) |
+| `.claude/logs/` | Registro de cada disparo |

@@ -27,7 +27,7 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 | [15_pauta_decisoes_time.md](15_pauta_decisoes_time.md) | Pauta para o time: 7 decisões pendentes, com opções, recomendação e quem decide (T23) |
 | [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 24 tarefas com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
 | [../PROGRESSO.md](../PROGRESSO.md) | Status do backlog por bloco e próximo lote; gerado por `scripts/run_backlog.py status` |
-| [../AUTOMATIZACAO.md](../AUTOMATIZACAO.md) | Como disparar o backlog no PC e pelo celular, e a barreira de escrita no Fabric |
+| [../AUTOMATIZACAO.md](../AUTOMATIZACAO.md) | Manual do backlog automatizado: como iniciar, acompanhar, parar e consertar; regras e barreira de escrita no Fabric |
 | `documentacao-tecnica.md` | Documentação técnica de origem (Icaro Guerra) |
 | `Revisando KPIs e métricas…md` | Transcrição da reunião de validação de 21/10/2026 |
 | `Apresentacao_Executiva_…v2.md/.pptx`, `Plano_Executivo_…v2.pdf` | Versão anterior à reunião de 21/10 (escopo, EBIT, % Achieved e entrega desatualizados; ver 13) |
