@@ -37,3 +37,28 @@ As formas abaixo são **hipóteses a prototipar**; o cliente escolhe (ver [13](1
 
 **Segurança:** SP com leitura só em `lh_forecast`; MCP nunca lê Bronze/Silver; segredos em cofre; log de chamadas.
 **FinOps:** previsões pré-materializadas em batch; consumo lê só resultados prontos; cache por `snapshot`; medir CU na F8 no handoff.
+
+## 4. Executar notebooks pela API (sem a porta 1433): `scripts/fabric_run.py` (T25)
+
+Com o SQL endpoint (1433) bloqueado, o código roda **dentro do Fabric** e só a API (443) sai da máquina.
+
+```text
+python scripts/fabric_run.py als_00_perfil_qualidade            # executa e baixa Files/als_oilmodel/perfil/ → data/perfil/
+python scripts/fabric_run.py als_00_perfil_qualidade --publicar # antes roda fabric_deploy.py --aplicar (publica em produção: só com confirmação)
+ALS_AUTH=device python scripts/fabric_run.py als_00_...         # login por device code: abrir o link no celular e digitar o código
+```
+
+| Passo | Chamada | Observação |
+|---|---|---|
+| Localizar | `GET /workspaces`, `/lakehouses`, `/notebooks` | workspace padrão `O&L Global - Prod - DA` (`ALS_WORKSPACE` ou `--workspace`); lakehouse por nome, sem diferenciar maiúsculas |
+| Barreira | `POST /notebooks/{id}/getDefinition?format=ipynb` (202 → `Location` → `/result`) | recusa nome sem `als_` antes de qualquer chamada, e definição publicada que `fabric_guard.violacoes` bloqueie |
+| Executar | `POST /items/{id}/jobs/instances?jobType=RunNotebook` → 202 + `Location` | consulta o `Location` a cada `Retry-After` (máx. 30 s) até `Completed/Failed/Cancelled/Deduped`; `--timeout` (padrão 3600 s) devolve `Timeout`; imprime status, tempo e `failureReason`; código de saída 0 só com `Completed` |
+| Baixar | OneLake DFS `GET ?resource=filesystem&recursive=true&directory=<lh>/Files/als_oilmodel/<pasta>` + `GET` por arquivo | só leitura; pasta por notebook (`perfil`, `planilhas`) ou `--pasta`; segue `x-ms-continuation`; 404 = nada a baixar; recusa caminho que saia de `data/` |
+
+Autenticação: o padrão é o `InteractiveBrowserCredential` em cache de `src/pipeline/fabric.py`. `ALS_AUTH=device` usa `DeviceCodeCredential` com o mesmo cache (`als_oilmodel`) e o mesmo `~/.als_oilmodel/auth_record.json`: o token salvo é reaproveitado e o código só aparece quando o cache expira. Testes: `tests/test_fabric_run.py`, 17 casos com sessão `requests` falsa (rotas, operação longa, barreira, falha/timeout, HTTP 403, paginação, 404, caminho fora de `data/`, device code).
+
+**Validação real (27/10/2026, rede do usuário, porta 443):**
+
+- Login em cache sem interação: credencial pronta em 3,1 s; workspace e `LakehouseOeL` resolvidos, localização completa em ~10 s.
+- **O notebook de perfil não está publicado:** o workspace tem 10 notebooks e nenhum `als_*`, e `Files/als_oilmodel/` não existe no lakehouse (o OneLake devolve 404). O executor respondeu `notebook não publicado: als_00_perfil_qualidade` e o download tratou a pasta ausente sem erro (17 s no total, só leitura). `python scripts/fabric_run.py perfil` foi recusado sem autenticar.
+- Execução do job e tempo do perfil: **pendentes**. Publicar (`python scripts/fabric_deploy.py --aplicar --workspace "O&L Global - Prod - DA"`) cria os 3 notebooks `als_*` e grava o wheel em `Files/als_oilmodel/wheels/` do workspace de produção. Pelo AGENTS.md isso exige confirmação explícita, então não foi feito nesta tarefa. Depois de publicar, rodar `python scripts/fabric_run.py als_00_perfil_qualidade` e registrar aqui o status e o tempo (caminho da T02).
