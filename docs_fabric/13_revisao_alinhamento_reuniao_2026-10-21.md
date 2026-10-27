@@ -28,7 +28,37 @@ Todas as hipóteses abaixo serão prototipadas e comparadas por acurácia (backt
 | H1 | Papel das oportunidades >80% do Zoho no forecast | (a) somam ao forecast, como no Power BI atual; (b) só descontam, no cross-check. **27/10 (T17, parcial):** `src/features/receita.py` separa o realizado total do realizado em escopo (recorrente + não recorrente ativo no corte), que é a base para medir a dupla contagem na T18 |
 | H2 | O que a receita representa | (a) venda de kit/pacote; (b) análise processada. **27/10 (T17, parcial, dados da T14 em `data/base`):** no Protheus (ago/24–out/26), CFOP x933 (serviço/análise) = R$ 83,1 mi, x949 (outras saídas) = R$ 55,1 mi e x102 (venda de mercadoria/kit) = R$ 31,4 mi. Só 1.315 de 7.424 entidades têm amostras e faturamento. Funções prontas: kit × análise por CFOP, R$/amostra, correlação defasada consumo × receita. **Falta rodar a correlação e o backtest do Forecast 27 (notebook 30_kpi2_vendas)**. EBIT sem fonte na tabela-base (D2) |
 | H3 | Formato de entrega | (a) dashboard HTML + acesso SQL às tabelas de saída; (b) modelo semântico (DirectLake); (c) API/MCP |
+| H3 (quadro) | Comparativo das três opções de entrega (T21, 27/10) | Detalhe abaixo, em "H3 · Comparativo de entrega (T21)". Recomendação: (b) modelo semântico como entrega principal, sobre as mesmas tabelas `als_*` da Gold; (a) só como retrato provisório; (c) na fase do agente do CRM, por cima de (b). Números de CU e latência ainda não medidos (T22) |
 | H4 | Regra de recorrência: última compra <90 dias é E ou OU | **Resolvida: E** (texto do Forecast 27; Customer Status dá 233 só com ≥6 meses vs 231 com E). Ver [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) |
+
+### H3 · Comparativo de entrega (T21, 27/10)
+
+Base: protótipo (a) da T20 (`src/serving/dashboard.py`, dados sintéticos, sem medição de CU). Avaliação por leitura e estimativa; o que depende de medição está marcado como **a medir (T22)**.
+
+| Critério | (a) Dashboard HTML + SQL | (b) Modelo semântico (DirectLake) | (c) API / MCP |
+|---|---|---|---|
+| **O que entrega** | Um arquivo HTML com dados embutidos; mesmas tabelas por SQL (`src/serving/sql/01_forecast_consumo.sql`) | Relatório Power BI e medidas DAX sobre `als_*` na Gold, com Direct Lake | Endpoint ou MCP (`07`) que devolve previsão + intervalo sob pergunta |
+| **Esforço para entregar** | Baixo: já existe. Falta ligar à saída real da T15/T16 e criar as tabelas `als_*` | Médio: modelo, medidas (WAPE, % Achieved, faixa p10–p90), RLS por segmento, publicação | Alto: serviço, service principal com escopo mínimo, testes de contrato, configuração do cliente MCP no agente |
+| **Custo em CU (F8)** | Baixo e pontual: a consulta roda só ao gerar o arquivo (no pipeline). **A medir (T22)** | Consumo por carga do modelo e por consulta DAX; com agregados na Gold fica leve. **A medir (T22)** | Mesmo custo do semântico/SQL por consulta, somado ao do agente (LLM fica fora da F8). Custo por pergunta cresce com o uso. **A medir (T22)** |
+| **Manutenção** | Alta: regerar o arquivo a cada corte; mudança de contrato quebra o gerador; sem histórico de versão | Média: atualização pelo pipeline; medidas e RLS versionadas no modelo | Média-alta: contrato de API, segredos, auditoria de consultas, evolução do agente |
+| **Latência** | Abrir o arquivo: imediata. Sem consulta ao vivo | Segundos (cache do Direct Lake e de visual); bom para filtros | Segundos por pergunta (consulta + composição da resposta do agente) |
+| **Aderência ao agente do CRM (longo prazo)** | Baixa: não é consultável por agente; o SQL serve mas sem camada de negócio | Alta: Fabric data agent ou `Fabric-Analytics-MCP` consultam o semântico direto (`07`, critérios) | Alta e direta: é a própria interface do agente |
+| **Risco principal** | Parecer entrega final e ficar desatualizada; número fictício virar referência | Dependência de licença/capacidade para os leitores; medidas DAX pesadas | Custo e superfície de dados crescem sem controle se o contrato não for estreito |
+
+**Leitura.** (a) entrega algo hoje, mas não é caminho de longo prazo. (b) é o ponto de encontro: resolve o relatório e serve de base para o agente via data agent ou MCP fino, sem duplicar regra de negócio. (c) só se justifica quando o agente existir; antes disso é custo sem usuário.
+
+**Recomendação (T21):** (b) como entrega principal, construído sobre as tabelas `als_*` da Gold (agregados pré-calculados, como pede `07`). Manter (a) apenas como retrato provisório para a revisão com o cliente, sem uso operacional. Deixar (c) para a fase do agente do CRM, por cima do semântico. Confirmar a escolha só depois da medição de CU na T22.
+
+**Perguntas objetivas para o cliente decidir:**
+1. Os leitores do relatório têm licença Power BI (Pro ou PPU) ou o acesso será pela capacidade F8? Quantos usuários?
+2. O agente do CRM entra no escopo desta entrega ou é fase seguinte?
+3. A cadência semanal é requisito ou desejável (hoje é pendência da §5)?
+4. Basta um relatório com filtros de segmento e período, ou é preciso consulta ao vivo por cliente?
+5. Aceita o HTML estático como entrega provisória para a revisão, sabendo que os números do protótipo são fictícios?
+6. Há janela de CU livre na F8 para o pipeline de forecast e o consumo de consultas (pendência da §5)?
+7. A publicação vai para produção ou primeiro para um workspace de desenvolvimento (T23)?
+
+**Pendente:** medir CU e latência reais (T22) com as tabelas da T15/T16; validar o contrato `als_*` com o time de dados antes de criar qualquer objeto no Fabric.
 
 ## 3. Descobertas por dados (engenharia reversa)
 

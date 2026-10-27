@@ -98,3 +98,8 @@ Se o MCP for escolhido, adicionar à **Fase 5 — Entrega e handoff**:
 4. Configurar o MCP client no agente (arquivo de configuração + segredos).
 5. Testar o fluxo ponta-a-ponta: pergunta do usuário → DAX/SQL → previsão + intervalo.
 6. Validar custo (CU) das consultas na F8 e ajustar agregações se necessário.
+
+## Comparativo das três opções de entrega (T21, 27/10)
+
+- Quadro (a) dashboard HTML + SQL, (b) modelo semântico, (c) API/MCP, com esforço, manutenção, latência, aderência ao agente do CRM e riscos: [13 §2, H3](13_revisao_alinhamento_reuniao_2026-10-21.md).
+- Recomendação: (b) como entrega principal, sobre as tabelas `als_*` da Gold; (c) na fase do agente, por cima do semântico (data agent ou `Fabric-Analytics-MCP`). CU e latência reais ainda não medidos (T22).
