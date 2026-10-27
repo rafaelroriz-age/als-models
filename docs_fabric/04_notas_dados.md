@@ -52,7 +52,7 @@ Acesso via lakehouse `LakehouseOel` no Microsoft Fabric. S360, Protheus e Zoho j
 
 1. Schemas e tabelas já listados no [discovery](08_dicionario_de_dados_discovery.md); validar conteúdo, frescor e cobertura.
 2. Mapear as tabelas de faturamento (Protheus) e de oportunidades (Zoho) já ingeridas.
-3. Validar as chaves de ligação (CNPJ, ERP ID, ID de equipamento, setor/segmento) campo a campo.
+3. Validar as chaves de ligação (CNPJ, ERP ID, ID de equipamento, setor/segmento) campo a campo. **Feito em 2026-10-27 (T03)**, resultados em [14](14_fase0_engenharia_reversa_e_base_de_codigo.md) §2: Protheus ↔ S360 casa 40,1% (50,5% com a regra de grupo `A`+5 dígitos), a cadeia amostra → equipamento fecha em 97,7%, e só 44,8% do faturamento tem cliente S360.
 4. Traçar o ciclo de vida do equipamento → compartimento → amostra → faturamento.
 5. Mapear as camadas medallion **já existentes** (`bronze_*` e `silver_*` de protheus, s360 e zoho no `LakehouseOel`) e desenhar apenas as tabelas fato/dimensão de saída do Forecast.
 6. Gerar relatório de qualidade (missingness, outliers, sanidade de timestamps e horímetro).
