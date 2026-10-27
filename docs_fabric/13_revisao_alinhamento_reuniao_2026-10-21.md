@@ -61,7 +61,8 @@ Não dependem de resposta do negócio; saem das planilhas, artefatos e tabelas.
 | `LEIA-ME` desatualizado | Índice completo |
 
 **Mantidos como estão:** `documentacao-tecnica.md` e `00_escopo_original.md` (fiéis à fonte), planilhas convertidas e a transcrição.
-**Pendente (binários):** `Apresentacao_Executiva…v2.pptx`, `Plano_Executivo…v2.pdf` e o `.md` da apresentação ainda trazem o escopo anterior (6 componentes, EBIT único, % Achieved antigo, entrega via semântico + MCP). Regerar quando o escopo estiver estável.
+**27/10 (T24):** o `.md` da apresentação foi reescrito com o escopo atual (KPI 1 Real/Potencial; KPI 2 com faturamento e EBIT separados; novos e reativados fora; % Achieved de D6; entrega por protótipos H3; decisões D1–D12).
+**Pendente (binários):** `Apresentacao_Executiva…v2.pptx` e `Plano_Executivo…v2.pdf` continuam na versão anterior (6 componentes, EBIT único, % Achieved antigo, entrega via semântico + MCP) até serem regerados a partir do `.md`.
 
 ## 5. Pontos ainda sem resposta (não bloqueiam a Fase 0)
 
