@@ -12,6 +12,7 @@ dependencies = ["pandas>=2.0", "numpy", "pyarrow", "openpyxl"]
 [project.optional-dependencies]
 local = ["pyodbc", "azure-identity", "requests"]
 dev = ["pytest"]
+stats = ["statsmodels>=0.14", "scipy"]
 
 [tool.setuptools.packages.find]
 include = ["src", "src.*"]

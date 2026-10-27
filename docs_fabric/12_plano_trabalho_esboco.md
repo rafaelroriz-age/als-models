@@ -102,6 +102,18 @@
 
 **A enriquecer:** biblioteca por candidato; custo estimado por execução; quantidade mínima de histórico para cada família.
 
+**Implementação dos estatísticos (T10):** `src/models/estatisticos.py` (`ets`, `theta`, `croston`, `sba`, `tsb`, dict `MODELOS`), mesma assinatura dos baselines (`f(treino, h) -> [id, periodo, yhat]`) e usados direto em `rolling_origin`. Testes: `tests/test_estatisticos.py` (séries sintéticas sazonal, intermitente e curta; `python -m pytest`: 35 passed).
+
+| Modelo | Biblioteca | Histórico mínimo (`min_obs`) | Observações |
+|---|---|---|---|
+| ETS | statsmodels `ExponentialSmoothing` (aditivo, tendência amortecida; sazonal m=12 só com ≥ 24 meses) | 8 | |
+| Theta | statsmodels `ThetaModel` (dessazonaliza com ≥ 24 meses) | 8 | |
+| Croston, SBA, TSB | numpy puro (α=0,1; β=0,1 no TSB) | 3 | sem dependência extra |
+
+- **Dependências:** extra opcional `stats` no `pyproject.toml` (`statsmodels>=0.14`, `scipy`); `pip install -e .[stats]`. Testado com statsmodels 0.14.6. `statsforecast` não foi adotado (puxa numba; statsmodels basta e já roda no Fabric).
+- **Fallback:** série com menos de `min_obs` meses, ajuste que levanta exceção ou previsão não finita → média dos últimos 3 meses (mesma regra da `media_movel`), sem erro. Previsões são truncadas em 0.
+- **Custo observado** (máquina local, 200 séries sintéticas de 36 meses, h=3, 1 núcleo): ETS 78,7 s (~0,4 s/série), Theta 7,5 s (~0,04 s/série), Croston 0,8 s, SBA 0,6 s, TSB 0,7 s. Extrapolação linear: ETS em ~10 mil séries ≈ 1 h por origem do backtest; para esse volume paralelizar por `id` ou restringir ETS aos níveis agregados. Medição sintética, a repetir com dados reais (G3).
+
 **Protocolo de avaliação (a fixar aqui, usado na etapa 4):**
 - Backtest com origem móvel (*rolling origin*), sem embaralhar o tempo.
 - Horizontes: 1, 3 e 6 meses (a confirmar).
