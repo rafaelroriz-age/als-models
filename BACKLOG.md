@@ -64,7 +64,7 @@ Tarefa T02 do BACKLOG.md. Leia AGENTS.md e docs_fabric/14 §3. Execute notebooks
 ```
 
 ### T03 · Validar as chaves entre fontes
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @analista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
@@ -92,7 +92,7 @@ Tarefa T04 do BACKLOG.md. Leia AGENTS.md e a Etapa 1 de docs_fabric/12_plano_tra
 ```
 
 ### T05 · Descobrir a origem do Annual Sample Potential e o status ativo do equipamento
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @especialista-dados
 - **Depende:** T02
 - **Ambiente:** fabric
