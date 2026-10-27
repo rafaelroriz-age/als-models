@@ -2,6 +2,112 @@
 
 **Endpoint**: `j2qfysdun5iebf3ezw2l7ke4eu-vpyatc664ptezeejap7oap22qu.datawarehouse.fabric.microsoft.com`
 
+## Perfil de qualidade das tabelas-chave (T02, 2026-10-27)
+
+> Seção escrita à mão. `scripts/fabric_probe.py` regera este arquivo e **apaga esta seção**: copie-a antes de rodar o probe. O dicionário de colunas gerado começa em "LakehouseOel", mais abaixo.
+
+Origem: `notebooks/00_validacao/01_perfil_qualidade.py` via SQL endpoint (porta 1433 liberada na rede de execução; só leitura). Saída em `data/perfil/` (fora do git): `perfil.json`, `gates_g0.json` e 10 parquets de agregados. 0 erros de leitura. As consultas extras (duplicatas, horímetro) são agregados rodados com o mesmo cliente `Fabric`.
+
+### Volume, período e chaves
+
+| Tabela | Linhas | Período (coluna) | Chaves distintas |
+|---|---|---|---|
+| `bronze_s360.amostra` | 8.663.147 (60 `excluido=1`) | `data_criacao` 2016-11-28 → 2026-10-27; `data_coleta` ver abaixo | id 8.662.997; cliente_id 8.566; compartimento_id 1.488.955 |
+| `bronze_s360.cliente` | 10.231 | `data_registro` 2016-11 → 2026-10 | id 10.231; id_cigam 7.463; codigo_legado 5.701; sam_id 1.167 |
+| `bronze_s360.equipamento` | 1.063.584 | `data_registro` 2016-11 → 2026-10 | familia_equipamento_id 515; obra_id 54.482 |
+| `bronze_s360.compartimento` | 3.478.165 | `data_registro` 2016-11 → 2026-10 | equipamento_id 1.053.566 |
+| `silver_protheus.notassaida` | 58.666 | `emissao` 2024-08-01 → 2026-10-09 | numero 21.705; cod_cliente 2.850; cod_produto 575 |
+| `silver_protheus.contasreceber` | 58.531 | `emissao` 2018-11-01 → 2026-10-09 | numero 16.141; cliente 2.456 |
+| `silver_zoho.accounts` | 9.840 | `data_criacao` 2026-01-20 → 2026-10-27 | zoho_id 9.840; cnpj 7.434; erp_id 7.879; id_protheus 0 |
+| `silver_zoho.deals` | 22.213 | `data_criacao` 2026-01-23 → 2026-10-27; `data_fechamento_prevista` 2024-01-02 → 2027-03-31 | zoho_id 22.213; conta_id 4.215 |
+
+Amostras por ano de `data_coleta` (não excluídas, 2022+): 2022 615.810 · 2023 827.348 · 2024 908.585 · 2025 933.772 · 2026 (até out) 749.958. Faturamento mensal Protheus: ~R$ 6,9–8,6 mi/mês, 400–550 clientes/mês; out/2026 parcial (até 09/10).
+
+### Nulos relevantes (% das linhas)
+
+- `amostra`: `data_coleta` **25,81%** (2.235.900); `compartimento_id` 24,72%; `horimetro_equipado` 41,78%; `horas_oleo` 59,08%; `valor_servico_valor/moeda` 48,95%; `data_entrada_laboratorio` 23,18%. `data_impressao` e `versao` 100% nulos.
+- `cliente`: `codigo_legado` 40,56%; `id_cigam` 26,81%; `sam_id` 88,59%; `razao_social` 25,37%.
+- `equipamento`: `saude` 45,29%; `setor` 32,43%. `compartimento`: `horas_oleo` 89,88%; `oleo_trocado` 35,81%.
+- `silver_zoho.accounts`: `id_protheus` **100%**; `vendas_ttm` 100%; `status_real` 77,76%.
+- `silver_zoho.deals`: `motivo_perda` 84,05%; `tipo_oportunidade` 75,06%.
+- `notassaida` e `contasreceber`: nenhuma coluna acima de 20% nula.
+
+### Duplicatas
+
+| Verificação | Resultado |
+|---|---|
+| `amostra.id` repetido | 145 ids, 150 linhas extra (0,002%) |
+| `amostra` mesmo (compartimento, data_coleta), não excluídas | 80.687 grupos, 163.522 linhas extra (pode ser coleta legítima de vários ensaios; precisa de regra) |
+| `notassaida` repetida em (numero, item) | 1.626 grupos, 1.652 linhas extra (2,8%) |
+| `cliente.id_cigam` repetido | 23 valores em 48 clientes |
+| `accounts.cnpj` repetido | 421 CNPJs em 1.052 contas (filiais ou cadastro duplicado) |
+
+### Datas fora do intervalo (`amostra.data_coleta`, não excluídas)
+
+| Faixa | Linhas |
+|---|---|
+| Nula | 2.235.900 (2.020.720 também sem `compartimento_id`; 215.180 só data nula) |
+| Antes de 2015 (inclui anos 0001, 0201, 1920, 1969…) | 227.852 |
+| Futuro (> 2026-10-28; chega a 2115-09-16) | 37 |
+| Válidas (2015-01-01 → 2026-10-28) | 6.199.298 |
+
+Picos suspeitos: 1969-12 (87 amostras, época Unix zero) e ano 0201 (centenas, erro de digitação). `data_entrada_laboratorio` e `data_finalizacao` têm mínimo 2005-05-11, antes do início do S360 (2016).
+
+### Horímetro (`amostra`, não excluídas)
+
+| Medida | `horimetro_equipado` | `horas_oleo` |
+|---|---|---|
+| Preenchidos | 5.043.997 | 3.545.334 |
+| Negativos | 85 | 4 |
+| Zero | 273.049 | n/d |
+| > 100.000 (equip.) / > 50.000 (óleo) | 275.190 | 161.217 |
+| > 1.000.000 | 21.159 | n/d |
+| Máximo | 2.100.607.054 | 2.113.521.135 |
+| P50 / P99 / P99,9 | 5.865 / 618.773 / 5.082.653 | n/d |
+
+- `horas_oleo` > `horimetro_equipado` em 240.871 linhas.
+- Regressão do horímetro por compartimento (valor menor que o da coleta anterior, 2015–2026): 260.538 ocorrências em 149.085 compartimentos.
+- P99 de 618 mil indica unidade ou escala inconsistente: o horímetro bruto não serve como feature sem saneamento.
+
+### Achados que afetam KPI 1 (consumo de amostras)
+
+1. **25,81% das amostras sem `data_coleta`**: não entram na série mensal. Decidir a data de referência (`data_criacao`, 100% preenchida, ou `data_entrada_laboratorio`) e medir o desvio entre elas.
+2. Datas impossíveis (227 mil < 2015, 37 futuras) contaminam a série: filtrar 2015-01-01 ≤ `data_coleta` ≤ hoje, registrando o descarte.
+3. Duplicatas de `id` (150) e de (compartimento, data) (163 mil) inflam a contagem sem regra de deduplicação.
+4. Avulsas (sem compartimento): 2.141.200 (24,7%); exigem tratamento na RN de recorrência (Real x Potencial).
+5. Horímetro e `horas_oleo` com outliers e regressão afetam a feature de intervalo de troca e o % Achieved.
+6. Crescimento 2022→2025 de +51%: série com tendência, não estacionária.
+
+### Achados que afetam KPI 2 (vendas/faturamento)
+
+1. **Histórico curto**: `notassaida` cobre só 2024-08 → 2026-10 (27 meses); `contasreceber` vai a 2018-11. Backtest sazonal tem poucos pontos por mês.
+2. Out/2026 é parcial (até 09/10): excluir da avaliação ou marcar como incompleto.
+3. 1.652 linhas duplicadas por (numero, item) e 46 itens com quantidade ≤ 0 distorcem o faturamento.
+4. Chaves S360 ↔ Protheus: `codigo_legado` 40% e `id_cigam` 27% nulos, `id_cigam` repetido em 23; `accounts.id_protheus` 100% nulo (Zoho liga só por `erp_id`/`cnpj`, com CNPJ repetido). Taxa de casamento fica para T03.
+5. Zoho tem só ~10 meses de histórico (desde 2026-01): insuficiente para aprender conversão de deals sem Protheus.
+
+### Rascunho dos gates G0/G1
+
+G0 hoje (`src/gates/checks.py`): 22 de 27 checagens passam. As 5 falhas são achados reais: `amostra.data_coleta` com 25,81% de nulos (limite 5%); datas implausíveis em `amostra.data_coleta`, `data_entrada_laboratorio` e `data_finalizacao`; e `deals.data_fechamento_prevista` (2027-03), que é data prevista legítima, então o gate precisa de janela própria para datas previstas.
+
+| Gate | Verificação proposta | Limiar inicial | Situação com os dados |
+|---|---|---|---|
+| G0 | Tabela-chave não vazia | > 0 linhas | passa |
+| G0 | Nulos de `data_coleta` (ou data de referência alternativa) | ≤ 5% | **falha** 25,81% |
+| G0 | `data_coleta` plausível (2015 → hoje) | 0 fora | **falha** (227.852 + 37) |
+| G0 | Datas previstas (deals) com janela própria (hoje ± 2 anos) | 0 fora | ajustar regra; hoje falha |
+| G0 | Frescor da carga (`MAX(data_criacao)` vs hoje) | ≤ 2 dias | passa |
+| G0 | Cobertura de `notassaida`: meses fechados completos | mês corrente marcado parcial | out/2026 parcial |
+| G0 (novo) | `amostra.id` sem duplicata | 0 | **falha** (150) |
+| G0 (novo) | (numero, item) único em `notassaida` | 0 | **falha** (1.652) |
+| G0 (novo) | Horímetro sem negativos e ≤ 1.000.000 | 0 negativos, outliers reportados | **falha** (85 negativos; 21.159 > 1 mi) |
+| G1 | `chave_unica` (cliente_id, ano_mes) na tabela-base | sem repetição | validar na construção |
+| G1 | `nao_negativo` e `sem_nulos` no alvo | 0 | validar |
+| G1 | `meses_continuos` por entidade | 0 buracos após zeros | validar |
+| G1 (novo) | Reconciliação: soma da tabela-base = fonte filtrada | diferença ≤ 0,1% | a criar |
+
+---
+
 ## LakehouseOel
 
 ### Schema: `bronze_protheus`

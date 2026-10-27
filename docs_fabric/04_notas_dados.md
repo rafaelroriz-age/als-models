@@ -56,3 +56,12 @@ Acesso via lakehouse `LakehouseOel` no Microsoft Fabric. S360, Protheus e Zoho j
 4. Traçar o ciclo de vida do equipamento → compartimento → amostra → faturamento.
 5. Mapear as camadas medallion **já existentes** (`bronze_*` e `silver_*` de protheus, s360 e zoho no `LakehouseOel`) e desenhar apenas as tabelas fato/dimensão de saída do Forecast.
 6. Gerar relatório de qualidade (missingness, outliers, sanidade de timestamps e horímetro).
+
+## Resultado do perfil de qualidade (T02, 2026-10-27)
+
+Perfil executado contra o SQL endpoint do LakehouseOel (somente leitura); tabelas completas e gates propostos em [08](08_dicionario_de_dados_discovery.md#perfil-de-qualidade-das-tabelas-chave-t02-2026-10-27). Resumo:
+
+- **Volume:** `amostra` 8,66 mi linhas (6,2 mi com `data_coleta` válida 2015–2026-10), `cliente` 10,2 mil, `equipamento` 1,06 mi, `compartimento` 3,48 mi, `notassaida` 58,7 mil (2024-08 → 2026-10), `contasreceber` 58,5 mil (desde 2018-11), Zoho `accounts` 9,8 mil e `deals` 22,2 mil (desde 2026-01).
+- **Qualidade:** `data_coleta` 25,81% nula e com valores impossíveis (ano 0001, 1969, 2115); 150 `amostra.id` duplicados; 1.652 itens duplicados em `notassaida`; horímetro com 85 negativos, P99 de 618 mil h e 21 mil valores > 1 mi h; `accounts.id_protheus` 100% nulo.
+- **Impacto:** KPI 1 depende de definir a data de referência da amostra e a regra de deduplicação; KPI 2 tem só 27 meses de faturamento e out/2026 parcial.
+- **G0:** 22/27 checagens passam; as 5 falhas são achados reais (listados em 08). Pendente decidir limiares e validar casamento de chaves (T03).
