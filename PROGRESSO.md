@@ -2,10 +2,11 @@
 
 > Gerado por `python scripts/run_backlog.py status` a partir do [BACKLOG.md](BACKLOG.md). Não edite à mão.
 
-Atualizado em 27/10/2026 13:16 · **0/25 concluídas** · 9 em andamento · 16 a fazer · 0 bloqueadas
+Atualizado em 27/10/2026 13:20 · **2/25 concluídas** · 7 em andamento · 16 a fazer · 0 bloqueadas
 
 ## Próximo lote (pode rodar em paralelo)
 
+- **T11** [offline, alta → opus] Modelo ML global com quantis
 - **T23** [humano, baixa → haiku] Pauta de decisões para o time
 
 ## Sessões em background agora
@@ -17,7 +18,7 @@ Atualizado em 27/10/2026 13:16 · **0/25 concluídas** · 9 em andamento · 16 a
 - backlog-T10: waiting (permission prompt)
 - backlog-T12: waiting (permission prompt)
 - backlog-T25: waiting (permission prompt)
-- backlog-T01: waiting (permission prompt)
+- backlog-T01: idle
 
 ## Bloco A — Acesso e Fase 0 (dados reais) (0/6)
 
@@ -30,18 +31,18 @@ Atualizado em 27/10/2026 13:16 · **0/25 concluídas** · 9 em andamento · 16 a
 | ⬜ | **T05** Descobrir a origem do Annual Sample Potential e o status ativo do equipamento | @especialista-dados | fabric | alta | T02 |
 | 🔄 | **T25** Executor de notebooks no Fabric via API (sem depender da porta 1433) | @engenheiro-software | fabric | alta | — |
 
-## Bloco B — Código que não depende de dados reais (0/8)
+## Bloco B — Código que não depende de dados reais (2/8)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
 | 🔄 | **T06** Testes e contrato de dados dos gates G0/G1 | @engenheiro-software | offline | media | — |
-| 🔄 | **T07** Features de série temporal por entidade e mês | @especialista-dados | offline | media | — |
+| ✅ | **T07** Features de série temporal por entidade e mês | @especialista-dados | offline | media | — |
 | 🔄 | **T08** Alertas de queda >20% e compartimento churn | @especialista-dados | offline | baixa | — |
 | 🔄 | **T09** Classificação de clientes (Fase 1b) sobre o Customer Status | @cientista-dados | offline | media | — |
 | 🔄 | **T10** Modelos estatísticos plugáveis no harness | @cientista-dados | offline | media | — |
 | ⬜ | **T11** Modelo ML global com quantis | @cientista-dados | offline | alta | T07 |
 | 🔄 | **T12** Snapshot mensal e reconstrução retroativa | @engenheiro-software | offline | media | — |
-| 🔄 | **T13** Reconciliação hierárquica Cliente → Equipamento → Compartimento | @cientista-dados | offline | alta | — |
+| ✅ | **T13** Reconciliação hierárquica Cliente → Equipamento → Compartimento | @cientista-dados | offline | alta | — |
 
 ## Bloco C — Modelagem com dados reais (0/6)
 

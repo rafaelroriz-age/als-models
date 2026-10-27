@@ -3,7 +3,7 @@
 Uso:
     python scripts/run_backlog.py run    [--ambiente offline|fabric|humano] [--model X] [--dry]
     python scripts/run_backlog.py colher [--dry]     # commita, faz merge na main e marca done o que terminou
-    python scripts/run_backlog.py auto   [--ambiente offline] [--intervalo 120]   # colher + run em loop
+    python scripts/run_backlog.py auto   [--ambiente X] [--intervalo 120]   # colher + run em loop
     python scripts/run_backlog.py status              # imprime e regenera PROGRESSO.md
 O modelo, o esforço e o teto de gasto vêm do campo `Dificuldade` de cada tarefa (tabela ROTA).
 Acompanhar: `claude agents`, `claude logs <id>`, `claude attach <id>`, `claude stop <id>`.
@@ -164,6 +164,9 @@ def cmd_colher(args):
             commitar_controle(f"backlog: {t['id']} done")
             if s and exe:
                 subprocess.run([exe, "stop", s["id"]], capture_output=True)
+                subprocess.run([exe, "rm", s["id"]], capture_output=True)
+            git("worktree", "prune")
+            git("branch", "-d", f"worktree-backlog-{t['id']}")
             feitas += 1
     if feitas:
         print("\nLote concluído? Rode o 'Fechamento de lote' do BACKLOG.md antes do próximo.")
@@ -230,7 +233,7 @@ def main():
     p.add_argument("--dry", action="store_true", help="mostra o que seria disparado, sem disparar nem gravar nada")
     sub.add_parser("colher").add_argument("--dry", action="store_true")
     p = sub.add_parser("auto")
-    p.add_argument("--ambiente", choices=("offline", "fabric", "humano"), default="offline")
+    p.add_argument("--ambiente", choices=("offline", "fabric", "humano"), help="sem o filtro, dispara todos")
     p.add_argument("--intervalo", type=int, default=120, help="segundos entre verificações")
     sub.add_parser("status")
     args = ap.parse_args()
