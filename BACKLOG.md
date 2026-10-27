@@ -124,7 +124,7 @@ Tarefa T25 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_deploy.py, scripts/fabr
 ## Bloco B — Código que não depende de dados reais
 
 ### T06 · Testes e contrato de dados dos gates G0/G1
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
