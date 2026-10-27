@@ -50,7 +50,7 @@ Tarefa T01 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_probe.py, src/pipeline/
 ```
 
 ### T02 · Rodar o perfil de qualidade das tabelas-chave
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @analista-dados
 - **Depende:** T01
 - **Ambiente:** fabric
@@ -194,7 +194,7 @@ Tarefa T10 do BACKLOG.md. Leia AGENTS.md, src/models/baselines.py, src/backtest/
 ```
 
 ### T11 · Modelo ML global com quantis
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** T07
 - **Ambiente:** offline
@@ -388,7 +388,7 @@ Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §
 ```
 
 ### T24 · Regerar a apresentação executiva com o escopo atual
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @organizador
 - **Depende:** T23
 - **Ambiente:** offline
