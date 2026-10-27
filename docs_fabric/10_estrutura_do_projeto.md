@@ -35,8 +35,8 @@ scripts/      fabric_probe.py (descoberta local)
 | RN-02 | Consumo real = horas (horímetro) × meses trabalhados/ano ÷ intervalo, por compartimento | A validar |
 | RN-03 | Recorrente: compras em ≥6 meses distintos dos últimos 12 **e** última compra <90 dias (sem redutor de 70%). Comprador de alto volume e poucas compras = não recorrente ativo | Confirmada (Diego, Keli); E/OU da última compra conferido nos dados (H4) |
 | RN-04 | Churn: >6 meses sem compra. Reativado: volta após >1 ano | Churn: a validar. Reativados: fora do escopo da fase 1 |
-| RN-05 | Alerta de queda: amostras do cliente caem >20% | A validar (base de comparação a definir) |
-| RN-06 | Compartimento churn: compartimento deixa de ser coletado dentro do intervalo esperado | A validar |
+| RN-05 | Alerta de queda: amostras do cliente caem >20% | Implementada em `src/features/alertas.py` (`alertar_queda`, T08). **Base de comparação: decisão pendente com o negócio** (Negócio, doc 12). Padrão adotado: `ano_anterior` (mesmo mês do ano anterior), com `mm3` e `mm12` disponíveis. Queda exatamente 20,0% não alerta; mês sem coleta fica NaN e não alerta |
+| RN-06 | Compartimento churn: compartimento deixa de ser coletado dentro do intervalo esperado | Implementada em `src/features/alertas.py` (`compartimento_churn`, T08). Padrão adotado: churn se horas desde a última coleta > `fator` × `intervalo_h` (fator = 1,0, ou seja, mais que um intervalo). Ainda a validar com o negócio e depende de RN-01 e de leitura atual do horímetro |
 | RN-07 | Potencial = benchmark de similares do mesmo segmento; % Achieved = realizado ÷ potencial | Fórmulas do Annual Sample Potential a descobrir nas planilhas e dados (R1) |
 | RN-08 | Inatividade do equipamento inferida por engenharia reversa: coluna de ativo do S360, intervalos entre coletas e vida útil por família/segmento (ex.: colhedora de cana ~7 anos). O horímetro é uma leitura por coleta, não série contínua | Descoberta por dados (R3) |
 | RN-09 | Sazonalidade: Cana (parada nov-mar), MT (soja/milho/algodão), Indústria (mensal/bimestral), Locomotiva (semanal) | Parcial (item 7) |
