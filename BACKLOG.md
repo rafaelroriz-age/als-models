@@ -427,7 +427,7 @@ Tarefa T26 do BACKLOG.md. Leia AGENTS.md, docs_fabric/15_pauta_decisoes_time.md 
 ```
 
 ### T27 · Guard para o fluxo de tabelas temporárias e pré-consultas
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
@@ -441,7 +441,7 @@ Tarefa T27 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_guard.py, .claude/hooks
 ```
 
 ### T28 · Contrato das saídas (pré-consultas e arquivos em `saida/`)
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
