@@ -122,6 +122,129 @@ Na janela comum (2024-08 a 2026-09), 80,0% das amostras estão em entidades com 
 
 **Limites e próximos passos:** a base de compartimento × mês não foi gerada (5,5 mi linhas esparsas); a T15 pode derivá-la com a mesma consulta trocando o nível. Faltam a confirmação do significado de `status_amostra = 1` com o time do S360, a lista de intercompany (ex.: `A58483` ALS Tribology, R$ 0,92 mi) e o resíduo de 12,3% do faturamento sem ponte, cujo maior código é `ZOAG81`, com R$ 3,99 mi e sem nome no `contasreceber`.
 
+### 3.3 Contrato das saídas (T28, 2026-10-28)
+
+Implementado em `src/serving/contrato.py` (`CONTRATOS`, `validar`, `validar_todas`, `aprovado`, `esquema_markdown`), testado em `tests/test_contrato.py` (21 casos). Regra da Fase 5b ([09](09_conexao_e_consumo_fabric.md) §0): **sem tabela permanente**. Cada saída existe como temp view Spark `v_als_*` (só na sessão do notebook) e como parquet em `Files/als_oilmodel/saida/`, que o dashboard (a) e o semântico (b, Import) leem. Uma `data_corte` por arquivo (a última rodada); o histórico de rodadas fica no snapshot (`src/backtest/snapshot.py`).
+
+| Saída | Pré-consulta | Arquivo em `saida/` | Chave | Granularidade |
+|---|---|---|---|---|
+| Forecast de consumo (Real p10/p50/p90, realizado, Potencial) | `v_als_forecast_consumo` | `forecast_consumo.parquet` | nivel, entidade_id, granularidade, periodo, data_corte | segmento/cliente/equipamento × mês ou semana, histórico + horizonte |
+| % Achieved (D6) | `v_als_pct_achieved` | `pct_achieved.parquet` | nivel, entidade_id, data_corte | entidade × corte (12 meses) |
+| Alertas de queda >20% e churn de compartimento | `v_als_alertas` | `alertas.parquet` | tipo, entidade_id, periodo, detalhe | um alerta aberto |
+| Forecast de vendas (6 componentes, faturamento e EBIT) | `v_als_forecast_vendas` | `forecast_vendas.parquet` | nivel, entidade_id, data_corte, periodo | total/segmento/cliente × mês projetado |
+| Métricas de backtest | `v_als_backtest_metricas` | `backtest_metricas.parquet` | kpi, modelo, nivel, segmento, horizonte, data_corte | modelo × nível × segmento × horizonte |
+
+**Validação (G4/G5):** `validar(nome, df)` devolve `list[dict]` no formato dos gates (`dq_resultados`). G4 bloqueia a publicação: colunas exatas, tipos (`str/int/float/date`), nulos só nas colunas anuláveis, domínios (nível, granularidade, tipo de alerta), chave única, não negativos, `p10 ≤ p50 ≤ p90` (e `potencial_p10 ≤ potencial ≤ potencial_p90`; EBIT idem) com os três preenchidos juntos, `realizado` só antes do corte e previsão só a partir dele, horizonte futuro sem buracos, uma `data_corte`. Regras por saída: `pct_achieved = realizado_12m ÷ potencial_12m` (nulo se potencial ≤ 0); queda com `variacao_pct > 0,20` e churn com horas > intervalo e sem variação; vendas com total (recorrente + não recorrente + novos + reativados − churn) ≥ 0, `periodo > data_corte`, 1º dia do mês. G5 avisa (não bloqueia) quando a `cobertura` do backtest foge mais de 10 pp dos 80% declarados do intervalo p10–p90; `aprovado(res, bloqueantes=("G4","G5"))` o torna bloqueante.
+
+**Divergência de nomes (doc 09 §1 × SQL da T20), resolvida:**
+
+| Doc 09 (alvo de produção, T36) | SQL T20 (`als_*`) | Fase 5b |
+|---|---|---|
+| `fct_forecast_consumo` | `als_forecast_saida` (formato longo: `quantil`, `valor`) + `als_amostras_realizado` + `als_potencial` | `forecast_consumo` (formato largo, `prev_p10/p50/p90`, igual ao `COLUNAS_FORECAST` do dashboard) |
+| `fct_forecast_vendas` | (não existia) | `forecast_vendas` |
+| `backtest_metrics` | (não existia) | `backtest_metricas` |
+| `snapshot_mensal` | (não existia) | `src/backtest/snapshot.py` (`COLUNAS_SNAPSHOT`), fora do contrato de consumo |
+| `dq_resultados` | (não existia) | resultado dos gates, mesmo formato de `validar` |
+
+Decisão: `fct_*` e `backtest_metrics` são nomes de **tabela Delta do alvo de produção**, que não existe na Fase 5b; `als_*` do SQL da T20 são **entradas hipotéticas** das consultas, também inexistentes. O que vale agora é o par `v_als_*` + parquet acima, com as colunas do contrato. Se a produção (T36) criar Delta, o mapa é `forecast_consumo → fct_forecast_consumo`, `forecast_vendas → fct_forecast_vendas`, `backtest_metricas → backtest_metrics`; o SQL da T20 passa a ler `v_als_*` em vez de `als_forecast_saida`. Mudanças em relação ao dashboard da T20: `forecast_consumo` ganhou `potencial_p10/potencial_p90` (Potencial com intervalo) e `alertas` mantém as colunas de `COLUNAS_ALERTAS` sem alteração.
+
+<details><summary>Esquema completo (gerado por <code>esquema_markdown()</code>)</summary>
+
+**forecast_consumo** — `v_als_forecast_consumo` → `Files/als_oilmodel/saida/forecast_consumo.parquet` · chave `nivel, entidade_id, granularidade, periodo, data_corte`
+
+| coluna | tipo | nulo | descrição |
+|---|---|---|---|
+| `nivel` | str | não | segmento | cliente | equipamento |
+| `entidade_id` | str | não | id no nível (raiz do CNPJ no cliente; id do equipamento) |
+| `entidade_nome` | str | não | rótulo exibido |
+| `cliente_id` | str | sim | cliente dono (vazio no nível segmento) |
+| `segmento` | str | não | segmento do cliente |
+| `granularidade` | str | não |  |
+| `periodo` | date | não | 1º dia do mês ou segunda-feira da semana |
+| `realizado` | float | sim | amostras coletadas (vazio em período futuro) |
+| `prev_p10` | float | sim | forecast Real, percentil 10 (vazio em período passado) |
+| `prev_p50` | float | sim | forecast Real, mediana |
+| `prev_p90` | float | sim | forecast Real, percentil 90 |
+| `potencial` | float | sim | potencial do período, valor central (benchmark T16) |
+| `potencial_p10` | float | sim | potencial, percentil 10 (incerteza do benchmark) |
+| `potencial_p90` | float | sim | potencial, percentil 90 |
+| `data_corte` | date | não | data de corte do forecast |
+| `versao_modelo` | str | não | modelo + hash dos dados (snapshot.versao_dados) |
+
+**pct_achieved** — `v_als_pct_achieved` → `Files/als_oilmodel/saida/pct_achieved.parquet` · chave `nivel, entidade_id, data_corte`
+
+| coluna | tipo | nulo | descrição |
+|---|---|---|---|
+| `nivel` | str | não |  |
+| `entidade_id` | str | não |  |
+| `entidade_nome` | str | não |  |
+| `segmento` | str | não |  |
+| `porte` | str | sim | faixa de porte por nº de equipamentos (potencial.porte) |
+| `n_equip` | int | sim |  |
+| `data_corte` | date | não |  |
+| `realizado_12m` | float | não | amostras dos 12 meses até o corte |
+| `potencial_12m` | float | sim | potencial anual (benchmark); nulo/zero → % vazio |
+| `pct_achieved` | float | sim | D6: realizado_12m ÷ potencial_12m (fração, pode passar de 1) |
+
+**alertas** — `v_als_alertas` → `Files/als_oilmodel/saida/alertas.parquet` · chave `tipo, entidade_id, periodo, detalhe`
+
+| coluna | tipo | nulo | descrição |
+|---|---|---|---|
+| `tipo` | str | não |  |
+| `nivel` | str | não | cliente (queda) | equipamento (churn) |
+| `entidade_id` | str | não |  |
+| `entidade_nome` | str | não |  |
+| `cliente_id` | str | sim |  |
+| `segmento` | str | não |  |
+| `periodo` | date | não | mês do alerta (queda) ou mês de corte (churn) |
+| `valor_atual` | float | não | queda: amostras do mês; churn: horas sem coleta |
+| `valor_base` | float | não | queda: base de comparação; churn: intervalo esperado (h) |
+| `variacao_pct` | float | sim | queda: 1 − atual ÷ base (fração, > 0,20); churn: vazio |
+| `detalhe` | str | não | texto curto (base usada, compartimento) |
+
+**forecast_vendas** — `v_als_forecast_vendas` → `Files/als_oilmodel/saida/forecast_vendas.parquet` · chave `nivel, entidade_id, data_corte, periodo`
+
+| coluna | tipo | nulo | descrição |
+|---|---|---|---|
+| `nivel` | str | não |  |
+| `entidade_id` | str | não | 'total' no nível total |
+| `data_corte` | date | não |  |
+| `periodo` | date | não | mês projetado (1º dia) |
+| `h` | int | não | horizonte em meses a partir do corte (1..H) |
+| `recorrente_base` | float | não | componente 1: base dos clientes recorrentes |
+| `nao_recorrente` | float | não | componente 2: clientes não recorrentes ativos |
+| `novos` | float | não | componente 3: fora do escopo (D3), 0 |
+| `reativados` | float | não | componente 4: fora do escopo (D3), 0 |
+| `churn` | float | não | componente 5: perda (valor positivo, subtraída no total) |
+| `var_mercado` | float | não | componente 6: variação de mercado (fração, pode ser negativa) |
+| `faturamento_p10` | float | sim | KPI 2: faturamento, percentil 10 (R$) |
+| `faturamento_p50` | float | sim |  |
+| `faturamento_p90` | float | sim |  |
+| `ebit_p10` | float | sim | KPI 2: EBIT como target separado, percentil 10 (R$) |
+| `ebit_p50` | float | sim |  |
+| `ebit_p90` | float | sim |  |
+| `versao_modelo` | str | não |  |
+
+**backtest_metricas** — `v_als_backtest_metricas` → `Files/als_oilmodel/saida/backtest_metricas.parquet` · chave `kpi, modelo, nivel, segmento, horizonte, data_corte`
+
+| coluna | tipo | nulo | descrição |
+|---|---|---|---|
+| `kpi` | str | não |  |
+| `modelo` | str | não |  |
+| `nivel` | str | não |  |
+| `segmento` | str | não | 'todos' quando a métrica não é por segmento |
+| `horizonte` | int | não | meses à frente (1..H) |
+| `data_corte` | date | não | último corte avaliado no backtest |
+| `versao_modelo` | str | não |  |
+| `n` | int | não | pares previsto × realizado |
+| `wape` | float | sim | src.backtest.harness.metricas |
+| `mae` | float | sim |  |
+| `bias_pct` | float | sim |  |
+| `smape` | float | sim |  |
+| `cobertura` | float | sim | fração do realizado dentro de [p10, p90]; declarada = 0,80 |
+
+</details>
+
 ## 4. Plano de testes (resumo para `specs/04_plano_testes.md`)
 
 - **Unitários (pytest):** cada regra RN-xx com casos de borda (ex.: exatamente 6 meses, exatamente 90 dias, queda de 20,0% vs. 20,1%).

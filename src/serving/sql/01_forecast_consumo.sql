@@ -1,4 +1,5 @@
 -- T20 · Consultas T-SQL (SQL analytics endpoint do LakehouseOel) que produzem as tabelas do dashboard.
+-- Contrato oficial das saídas (v_als_*, parquet, G4/G5): src/serving/contrato.py e docs_fabric/10 §3.3.
 -- Contrato de colunas: src/serving/dashboard.py (COLUNAS_FORECAST, COLUNAS_ALERTAS).
 --
 -- PROPOSTA, NÃO EXECUTADA: as tabelas de saída abaixo ainda não existem no Fabric. São nomes propostos
