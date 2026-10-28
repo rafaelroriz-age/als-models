@@ -182,3 +182,173 @@ def test_main_recusa_nome_sem_api(monkeypatch):
     monkeypatch.setattr(fr, "Executor", lambda *a, **k: pytest.fail("não deveria autenticar"))
     with pytest.raises(SystemExit, match="als_"):
         fr.main()
+
+
+# ---------------------------------------------------------------- T30: registro por convenção e parâmetros
+import scripts.fabric_deploy as fd  # noqa: E402
+import scripts.fabric_run as fr  # noqa: E402
+
+NB_DEV = '"""Doc."""\n# %% [parameters]\nlakehouse = "LakehouseOel"\n\n# %%\nPASTA_FABRIC = "dev_x"\nprint(lakehouse)\n'
+
+
+def arvore(tmp_path, arquivos):
+    for rel, texto in arquivos.items():
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text(texto, encoding="utf-8")
+    return tmp_path
+
+
+def test_descobre_als_por_convencao_e_mantem_legados(tmp_path):
+    raiz = arvore(tmp_path, {"notebooks/50_dev/als_50_x.py": NB_DEV, "notebooks/50_dev/rascunho.py": "x = 1\n",
+                             "notebooks/00/als_00_y.py": "y = 2\n"})
+    achados = fd.descobrir_notebooks(raiz, legados={"als_00_legado": raiz / "legado.py"})
+    assert list(achados) == ["als_00_legado", "als_00_y", "als_50_x"]
+    reais = fd.descobrir_notebooks()
+    assert set(fd.NOTEBOOKS) <= set(reais) and {"als_50_pre_consultas", "als_51_views_saida"} <= set(reais)
+
+
+def test_descoberta_recusa_nome_duplicado(tmp_path):
+    raiz = arvore(tmp_path, {"notebooks/a/als_1.py": "", "notebooks/b/als_1.py": ""})
+    with pytest.raises(SystemExit, match="duplicado"):
+        fd.descobrir_notebooks(raiz, legados={})
+
+
+def test_selecionar_filtra_e_recusa_desconhecido():
+    nbs = {"als_a": "a", "als_b": "b"}
+    assert fd.selecionar(nbs, None) == nbs and fd.selecionar(nbs, ["als_b"]) == {"als_b": "b"}
+    with pytest.raises(SystemExit, match="não registrado"):
+        fd.selecionar(nbs, ["als_c"])
+
+
+def test_celulas_e_celula_de_parametros(tmp_path):
+    py = arvore(tmp_path, {"als_50_x.py": NB_DEV}) / "als_50_x.py"
+    nb = fd.para_ipynb(py, "w.whl", None)
+    codigo = [c for c in nb["cells"] if c["cell_type"] == "code"]
+    assert len(codigo) == 4  # %pip, docstring, parâmetros, corpo
+    assert codigo[2]["metadata"] == {"tags": ["parameters"]} and "lakehouse" in "".join(codigo[2]["source"])
+    assert codigo[3]["metadata"] == {} and "PASTA_FABRIC" in "".join(codigo[3]["source"])
+    legado = fd.para_ipynb(fd.NOTEBOOKS["als_00_perfil_qualidade"], "w.whl", None)
+    assert len(legado["cells"]) == 3  # sem `# %%`: célula única, igual ao comportamento anterior
+
+
+def test_notebooks_registrados_passam_no_guard_e_nao_usam_tables(monkeypatch):
+    monkeypatch.delenv("ALS_FABRIC_ESCRITA", raising=False)
+    monkeypatch.delenv("ALS_FABRIC_DEV", raising=False)
+    for nome, py in fd.descobrir_notebooks().items():
+        texto = py.read_text(encoding="utf-8")
+        assert fr.violacoes(texto) == [], nome
+        if "50_dev" in py.parts:
+            assert "saveAs" + "Table" not in texto and "/Tables/" not in texto
+            assert "createOrReplaceTempView" in texto
+
+
+def test_gerar_simulacao_escreve_ipynb_e_recusa_barreira(tmp_path, monkeypatch):
+    monkeypatch.delenv("ALS_FABRIC_ESCRITA", raising=False)
+    nbs = {n: p for n, p in fd.descobrir_notebooks().items() if n.startswith("als_5")}
+    defs = fd.gerar(nbs, "w.whl", None, tmp_path)
+    assert set(defs) == {"als_50_pre_consultas", "als_51_views_saida"}
+    nb = json.loads((tmp_path / "als_50_pre_consultas.ipynb").read_text(encoding="utf-8"))
+    assert any(c["metadata"].get("tags") == ["parameters"] for c in nb["cells"])
+    ruim = arvore(tmp_path, {"als_ruim.py": ESCRITAS[0]}) / "als_ruim.py"
+    with pytest.raises(SystemExit, match="barreira"):
+        fd.gerar({"als_ruim": ruim}, "w.whl", None, tmp_path)
+    with pytest.raises(SystemExit, match="als_"):
+        fd.gerar({"outro": ruim}, "w.whl", None, tmp_path)
+
+
+def test_deploy_main_simula_sem_api(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(fd, "DIST", tmp_path)
+    monkeypatch.setattr(fd, "construir_wheel", lambda: tmp_path / "als_oilmodel-0.0.0-py3-none-any.whl")
+    monkeypatch.setattr(fd, "Cliente", lambda: pytest.fail("simulação não autentica"))
+    fd.main(["--notebooks", "als_50_pre_consultas"])
+    assert (tmp_path / "fabric/als_50_pre_consultas.ipynb").exists()
+    assert "modo simulação" in capsys.readouterr().out
+
+
+def test_deploy_workspace_e_lakehouse_por_ambiente(tmp_path, monkeypatch):
+    monkeypatch.setattr(fd, "construir_wheel", lambda: tmp_path / "w.whl")
+    monkeypatch.delenv("ALS_WORKSPACE", raising=False)
+    with pytest.raises(SystemExit, match="obrigatório"):
+        fd.main(["--aplicar"])
+    vistos = []
+
+    class Cli:
+        def api(self, metodo, caminho, **kw):
+            vistos.append(caminho)
+            if caminho == "/workspaces":
+                return {"value": [{"id": WS, "displayName": "WS-env"}]}
+            return {"value": [{"id": LH, "displayName": "lh_env"}]}
+
+    monkeypatch.setattr(fd, "Cliente", Cli)
+    monkeypatch.setenv("ALS_WORKSPACE", "WS-env")
+    monkeypatch.setenv("ALS_LAKEHOUSE", "outro")
+    with pytest.raises(SystemExit, match="lakehouse não encontrado: outro"):
+        fd.main(["--aplicar"])
+    assert vistos == ["/workspaces", f"/workspaces/{WS}/lakehouses"]
+
+
+def test_pasta_saida_legado_convencao_e_padrao(tmp_path):
+    raiz = arvore(tmp_path, {"notebooks/als_50_x.py": NB_DEV, "notebooks/als_52_sem.py": "x = 1\n"})
+    nbs = fd.descobrir_notebooks(raiz, legados={})
+    assert fr.pasta_saida("als_00_perfil_qualidade") == "perfil"
+    assert fr.pasta_saida("als_40_backtest_baselines") is None  # legado sem saída: igual a antes
+    assert fr.pasta_saida("als_50_x", nbs) == "dev_x" and fr.pasta_saida("als_52_sem", nbs) == "saida"
+    assert fr.pasta_saida("als_50_pre_consultas") == "saida"
+    assert fr.pasta_saida("als_99_inexistente", nbs) is None
+
+
+def test_ler_parametros():
+    assert fr.ler_parametros(None) == {}
+    assert fr.ler_parametros(["lakehouse=LakehouseOel", "data_corte="]) == {"lakehouse": "LakehouseOel",
+                                                                             "data_corte": ""}
+    with pytest.raises(SystemExit):
+        fr.ler_parametros(["sem_igual"])
+
+
+class HttpCorpo(Http):
+    def request(self, metodo, url, **kw):
+        self.corpos = getattr(self, "corpos", []) + [kw.get("json")]
+        return super().request(metodo, url, **kw)
+
+
+def test_executar_envia_parametros_so_quando_informados():
+    def rotas():
+        return {("POST", f"{API}/workspaces/{WS}/items/{NB}/jobs/instances"): [resp(202, headers={"Location": JOB})],
+                ("GET", JOB): [resp(corpo={"status": "Completed"})]}
+
+    cred = SimpleNamespace(get_token=lambda escopo: SimpleNamespace(token="t"))
+    ex = Executor(cred=cred, http=HttpCorpo(rotas()), dormir=lambda s: None)
+    ex.executar(WS, NB)
+    assert ex.http.corpos[0] is None  # padrão anterior: POST sem corpo
+    ex = Executor(cred=cred, http=HttpCorpo(rotas()), dormir=lambda s: None)
+    ex.executar(WS, NB, parametros={"lakehouse": "Outro"})
+    assert ex.http.corpos[0] == {"executionData": {"parameters": {"lakehouse": {"value": "Outro", "type": "string"}}}}
+
+
+def test_main_run_usa_env_parametros_e_pasta_por_convencao(tmp_path, monkeypatch):
+    chamadas = {}
+
+    class Ex:
+        def localizar(self, ws, lh, nb):
+            chamadas["localizar"] = (ws, lh, nb)
+            return {"ws": WS, "lh": LH, "nb": NB}
+
+        def checar(self, *a):
+            pass
+
+        def executar(self, ws, nb, timeout, parametros):
+            chamadas["parametros"] = parametros
+            return {"status": "Completed", "segundos": 1.0}
+
+        def baixar(self, ws, lh, pasta, destino):
+            chamadas["baixar"] = pasta
+            return []
+
+    monkeypatch.setattr(fr, "Executor", Ex)
+    monkeypatch.setenv("ALS_LAKEHOUSE", "LhEnv")
+    with pytest.raises(SystemExit) as fim:
+        fr.main(["als_50_pre_consultas", "--workspace", "W", "--destino", str(tmp_path),
+                 "--param", "lakehouse=LakehouseOel"])
+    assert fim.value.code == 0
+    assert chamadas == {"localizar": ("W", "LhEnv", "als_50_pre_consultas"),
+                        "parametros": {"lakehouse": "LakehouseOel"}, "baixar": "saida"}

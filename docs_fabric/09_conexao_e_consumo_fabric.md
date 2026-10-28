@@ -6,7 +6,7 @@
 
 Resposta do Caio ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) D13): desenvolver em **notebook**, escolhendo o lakehouse; usar os **lakehouses já existentes**; criar **só tabelas temporárias ou pré-consultas**. Por isso a topologia da §1 (novo `lh_forecast`, tabelas Delta de saída) **não é pré-requisito** nesta fase e fica como alvo de produção a rediscutir (T36).
 
-- **Leitura:** Silver do `LakehouseOel`, somente leitura (parâmetro de lakehouse nos notebooks `notebooks/50_dev`, T30).
+- **Leitura:** Silver do `LakehouseOel`, somente leitura (parâmetro de lakehouse nos notebooks `notebooks/50_dev`, T30; fluxo na §6).
 - **Pré-consultas:** temp views Spark `v_als_*` (vivem só na sessão do notebook; nome e colunas no contrato da T28).
 - **Saída persistente:** arquivos em `Files/als_oilmodel/saida/` (parquet), baixados por `scripts/fabric_run.py`. É o que o dashboard (a) e o semântico (b, modo Import) consomem.
 - **Guard:** liberar `CREATE TEMP VIEW`/`createOrReplaceTempView` e fechar `CREATE TABLE/VIEW` permanentes é a T27. `als_dev_*` Delta só com `ALS_FABRIC_DEV=1` e depois da resposta do Caio (T26).
@@ -63,7 +63,7 @@ ALS_AUTH=device python scripts/fabric_run.py als_00_...         # login por devi
 | Localizar | `GET /workspaces`, `/lakehouses`, `/notebooks` | workspace padrão `O&L Global - Prod - DA` (`ALS_WORKSPACE` ou `--workspace`); lakehouse por nome, sem diferenciar maiúsculas |
 | Barreira | `POST /notebooks/{id}/getDefinition?format=ipynb` (202 → `Location` → `/result`) | recusa nome sem `als_` antes de qualquer chamada, e definição publicada que `fabric_guard.violacoes` bloqueie |
 | Executar | `POST /items/{id}/jobs/instances?jobType=RunNotebook` → 202 + `Location` | consulta o `Location` a cada `Retry-After` (máx. 30 s) até `Completed/Failed/Cancelled/Deduped`; `--timeout` (padrão 3600 s) devolve `Timeout`; imprime status, tempo e `failureReason`; código de saída 0 só com `Completed` |
-| Baixar | OneLake DFS `GET ?resource=filesystem&recursive=true&directory=<lh>/Files/als_oilmodel/<pasta>` + `GET` por arquivo | só leitura; pasta por notebook (`perfil`, `planilhas`) ou `--pasta`; segue `x-ms-continuation`; 404 = nada a baixar; recusa caminho que saia de `data/` |
+| Baixar | OneLake DFS `GET ?resource=filesystem&recursive=true&directory=<lh>/Files/als_oilmodel/<pasta>` + `GET` por arquivo | só leitura; pasta por notebook (`perfil`, `planilhas`; nos `als_*` descobertos por convenção, `PASTA_FABRIC` ou `saida`, §6) ou `--pasta`; segue `x-ms-continuation`; 404 = nada a baixar; recusa caminho que saia de `data/` |
 
 Autenticação: o padrão é o `InteractiveBrowserCredential` em cache de `src/pipeline/fabric.py`. `ALS_AUTH=device` usa `DeviceCodeCredential` com o mesmo cache (`als_oilmodel`) e o mesmo `~/.als_oilmodel/auth_record.json`: o token salvo é reaproveitado e o código só aparece quando o cache expira. Testes: `tests/test_fabric_run.py`, 17 casos com sessão `requests` falsa (rotas, operação longa, barreira, falha/timeout, HTTP 403, paginação, 404, caminho fora de `data/`, device code).
 
@@ -96,3 +96,38 @@ O guard inspeciona o texto de comandos e arquivos (hook `.claude/hooks/fabric_gu
 - Não vê escrita por outro caminho (API REST direta, outra linguagem, SQL montado em string e executado depois); a revisão humana antes de publicar notebook continua necessária.
 - `ALS_FABRIC_DEV` não impede o uso de um nome `als_dev_x` que já exista com dado de outra pessoa: usar o prefixo só em tabelas criadas por nós e limpar ao fim.
 - Gravação em `Files/als_oilmodel/` segue livre; `/Tables/` segue bloqueado, também para `als_dev_`.
+
+## 6. Fluxo de desenvolvimento: `notebooks/50_dev` (T30, 28/10/2026)
+
+Implementa a §0: notebooks `als_*` que leem o lakehouse escolhido só com SELECT, montam as pré-consultas como temp views e gravam as saídas do contrato da T28 em `Files/als_oilmodel/saida/`. **Nada foi publicado**: validado só em modo simulação e em testes locais.
+
+```text
+python scripts/fabric_deploy.py                                    # simulação: dist/fabric/*.ipynb, nada sai da máquina
+python scripts/fabric_deploy.py --notebooks als_50_pre_consultas   # simula só um notebook
+python scripts/fabric_deploy.py --aplicar --workspace "<nome>"     # publica (produção: só com confirmação explícita, T31)
+python scripts/fabric_run.py als_50_pre_consultas                  # executa e baixa Files/als_oilmodel/saida/ → data/saida/
+python scripts/fabric_run.py als_50_pre_consultas --param lakehouse=OutroLH --param horizonte=6
+```
+
+| Notebook | Faz | Grava (Files do lakehouse padrão) |
+|---|---|---|
+| `als_50_pre_consultas` (`notebooks/50_dev/als_50_pre_consultas.py`) | temp views `v_als_src_amostra`, `_compartimento`, `_equipamento`, `_cliente`, `_zoho_accounts` (projeção das tabelas de origem) → `v_als_amostras_mes` (cliente S360 × equipamento × mês, regras de data/exclusão da T14, sem avulsas) → séries mensais por segmento, cliente (ponte S360 → Zoho da T14) e equipamento → `v_als_forecast_consumo`, `v_als_pct_achieved`, `v_als_alertas` | `saida/forecast_consumo.parquet`, `pct_achieved.parquet`, `alertas.parquet` (só as aprovadas no G4) e `relatorio_dev.json` (gates); falha o job se alguma saída for reprovada |
+| `als_51_views_saida` | recarrega os parquets de `saida/` como temp views `v_als_*` numa sessão nova e roda `validar_todas` (G4/G5) | `saida/relatorio_views.json` |
+
+**Parâmetros** (célula `# %% [parameters]` do .py, que o deploy marca com a tag `parameters` do Fabric; local: variáveis de ambiente): `lakehouse` (padrão `LakehouseOel`, `ALS_LAKEHOUSE`; só identificador simples, vai qualificado como `` `lakehouse`.schema.tabela ``), `data_corte` (vazio = 1º dia do mês corrente), `horizonte` (1–12, padrão 12), `meses_historico` (padrão 36), `base_alerta` (`ano_anterior`, `mm3`, `mm12`). Origem: S360 em `bronze_s360` (no `LakehouseOel` a S360 só existe na Bronze, como na T14) e Zoho em `silver_zoho`; `sql_fontes(lh, schemas)` aceita outros schemas. O `lakehouse` do parâmetro é a **origem da leitura**; as saídas vão para o Files do lakehouse **anexado no deploy** (`--lakehouse` do `fabric_deploy.py`), que é o mesmo de onde o `fabric_run.py` baixa.
+
+**Conteúdo das saídas (versão de desenvolvimento, `src/pipeline/dev.py`):** forecast = baseline ingênuo sazonal (`p50 = y(t−12)`; série com menos de 12 meses repete o último valor), `p10/p90 = p50 +` quantis 10/90 dos resíduos sazonais da própria entidade (truncado em 0), `versao_modelo = ingenuo_sazonal_dev+<hash dos dados>`. O modelo escolhido entra na T15. Potencial (T16), `porte`, churn de compartimento (RN-06, depende de horímetro), `forecast_vendas` e `backtest_metricas` ficam de fora: colunas anuláveis saem vazias e as duas últimas saídas não são geradas (o `als_51` acusa `saida_presente` no G4). Alertas: só queda > 20% do cliente no último mês fechado (mês sem coleta não alerta, RN-05).
+
+**Registro por convenção (`fabric_deploy.py` e `fabric_run.py`):**
+
+- `descobrir_notebooks()` = os 3 legados de `NOTEBOOKS` (nomes fixos, sem mudança) + todo `notebooks/**/als_*.py`, publicado com o nome do arquivo; nome repetido é erro. `--notebooks` filtra; nome sem `als_` ou bloqueado pelo guard é recusado antes de gerar o .ipynb.
+- Células: linhas `# %%` separam células e `# %% [parameters]` vira a célula de parâmetros; .py sem marcador continua numa célula única (legados idênticos ao que era gerado antes).
+- Pasta baixada pelo `fabric_run.py`: `SAIDAS` para os legados (`perfil`, `planilhas`; `als_40` sem pasta, como antes); para os descobertos, a constante `PASTA_FABRIC = "..."` do .py (lida por AST) ou `saida`.
+- `--param chave=valor` (repetível) vai no corpo do job (`executionData.parameters`, tipo `string`); sem `--param` o POST segue sem corpo, como antes. O notebook converte os numéricos com `int()`.
+- Workspace e lakehouse por argumento ou ambiente: `ALS_WORKSPACE` (deploy: sem padrão, continua obrigatório com `--aplicar`; run: padrão `O&L Global - Prod - DA`) e `ALS_LAKEHOUSE` (padrão `LakehouseOel` nos dois).
+
+**Garantias verificadas:** os 5 notebooks registrados passam no guard sem `ALS_FABRIC_ESCRITA`/`ALS_FABRIC_DEV`; os de `50_dev` não contêm `saveAsTable` nem `/Tables/` e só criam objetos por `createOrReplaceTempView`; as consultas são todas `SELECT`. Simulação de 28/10: `python scripts/fabric_deploy.py` gerou `dist/fabric/` com `als_00_perfil_qualidade`, `als_01_engenharia_reversa_planilhas`, `als_40_backtest_baselines`, `als_50_pre_consultas` e `als_51_views_saida` (o `als_50` com 6 células de código, uma marcada `parameters`). Num conjunto sintético (3 clientes S360, 2 entidades Zoho, 4 equipamentos, 36 meses) o pipeline gerou 270 linhas de série, 390 de `forecast_consumo` (h = 12), 10 de `pct_achieved` e 1 alerta, todas aprovadas no G4.
+
+**Testes:** `tests/test_dev.py` (9 casos: lakehouse por parâmetro/ambiente/padrão e recusa de nome inválido, SQL só leitura e qualificado, janela, níveis e somas da série, contrato G4 das 3 saídas, ingênuo sazonal e fallback, % Achieved com e sem potencial, alerta, gravação só das aprovadas) e `tests/test_fabric_run.py` (29 casos, 12 novos: descoberta e duplicidade, filtro, células e tag `parameters`, guard nos notebooks reais, simulação do deploy sem API, workspace/lakehouse por ambiente, pasta por convenção, `--param` no corpo do job, `main` do run com ambiente e convenção). `python -m pytest` em 28/10: 277 passaram, 2 pulados e 1 falha anterior à T30, fora dos arquivos desta tarefa (`tests/test_comparacao.py::test_g3_oraculo_bate_baselines_e_tem_cobertura`: cobertura não nula em modelo sem intervalo, em `src/backtest/comparacao.py`).
+
+**Pendente para a T31 (execução real):** confirmar no Fabric que a tag `parameters` do .ipynb é reconhecida pela célula de parâmetros, que a leitura `` `LakehouseOel`.bronze_s360.amostra `` resolve no Spark (lakehouse com schemas) e medir tempo/CU do `als_50`.
