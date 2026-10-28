@@ -44,12 +44,15 @@ def taxas_cliente(frota: pd.DataFrame, realizado: pd.DataFrame, segmentos: pd.Da
     return t
 
 
-def benchmark(taxas: pd.DataFrame, p: ParametrosPotencial = ParametrosPotencial()) -> pd.DataFrame:
+def benchmark(taxas: pd.DataFrame, p: ParametrosPotencial = ParametrosPotencial(),
+              ref: pd.DataFrame | None = None) -> pd.DataFrame:
     """Taxa de benchmark por linha de `taxas`, com o nível de similaridade usado (fallback hierárquico).
 
     Só clientes que coletaram na família (taxa > 0) entram no benchmark, para não puxá-lo para zero.
+    `ref` (padrão: a própria `taxas`) é a população de similares; o bootstrap passa uma reamostra dela.
     """
-    ref = taxas[taxas["taxa"] > 0]
+    ref = taxas if ref is None else ref
+    ref = ref[ref["taxa"] > 0]
     out = taxas.copy()
     out["taxa_bench"] = np.nan
     out["nivel"] = pd.NA
@@ -68,6 +71,46 @@ def benchmark(taxas: pd.DataFrame, p: ParametrosPotencial = ParametrosPotencial(
         out.loc[livre, "taxa_bench"] = m.loc[livre, "q"]
         out.loc[livre, "nivel"] = "×".join(dims) or "global"
     return out
+
+
+def benchmark_bootstrap(taxas: pd.DataFrame, p: ParametrosPotencial = ParametrosPotencial(), n_boot: int = 200,
+                        seed: int = 0) -> np.ndarray:
+    """Matriz linhas de `taxas` × `n_boot` com a taxa de benchmark recalculada sobre reamostras de clientes.
+
+    Cada reamostra sorteia entidades com reposição (todas as famílias da entidade juntas) e refaz `benchmark`
+    com ela como população de similares: mede a incerteza do benchmark por ter poucos similares no grupo.
+    """
+    rng = np.random.default_rng(seed)
+    ents = taxas["entidade"].unique()
+    linhas = {e: np.flatnonzero(taxas["entidade"].to_numpy() == e) for e in ents}
+    out = np.full((len(taxas), n_boot), np.nan)
+    for b in range(n_boot):
+        idx = np.concatenate([linhas[e] for e in rng.choice(ents, size=len(ents), replace=True)])
+        out[:, b] = benchmark(taxas, p, ref=taxas.iloc[idx])["taxa_bench"].to_numpy()
+    return out
+
+
+def potencial_intervalo(taxas: pd.DataFrame, p: ParametrosPotencial = ParametrosPotencial(), n_boot: int = 200,
+                        quantis: tuple[float, float] = (0.1, 0.9), seed: int = 0
+                        ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """(por entidade, por linha): potencial central (benchmark) e p10/p90 pelo bootstrap de `benchmark_bootstrap`.
+
+    Por entidade: potencial, potencial_p10, potencial_p90. Por linha (entidade × família): o `benchmark` com
+    taxa_bench_p10/p90. O central fica sempre dentro do intervalo (o intervalo é alargado se preciso).
+    """
+    b = benchmark(taxas, p)
+    boot = benchmark_bootstrap(taxas, p, n_boot, seed)
+    n = b["n_equip"].to_numpy()[:, None]
+    pot_boot = pd.DataFrame(n * boot).groupby(b["entidade"].to_numpy()).sum(min_count=1)
+    central = (b["n_equip"] * b["taxa_bench"]).groupby(b["entidade"]).sum(min_count=1)
+    lo = np.nanquantile(pot_boot.to_numpy(), quantis[0], axis=1)
+    hi = np.nanquantile(pot_boot.to_numpy(), quantis[1], axis=1)
+    out = pd.DataFrame({"potencial": central.reindex(pot_boot.index)}, index=pot_boot.index)
+    out["potencial_p10"] = np.fmin(lo, out["potencial"])
+    out["potencial_p90"] = np.fmax(hi, out["potencial"])
+    linhas = b.assign(taxa_bench_p10=np.fmin(np.nanquantile(boot, quantis[0], axis=1), b["taxa_bench"]),
+                      taxa_bench_p90=np.fmax(np.nanquantile(boot, quantis[1], axis=1), b["taxa_bench"]))
+    return out.rename_axis("entidade").reset_index(), linhas
 
 
 def pct_achieved(realizado: pd.Series, potencial: pd.Series) -> pd.Series:

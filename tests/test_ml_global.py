@@ -6,7 +6,7 @@ pytest.importorskip("lightgbm")
 
 from src.backtest.harness import resumir, rolling_origin
 from src.models.baselines import media_movel
-from src.models.ml_global import ml_global, montar_base
+from src.models.ml_global import ml_global, montar_base, prever, treinar
 
 ORIGENS = ["2024-12-01", "2025-06-01"]
 
@@ -67,3 +67,15 @@ def test_sem_vazamento_alterar_futuro_nao_muda_previsao(serie, backtest):
     orig = backtest[(backtest["modelo"] == "ml") & (backtest["origem"] == pd.Timestamp(ORIGENS[0]))]
     cols = ["id", "periodo", "yhat", "yhat_lo", "yhat_hi"]
     pd.testing.assert_frame_equal(prev[cols].reset_index(drop=True), orig[cols].reset_index(drop=True))
+
+
+def test_treinar_e_prever_em_lotes_e_em_series_fora_do_treino(serie):
+    treino = serie[serie["periodo"] <= "2025-06-01"]
+    modelos, x_cols = treinar(treino, 3)
+    ordem = ["id", "periodo"]
+    # lotes com categorias de segmento diferentes do treino: o LightGBM remapeia pelas categorias do ajuste
+    pd.testing.assert_frame_equal(ml_global(treino, 3).sort_values(ordem, ignore_index=True),
+                                  prever(modelos, x_cols, treino, 3, lote=7).sort_values(ordem, ignore_index=True))
+    nova = treino[treino["id"] == "s1"].tail(13).assign(id="nova")   # fora do treino, só 13 meses de histórico
+    p = prever(modelos, x_cols, nova, 3)
+    assert set(p["id"]) == {"nova"} and len(p) == 3 and (p["yhat_lo"] <= p["yhat"]).all()

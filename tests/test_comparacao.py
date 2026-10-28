@@ -31,8 +31,9 @@ def _oraculo(serie):
 
 
 def test_rotular_segmento():
-    s = rotular_segmento(pd.Series(["Mining", None, "-", " "], dtype="object"))
-    assert s.tolist() == ["Mining", "sem_segmento", "sem_segmento", "sem_segmento"]
+    s = rotular_segmento(pd.Series(["Mining", None, "-", " ", "--", "Consumer products."], dtype="object"))
+    assert s.tolist() == ["Mining", "sem_segmento", "sem_segmento", "sem_segmento", "sem_segmento",
+                          "Consumer products"]
 
 
 def test_ids_ativos_so_olha_ate_a_data():

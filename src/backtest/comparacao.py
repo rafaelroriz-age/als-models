@@ -15,9 +15,9 @@ TODOS = "TODOS"
 
 
 def rotular_segmento(s: pd.Series) -> pd.Series:
-    """Segmento como texto; nulo, vazio e '-' viram `sem_segmento`."""
-    s = s.astype("string").str.strip()
-    return s.where(s.notna() & ~s.isin(["", "-"]), SEM_SEGMENTO).astype(str)
+    """Segmento como texto sem ponto final; nulo, vazio e só traços ('-', '--') viram `sem_segmento`."""
+    s = s.astype("string").str.strip().str.rstrip(".").str.strip()
+    return s.where(s.notna() & ~s.str.fullmatch(r"-*").fillna(True), SEM_SEGMENTO).astype(str)
 
 
 def ids_ativos(serie: pd.DataFrame, ate: str | pd.Timestamp, meses: int = 12) -> pd.Index:

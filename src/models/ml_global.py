@@ -77,17 +77,44 @@ def colunas_features(base: pd.DataFrame) -> list[str]:
         ["mes_sin", "mes_cos", "horizonte"] + [c for c in CATEGORICAS if c in base]
 
 
-def ml_global(treino: pd.DataFrame, h: int, p: ParametrosML = ParametrosML()) -> pd.DataFrame:
-    """Um LGBMRegressor(objective='quantile') por quantil, treinado em todas as séries; quantis ordenados."""
+def _ajustar(base: pd.DataFrame, p: ParametrosML) -> tuple[list, list[str]]:
     from lightgbm import LGBMRegressor
 
-    base, fut = montar_base(treino, h, p)
     x_cols = colunas_features(base)
-    preds = np.column_stack([
-        LGBMRegressor(objective="quantile", alpha=q, **p.lgbm).fit(base[x_cols], base["alvo"]).predict(fut[x_cols])
-        for q in p.quantis])
+    return [LGBMRegressor(objective="quantile", alpha=q, **p.lgbm).fit(base[x_cols], base["alvo"])
+            for q in p.quantis], x_cols
+
+
+def _prever_fut(modelos: list, x_cols: list[str], fut: pd.DataFrame, p: ParametrosML) -> pd.DataFrame:
+    preds = np.column_stack([m.predict(fut[x_cols]) for m in modelos])
     preds = np.sort(preds, axis=1) * fut["escala"].to_numpy()[:, None]  # sem cruzamento de quantis
     if p.nao_negativo:
         preds = np.clip(preds, 0, None)
     return pd.DataFrame({"id": fut["entidade"].to_numpy(), "periodo": fut["periodo_alvo"].to_numpy(),
                          "yhat": preds[:, 1], "yhat_lo": preds[:, 0], "yhat_hi": preds[:, 2]})
+
+
+def treinar(treino: pd.DataFrame, h: int, p: ParametrosML = ParametrosML()) -> tuple[list, list[str]]:
+    """Ajusta um LGBMRegressor(objective='quantile') por quantil em todas as séries de `treino`."""
+    return _ajustar(montar_base(treino, h, p)[0], p)
+
+
+def prever(modelos: list, x_cols: list[str], historico: pd.DataFrame, h: int,
+           p: ParametrosML = ParametrosML(), lote: int | None = None) -> pd.DataFrame:
+    """Previsão dos h meses após o último mês de `historico` com modelos já treinados (`treinar`).
+
+    `historico` pode ter séries que não entraram no treino (ex.: treino numa amostra, previsão em toda a frota);
+    basta trazer os últimos 13 meses de cada série. `lote` divide as séries em blocos para caber na memória.
+    """
+    ids = historico["id"].unique()
+    passo = lote or max(len(ids), 1)
+    return pd.concat([_prever_fut(modelos, x_cols, montar_base(historico[historico["id"].isin(ids[i:i + passo])],
+                                                                h, p)[1], p)
+                      for i in range(0, len(ids), passo)], ignore_index=True)
+
+
+def ml_global(treino: pd.DataFrame, h: int, p: ParametrosML = ParametrosML()) -> pd.DataFrame:
+    """Um LGBMRegressor(objective='quantile') por quantil, treinado em todas as séries; quantis ordenados."""
+    base, fut = montar_base(treino, h, p)
+    modelos, x_cols = _ajustar(base, p)
+    return _prever_fut(modelos, x_cols, fut, p)
