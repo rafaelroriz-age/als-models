@@ -32,9 +32,11 @@ Legenda: ✅ sustentado por teste/medição citado; 🔶 só sintético ou só p
 
 Pontos não medidos que a tabela não pode preencher: acurácia por nível (cliente/equipamento/compartimento) e por segmento em dados reais, calibração em dados reais, custo em CU real (T22 mede; o proxy atual é tempo × 1 núcleo local) e robustez a dado faltante.
 
-Teste em aberto (não causado por esta tarefa, que só adiciona docs): `tests/test_comparacao.py::test_g3_oraculo_bate_baselines_e_tem_cobertura` falha em `python -m pytest` (177 passed, 1 failed em 27/10/2026): a asserção de que a cobertura dos modelos sem intervalo é NaN não vale, coerente com o achado abaixo. Corrigir em `tabela_comparativa`/`resumir` antes de ler cobertura do G3.
+O teste `tests/test_comparacao.py::test_g3_oraculo_bate_baselines_e_tem_cobertura` foi **corrigido na T29 (28/10/2026)**.
+- **Causa:** `rolling_origin` empilha as previsões de todos os modelos num só DataFrame. Como o oráculo tem `yhat_lo/yhat_hi`, as colunas também existem nas linhas dos baselines, com NaN. `resumir` então passa o intervalo para `metricas`, e `(y >= NaN) & (y <= NaN)` dá `False`: a cobertura de um modelo sem intervalo saía 0 em vez de NaN.
+- **Correção:** em `src/backtest/harness.py::metricas`, a cobertura só conta as linhas com `yhat_lo` e `yhat_hi` preenchidos e fica NaN quando não há nenhuma.
 
-Achado de método (de [12](12_plano_trabalho_esboco.md)): `resumir` calcula cobertura = 0 para modelo sem intervalo quando resumido junto com modelo que tem `yhat_lo/yhat_hi`. A cobertura só é lida dos modelos com intervalo.
+Achado de método (de [12](12_plano_trabalho_esboco.md)): `resumir` calculava cobertura = 0 para modelo sem intervalo quando resumido junto com modelo que tem `yhat_lo/yhat_hi`. Resolvido na T29 (ver acima).
 
 ## 2. Candidatos por problema (além dos baselines)
 
@@ -102,3 +104,101 @@ Consolida o rascunho de [12](12_plano_trabalho_esboco.md) com o que o harness j�
 - Metas numéricas de acurácia por KPI (doc 12, pontos em aberto): sem elas "bate o baseline" é o único critério.
 - Fonte do EBIT (D2) e confirmação da origem de `receita_valor`.
 - Janela de CU da F8.
+
+## 6. Saídas reais do KPI 1 (T29, 28/10/2026)
+
+Esta seção implementa os modelos escolhidos na §2 para gerar `data/forecast/` no contrato da T28 (`src/serving/contrato.py`).
+
+### Código
+
+**Notebooks em `notebooks/20_kpi1_consumo/`**
+- `23_potencial.py`: calcula o potencial por benchmark de similares e o % Achieved (D6). Grava em `data/potencial/` os arquivos `potencial_cliente`, `potencial_linhas`, `equipamentos_ativos`, `distribuicao_segmento` e `sensibilidade` (parquet) e um `relatorio.json`.
+- `24_saidas_forecast.py`: gera as quatro saídas do contrato.
+  - Forecast Real com o LightGBM global com quantis (§2), nos níveis cliente e equipamento.
+  - Nível segmento: p50 = soma dos p50 dos clientes (bottom-up). A largura relativa do intervalo vem de um LightGBM direto nas séries de segmento.
+  - Potencial lido da 23, mais % Achieved, alertas e um holdout contra os baselines.
+  - Valida cada saída com `contrato.validar` e grava `data/forecast/{forecast_consumo,pct_achieved,alertas,backtest_metricas}.parquet` e um `relatorio.json` com contagens, cobertura e tempos.
+  - Variáveis de ambiente (padrão entre parênteses): `ALS_PASTA_DADOS`, `ALS_MOD_TREINO` (50), `ALS_AMOSTRA_MOD` (100), `ALS_N_JOBS` (4), `ALS_LOTE` (20000).
+
+**Módulos**
+- `src/serving/saidas.py` (novo): monta cada saída no contrato (`forecast_consumo`, `segmento_bottom_up`, `pct_achieved`, `alertas_queda`, `alertas_churn`, `backtest_metricas`) e tem `grade_mensal`, que completa os meses de forma vetorizada. Testes em `tests/test_saidas.py` (7).
+- `src/models/ml_global.py`: `treinar` e `prever` agora são funções separadas, para treinar numa amostra e prever toda a frota em lotes. `ml_global` dá o mesmo resultado de antes. Teste novo em `tests/test_ml_global.py`.
+- `src/models/potencial.py`: novos `benchmark(..., ref=)`, `benchmark_bootstrap` e `potencial_intervalo`.
+  - `potencial_p10/p90` = percentis 10 e 90 do potencial recalculado em 200 reamostras dos clientes do benchmark. Medem a incerteza de ter poucos similares no grupo.
+  - O valor central fica sempre dentro da faixa.
+- `src/backtest/comparacao.py::rotular_segmento`: agora tira o ponto final e trata `--` como `sem_segmento`. Antes, `Consumer products.` (1.661 linhas) contava como um segmento à parte de `Consumer products`, e `--` (1.076 linhas) virava um segmento próprio.
+
+**Testes:** `python -m pytest` deu **265 passed, 2 skipped** (28/10/2026).
+
+### Escolhas e limitações (dados locais da T14)
+
+- **Corte e horizonte.** O último mês fechado é 2026-09, então `data_corte` = 2026-10-01. O horizonte é de 6 meses (2026-10 a 2027-03).
+- **Séries previstas.** Só as ativas, isto é, com consumo nos 12 meses até o corte (`ids_ativos`).
+- **Frota e família.** A tabela-base não tem a família do equipamento nem a flag `ativo`.
+  - A frota é a dos equipamentos com coleta nos últimos 12 meses (regra da T05, sem a flag).
+  - Todos ficam na família `todas`, então "similar" vira, na prática, segmento × porte.
+  - Se existir `data/potencial/bruto/equipamento_familia.parquet` [equipamento_id, familia], a 23 usa a família.
+- **Churn (RN-06) com proxy de calendário.** A tabela-base não tem horímetro nem compartimento.
+  - Alerta por equipamento ativo com pelo menos 3 meses coletados.
+  - Intervalo esperado = mediana dos meses entre coletas × 730 h.
+  - Horas sem coleta = do 1º dia do último mês coletado até o corte, com fator 1,0 (padrão da RN-06).
+  - Não substitui a RN-06 por horímetro, que exige leitura no Fabric.
+- **Queda (RN-05).** Base `ano_anterior`, mês 2026-09, limiar acima de 20%. Mês com zero amostras é tratado como mês sem coleta e não gera alerta.
+- **Potencial mensal.** No `forecast_consumo` é o potencial anual vigente no corte ÷ 12, repetido também nas linhas de histórico. Não é reconstruído para o passado.
+
+### Resultados do potencial (`23_potencial.py`, executado em 39,6 s)
+
+| Medida | Valor |
+|---|---|
+| Clientes com frota ativa / equipamentos ativos | 1.996 / 166.600 |
+| Realizado 12m (out/25–set/26) | 907.016 amostras |
+| Potencial anual (p10 – central – p90) | 839.215 – 1.080.580 – 1.316.082 |
+| % Achieved (D6) por cliente: p25 / mediana / p75 / >100% | 0,486 / 0,578 / 1,000 / 22,6% |
+| Nível de similaridade usado | segmento×família×porte 1.909; segmento×família 74; global 13 |
+| Mediana do % Achieved por porte | 1–5: 0,500 (756 clientes); 6–20: 0,601 (454); 21–100: 0,666 (439); >100: 0,671 (347) |
+| Largura relativa (p90 − p10) ÷ potencial por cliente | mediana 0,34; p25 0,20; p75 0,65 |
+
+Os valores concentrados em 0,5 e 1,0 vêm de clientes pequenos com taxa inteira: 1 ou 2 amostras por equipamento por ano contra um benchmark de 2. O grupo `sem_segmento` tem 908 clientes (45% dos clientes com frota) e mediana exatamente 0,500.
+
+**Sensibilidade à definição de "similar"** (Spearman do potencial por cliente contra a variante padrão):
+
+| Variante | Potencial total | Mediana % Achieved | Spearman |
+|---|---|---|---|
+| segmento×família×porte q75 (padrão) | 1.080.580 | 0,578 | 1,000 |
+| segmento×família q75 (sem porte) | 772.382 | 0,592 | 0,988 |
+| família×porte q75 (sem segmento) | 1.033.550 | 0,500 | 0,984 |
+| segmento×família×porte q50 | 653.612 | 1,000 | 0,997 |
+| segmento×família×porte q90 | 1.577.120 | 0,323 | 0,995 |
+| segmento×família×porte, mín. 10 clientes | 1.062.608 | 0,574 | 0,999 |
+
+- A ordem dos clientes quase não muda entre as variantes (Spearman ≥ 0,98).
+- O nível absoluto do potencial e do % Achieved depende sobretudo do quantil (de 0,65 mi em q50 para 1,58 mi em q90) e do uso do porte (−29% sem ele).
+- A escolha cabe ao negócio (Bahia). Vai para o doc 13 §3 no fechamento de lote.
+
+### Geração das saídas de forecast (`24_saidas_forecast.py`): interrompida, `data/forecast/` vazio
+
+A primeira execução, em 28/10/2026, foi encerrada pelo Claude Code porque a máquina ficou sem memória (cerca de 0,9 GB livres de 16 GB, com outros jobs rodando em paralelo). Não houve erro do notebook. Etapas concluídas antes da parada:
+
+| Etapa | Tempo |
+|---|---|
+| Cliente: treino do LightGBM (clientes com consumo em 36 meses, desde 2019) e previsão dos ativos | 146,4 s |
+| Segmento: LightGBM direto (largura do intervalo) | 3,5 s |
+| Equipamento: montagem das séries (treino na amostra `% 50`, previsão dos 166.600 ativos) | 15,2 s |
+| Equipamento: treino e previsão em lotes | interrompido |
+
+**Ainda não há** contagens finais, cobertura do holdout nem resultado de `contrato.validar` em dados reais. Nos testes sintéticos (`tests/test_saidas.py`), as quatro saídas passam no G4.
+
+Para reexecutar, com a máquina livre (pelo menos 4 GB disponíveis; se faltar memória, use `ALS_LOTE=5000`):
+
+```text
+ALS_PASTA_DADOS=<repo>/data python notebooks/20_kpi1_consumo/24_saidas_forecast.py
+```
+
+O `relatorio.json` gerado traz:
+- `series`: quantas séries foram treinadas e previstas por nível;
+- `holdout.lgbm_todos`: WAPE, viés e cobertura por nível e horizonte;
+- `contagens`: linhas e entidades por saída;
+- `validacao`: resultado de G4/G5 por saída;
+- `tempos_s`: tempo de cada etapa.
+
+Esses números entram nesta seção quando a execução terminar.

@@ -22,7 +22,9 @@ def metricas(y: pd.Series, yhat: pd.Series, lo: pd.Series | None = None, hi: pd.
         "smape": float(np.mean(np.where(smape_den == 0, 0, 2 * np.abs(err) / smape_den.replace(0, 1)))),
     }
     if lo is not None and hi is not None:
-        out["cobertura"] = float(((y >= lo) & (y <= hi)).mean())
+        # só linhas com intervalo: modelo sem intervalo empilhado com outro que tem fica NaN (não 0)
+        com = lo.notna() & hi.notna()
+        out["cobertura"] = float(((y >= lo) & (y <= hi))[com].mean()) if com.any() else np.nan
     return out
 
 
