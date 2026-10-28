@@ -3,7 +3,11 @@
 Sem --aplicar só gera dist/ (nada sai da máquina). Com --aplicar:
   1. sobe o wheel (e, com --planilhas, as .xlsx) para Files/als_oilmodel/ do lakehouse padrão via OneLake;
   2. cria ou atualiza os notebooks `als_*` no workspace, com o lakehouse padrão anexado.
+Notebooks: os 3 legados de NOTEBOOKS (nome fixo) + todo `notebooks/**/als_*.py`, publicado com o nome do arquivo
+(convenção da T30). Linhas `# %%` separam células; `# %% [parameters]` vira a célula de parâmetros do Fabric.
+Workspace e lakehouse: argumento ou ALS_WORKSPACE / ALS_LAKEHOUSE (padrão LakehouseOel).
 Uso: python scripts/fabric_deploy.py [--aplicar --workspace "<nome>"] [--lakehouse LakehouseOel] [--planilhas]
+     [--notebooks als_50_pre_consultas ...]
 """
 from __future__ import annotations
 
@@ -11,6 +15,8 @@ import argparse
 import ast
 import base64
 import json
+import os
+import re
 import subprocess
 import sys
 import time
@@ -21,7 +27,7 @@ from fabric_guard import violacoes  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
 DIST = RAIZ / "dist"
-NOTEBOOKS = {
+NOTEBOOKS = {  # legados, nome fixo; notebooks novos entram por convenção (descobrir_notebooks)
     "als_00_perfil_qualidade": RAIZ / "notebooks/00_validacao/01_perfil_qualidade.py",
     "als_01_engenharia_reversa_planilhas": RAIZ / "notebooks/00_validacao/02_engenharia_reversa_planilhas.py",
     "als_40_backtest_baselines": RAIZ / "notebooks/40_backtest/01_backtest_baselines.py",
@@ -32,8 +38,10 @@ PLANILHAS = [
     "Customer Status Novo_Geral_Novas Carteiras 2026.xlsx",
 ]
 PASTA_FILES = "als_oilmodel"
+LAKEHOUSE = "LakehouseOel"
 API = "https://api.fabric.microsoft.com/v1"
 ONELAKE = "https://onelake.dfs.fabric.microsoft.com"
+_CELULA = re.compile(r"^# %%(?:[ \t]*\[(?P<tag>[\w-]+)\])?[ \t]*$", re.M)
 
 
 def construir_wheel() -> Path:
@@ -44,11 +52,41 @@ def construir_wheel() -> Path:
     return next(DIST.glob("als_oilmodel-*.whl"))
 
 
-def _celula(tipo: str, fonte: str) -> dict:
-    c = {"cell_type": tipo, "metadata": {}, "source": fonte.splitlines(keepends=True)}
+def descobrir_notebooks(raiz: Path = RAIZ, legados: dict[str, Path] | None = None) -> dict[str, Path]:
+    """Legados (NOTEBOOKS) + `notebooks/**/als_*.py` com o nome do arquivo. Nome repetido é erro."""
+    achados = dict(NOTEBOOKS if legados is None else legados)
+    for py in sorted((raiz / "notebooks").rglob("als_*.py")):
+        if py.stem in achados and achados[py.stem].resolve() != py.resolve():
+            raise SystemExit(f"notebook `{py.stem}` duplicado: {achados[py.stem]} e {py}")
+        achados[py.stem] = py
+    return achados
+
+
+def selecionar(notebooks: dict[str, Path], nomes: list[str] | None) -> dict[str, Path]:
+    if not nomes:
+        return notebooks
+    falta = [n for n in nomes if n not in notebooks]
+    if falta:
+        raise SystemExit(f"notebook não registrado: {', '.join(falta)} (registrados: {', '.join(notebooks)})")
+    return {n: notebooks[n] for n in nomes}
+
+
+def _celula(tipo: str, fonte: str, tags: list[str] | None = None) -> dict:
+    c = {"cell_type": tipo, "metadata": {"tags": tags} if tags else {}, "source": fonte.splitlines(keepends=True)}
     if tipo == "code":
         c.update(outputs=[], execution_count=None)
     return c
+
+
+def celulas_codigo(fonte: str) -> list[dict]:
+    """Sem `# %%`, uma célula só (comportamento original). Com marcadores, uma célula por trecho."""
+    marcas = list(_CELULA.finditer(fonte))
+    if not marcas:
+        return [_celula("code", fonte)]
+    trechos = [(None, fonte[:marcas[0].start()])]
+    trechos += [(m.group("tag"), fonte[m.end():(marcas[i + 1].start() if i + 1 < len(marcas) else len(fonte))])
+                for i, m in enumerate(marcas)]
+    return [_celula("code", t.strip("\n") + "\n", [tag] if tag else None) for tag, t in trechos if t.strip()]
 
 
 def para_ipynb(py: Path, wheel: str, lakehouse: dict | None) -> dict:
@@ -63,7 +101,23 @@ def para_ipynb(py: Path, wheel: str, lakehouse: dict | None) -> dict:
             "default_lakehouse": lakehouse["id"], "default_lakehouse_name": lakehouse["displayName"],
             "default_lakehouse_workspace_id": lakehouse["workspaceId"]}}
     return {"nbformat": 4, "nbformat_minor": 5, "metadata": meta,
-            "cells": [_celula("markdown", f"# {py.stem}\n\n{doc}"), _celula("code", instalar), _celula("code", fonte)]}
+            "cells": [_celula("markdown", f"# {py.stem}\n\n{doc}"), _celula("code", instalar), *celulas_codigo(fonte)]}
+
+
+def gerar(notebooks: dict[str, Path], wheel: str, lakehouse: dict | None, saida: Path) -> dict[str, str]:
+    """Converte cada notebook para .ipynb em `saida` (recusa nome sem `als_` e o que a barreira bloquear)."""
+    saida.mkdir(parents=True, exist_ok=True)
+    defs = {}
+    for nome, py in notebooks.items():
+        if not nome.startswith("als_"):
+            sys.exit(f"{nome}: só notebooks `als_*` deste projeto podem ser publicados")
+        achados = violacoes(py.read_text(encoding="utf-8"))
+        if achados:
+            sys.exit(f"{py.name} bloqueado pela barreira do Fabric ({', '.join(achados)}); ver scripts/fabric_guard.py")
+        nb = para_ipynb(py, wheel, lakehouse)
+        (saida / f"{nome}.ipynb").write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
+        defs[nome] = base64.b64encode(json.dumps(nb, ensure_ascii=False).encode("utf-8")).decode()
+    return defs
 
 
 class Cliente:
@@ -96,20 +150,22 @@ class Cliente:
         self.http.patch(url, params={"action": "flush", "position": len(dados)}, headers=h).raise_for_status()
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--aplicar", action="store_true")
-    ap.add_argument("--workspace")
-    ap.add_argument("--lakehouse", default="LakehouseOel")
+    ap.add_argument("--workspace", default=os.environ.get("ALS_WORKSPACE"))
+    ap.add_argument("--lakehouse", default=os.environ.get("ALS_LAKEHOUSE", LAKEHOUSE))
     ap.add_argument("--planilhas", action="store_true")
-    a = ap.parse_args()
+    ap.add_argument("--notebooks", nargs="+", help="só estes `als_*` (padrão: todos os registrados)")
+    a = ap.parse_args(argv)
 
+    notebooks = selecionar(descobrir_notebooks(), a.notebooks)
     wheel = construir_wheel()
     print(f"wheel: {wheel.name}")
     cli = lakehouse = ws_id = None
     if a.aplicar:
         if not a.workspace:
-            sys.exit("--workspace é obrigatório com --aplicar")
+            sys.exit("--workspace (ou ALS_WORKSPACE) é obrigatório com --aplicar")
         cli = Cliente()
         ws = [w for w in cli.api("GET", "/workspaces")["value"] if w["displayName"] == a.workspace]
         if not ws:
@@ -122,15 +178,7 @@ def main() -> None:
         lakehouse = {**lhs[0], "workspaceId": ws_id}
 
     saida = DIST / "fabric"
-    saida.mkdir(parents=True, exist_ok=True)
-    defs = {}
-    for nome, py in NOTEBOOKS.items():
-        achados = violacoes(py.read_text(encoding="utf-8"))
-        if achados:
-            sys.exit(f"{py.name} bloqueado pela barreira do Fabric ({', '.join(achados)}); ver scripts/fabric_guard.py")
-        nb = para_ipynb(py, wheel.name, lakehouse)
-        (saida / f"{nome}.ipynb").write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
-        defs[nome] = base64.b64encode(json.dumps(nb, ensure_ascii=False).encode("utf-8")).decode()
+    defs = gerar(notebooks, wheel.name, lakehouse, saida)
     print(f"notebooks gerados em {saida}: {', '.join(defs)}")
     if not a.aplicar:
         print("modo simulação: nada foi publicado. Use --aplicar --workspace \"<nome>\" para publicar.")

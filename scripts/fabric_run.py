@@ -4,11 +4,16 @@ Passos: localiza workspace, lakehouse e notebook; lê a definição publicada e 
 (scripts/fabric_guard.py) bloquear; dispara o job RunNotebook e acompanha pelo header Location até concluir;
 baixa de Files/als_oilmodel/<pasta>/ no OneLake para data/<pasta>/ (só leitura no Fabric).
 Autenticação: login interativo em cache (padrão) ou ALS_AUTH=device (device code, login pelo navegador do celular).
+Notebooks: qualquer `als_*` registrado em fabric_deploy.descobrir_notebooks. Pasta de saída: SAIDAS (legados) ou a
+constante `PASTA_FABRIC` do .py (padrão `saida`). `--param chave=valor` vai para a célula de parâmetros do notebook.
+Workspace/lakehouse: argumento ou ALS_WORKSPACE / ALS_LAKEHOUSE (o lakehouse é o do Files de onde se baixa).
 Uso: python scripts/fabric_run.py als_00_perfil_qualidade [--workspace "<nome>"] [--pasta perfil] [--publicar]
+     python scripts/fabric_run.py als_50_pre_consultas [--param lakehouse=LakehouseOel --param horizonte=6]
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import base64
 import json
 import os
@@ -18,14 +23,15 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fabric_deploy import API, ONELAKE, PASTA_FILES, RAIZ, Cliente  # noqa: E402
+from fabric_deploy import API, LAKEHOUSE, ONELAKE, PASTA_FILES, RAIZ, Cliente, descobrir_notebooks  # noqa: E402
 from fabric_guard import violacoes  # noqa: E402
 
 WORKSPACE = os.environ.get("ALS_WORKSPACE", "O&L Global - Prod - DA")
-SAIDAS = {  # notebook -> subpasta de Files/als_oilmodel/ que ele grava
+SAIDAS = {  # legados: notebook -> subpasta de Files/als_oilmodel/ que ele grava
     "als_00_perfil_qualidade": "perfil",
     "als_01_engenharia_reversa_planilhas": "planilhas",
 }
+PASTA_PADRAO = "saida"  # notebooks descobertos por convenção sem PASTA_FABRIC
 FINAIS = {"Completed", "Failed", "Cancelled", "Deduped"}
 ESCOPO_API = "https://api.fabric.microsoft.com/.default"
 ESCOPO_STORAGE = "https://storage.azure.com/.default"
@@ -55,6 +61,31 @@ def credencial():
 def validar_nome(nome: str) -> None:
     if not nome.startswith("als_"):
         raise Recusado(f"{nome}: só notebooks `als_*` deste projeto podem ser executados")
+
+
+def pasta_saida(nome: str, notebooks: dict[str, Path] | None = None) -> str | None:
+    """Subpasta de Files/als_oilmodel/ que o notebook grava: SAIDAS, senão `PASTA_FABRIC = "..."` no .py
+    (padrão `saida`) para os descobertos por convenção; None para legado sem saída."""
+    if nome in SAIDAS:
+        return SAIDAS[nome]
+    py = (descobrir_notebooks() if notebooks is None else notebooks).get(nome)
+    if py is None or not py.name.startswith("als_"):
+        return None
+    for no in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
+        if (isinstance(no, ast.Assign) and any(getattr(t, "id", None) == "PASTA_FABRIC" for t in no.targets)
+                and isinstance(no.value, ast.Constant) and isinstance(no.value.value, str)):
+            return no.value.value
+    return PASTA_PADRAO
+
+
+def ler_parametros(pares: list[str] | None) -> dict[str, str]:
+    out = {}
+    for par in pares or []:
+        chave, sep, valor = par.partition("=")
+        if not sep or not chave.strip().isidentifier():
+            raise SystemExit(f"--param inválido: {par!r} (use chave=valor)")
+        out[chave.strip()] = valor
+    return out
 
 
 class Executor(Cliente):
@@ -108,9 +139,13 @@ class Executor(Cliente):
         if achados:
             raise Recusado(f"{nome} bloqueado pela barreira do Fabric ({', '.join(achados)}); ver scripts/fabric_guard.py")
 
-    def executar(self, ws_id: str, nb_id: str, timeout: int = 3600) -> dict:
+    def executar(self, ws_id: str, nb_id: str, timeout: int = 3600, parametros: dict[str, str] | None = None) -> dict:
+        kw = {}
+        if parametros:  # sobrepõe a célula de parâmetros do notebook
+            kw["json"] = {"executionData": {"parameters": {
+                k: {"value": v, "type": "string"} for k, v in parametros.items()}}}
         r = self.http.post(f"{API}/workspaces/{ws_id}/items/{nb_id}/jobs/instances",
-                           params={"jobType": "RunNotebook"}, headers=self._h(ESCOPO_API))
+                           params={"jobType": "RunNotebook"}, headers=self._h(ESCOPO_API), **kw)
         r.raise_for_status()
         local, espera = r.headers["Location"], int(r.headers.get("Retry-After", 30))
         inicio, ultimo = time.monotonic(), None
@@ -154,22 +189,24 @@ class Executor(Cliente):
             params = {**params, "continuation": cont}
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("notebook")
     ap.add_argument("--workspace", default=WORKSPACE)
-    ap.add_argument("--lakehouse", default="LakehouseOel")
+    ap.add_argument("--lakehouse", default=os.environ.get("ALS_LAKEHOUSE", LAKEHOUSE))
     ap.add_argument("--pasta", help="subpasta de Files/als_oilmodel/ a baixar (padrão: a do notebook)")
     ap.add_argument("--destino", default=str(RAIZ / "data"))
     ap.add_argument("--timeout", type=int, default=3600)
     ap.add_argument("--sem-download", action="store_true")
     ap.add_argument("--publicar", action="store_true", help="roda fabric_deploy.py --aplicar antes de executar")
-    a = ap.parse_args()
+    ap.add_argument("--param", action="append", metavar="CHAVE=VALOR", help="parâmetro do notebook (repetível)")
+    a = ap.parse_args(argv)
 
     try:
         validar_nome(a.notebook)
     except Recusado as e:
         sys.exit(str(e))
+    parametros = ler_parametros(a.param)
     if a.publicar:
         subprocess.run([sys.executable, str(RAIZ / "scripts/fabric_deploy.py"), "--aplicar",
                         "--workspace", a.workspace, "--lakehouse", a.lakehouse], check=True)
@@ -179,10 +216,10 @@ def main() -> None:
         ex.checar(a.notebook, ids["ws"], ids["nb"])
     except Recusado as e:
         sys.exit(str(e))
-    job = ex.executar(ids["ws"], ids["nb"], a.timeout)
+    job = ex.executar(ids["ws"], ids["nb"], a.timeout, parametros)
     print(json.dumps({k: job.get(k) for k in ("status", "segundos", "startTimeUtc", "endTimeUtc", "failureReason",
                                                "location")}, indent=2, ensure_ascii=False))
-    pasta = a.pasta if a.pasta is not None else SAIDAS.get(a.notebook)
+    pasta = a.pasta if a.pasta is not None else pasta_saida(a.notebook)
     if job["status"] == "Completed" and not a.sem_download and pasta is not None:
         arquivos = ex.baixar(ids["ws"], ids["lh"], pasta, Path(a.destino))
         print(f"{len(arquivos)} arquivo(s) baixado(s) para {Path(a.destino) / pasta}")
