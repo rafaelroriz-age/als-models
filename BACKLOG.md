@@ -427,7 +427,7 @@ Tarefa T26 do BACKLOG.md. Leia AGENTS.md, docs_fabric/15_pauta_decisoes_time.md 
 ```
 
 ### T27 · Guard para o fluxo de tabelas temporárias e pré-consultas
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** —
 - **Ambiente:** offline
