@@ -455,7 +455,7 @@ Tarefa T28 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 (§1, tabelas fct_*), s
 ```
 
 ### T29 · Gerar as saídas reais de forecast, potencial e alertas
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @cientista-dados
 - **Depende:** T28
 - **Ambiente:** offline
@@ -469,7 +469,7 @@ Tarefa T29 do BACKLOG.md. Leia AGENTS.md, docs_fabric/16, o contrato da T28 (src
 ```
 
 ### T30 · Notebooks de desenvolvimento com lakehouse parametrizado
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** T27, T28
 - **Ambiente:** offline
@@ -525,7 +525,7 @@ Tarefa T33 do BACKLOG.md. Leia AGENTS.md, a Fase 5 de docs_fabric/06 (item abert
 ```
 
 ### T34 · Definição do modelo semântico
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-ia
 - **Depende:** T28
 - **Ambiente:** offline
