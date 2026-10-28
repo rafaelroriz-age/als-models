@@ -1,0 +1,97 @@
+/// host público do OneLake (DFS)
+expression OneLake = "https://onelake.dfs.fabric.microsoft.com" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+
+/// workspace do lakehouse; preencher no serviço, nunca no git
+expression Workspace = "<nome-ou-id-do-workspace>" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+
+/// lakehouse existente onde fica Files/als_oilmodel/ (D13)
+expression Lakehouse = "<NomeDoLakehouse.Lakehouse-ou-id>" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+
+/// pasta das saídas do contrato T28
+expression PastaSaida = "Files/als_oilmodel/saida" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+
+/// lê um parquet de PastaSaida (arquivo único ou pasta de partes)
+expression LerSaida =
+		(arquivo as text) as table =>
+		let
+		    pasta = OneLake & "/" & Workspace & "/" & Lakehouse & "/" & PastaSaida,
+		    itens = AzureStorage.DataLake(pasta, [HierarchicalNavigation = false]),
+		    // arquivo único (pandas) ou pasta de partes (Spark): aceita os dois
+		    partes = Table.SelectRows(itens, each [Extension] = ".parquet" and
+		        ([Name] = arquivo or Text.Contains([Folder Path], "/" & arquivo & "/"))),
+		    tabela = Table.Combine(List.Transform(partes[Content], Parquet.Document))
+		in
+		    tabela
+
+	annotation PBI_ResultType = Function
+
+/// Files/als_oilmodel/saida/forecast_consumo.parquet tipado pelo contrato + chaves derivadas
+expression base_forecast_consumo =
+		let
+		    origem = LerSaida("forecast_consumo.parquet"),
+		    colunas = Table.SelectColumns(origem, {"nivel", "entidade_id", "entidade_nome", "cliente_id", "segmento", "granularidade", "periodo", "realizado", "prev_p10", "prev_p50", "prev_p90", "potencial", "potencial_p10", "potencial_p90", "data_corte", "versao_modelo"}),
+		    tipos = Table.TransformColumnTypes(colunas, {{"nivel", type text}, {"entidade_id", type text}, {"entidade_nome", type text}, {"cliente_id", type text}, {"segmento", type text}, {"granularidade", type text}, {"periodo", type date}, {"realizado", type number}, {"prev_p10", type number}, {"prev_p50", type number}, {"prev_p90", type number}, {"potencial", type number}, {"potencial_p10", type number}, {"potencial_p90", type number}, {"data_corte", type date}, {"versao_modelo", type text}}),
+		    entidade_chave = Table.AddColumn(tipos, "entidade_chave", each [nivel] & "|" & [entidade_id], type text),
+		    cliente_chave = Table.AddColumn(entidade_chave, "cliente_chave", each if [nivel] = "cliente" then [entidade_id] else [cliente_id], type text)
+		in
+		    cliente_chave
+
+	annotation PBI_ResultType = Table
+
+/// Files/als_oilmodel/saida/pct_achieved.parquet tipado pelo contrato + chaves derivadas
+expression base_pct_achieved =
+		let
+		    origem = LerSaida("pct_achieved.parquet"),
+		    colunas = Table.SelectColumns(origem, {"nivel", "entidade_id", "entidade_nome", "segmento", "porte", "n_equip", "data_corte", "realizado_12m", "potencial_12m", "pct_achieved"}),
+		    tipos = Table.TransformColumnTypes(colunas, {{"nivel", type text}, {"entidade_id", type text}, {"entidade_nome", type text}, {"segmento", type text}, {"porte", type text}, {"n_equip", Int64.Type}, {"data_corte", type date}, {"realizado_12m", type number}, {"potencial_12m", type number}, {"pct_achieved", type number}}),
+		    entidade_chave = Table.AddColumn(tipos, "entidade_chave", each [nivel] & "|" & [entidade_id], type text),
+		    cliente_chave = Table.AddColumn(entidade_chave, "cliente_chave", each if [nivel] = "cliente" then [entidade_id] else null, type text)
+		in
+		    cliente_chave
+
+	annotation PBI_ResultType = Table
+
+/// Files/als_oilmodel/saida/alertas.parquet tipado pelo contrato + chaves derivadas
+expression base_alertas =
+		let
+		    origem = LerSaida("alertas.parquet"),
+		    colunas = Table.SelectColumns(origem, {"tipo", "nivel", "entidade_id", "entidade_nome", "cliente_id", "segmento", "periodo", "valor_atual", "valor_base", "variacao_pct", "detalhe"}),
+		    tipos = Table.TransformColumnTypes(colunas, {{"tipo", type text}, {"nivel", type text}, {"entidade_id", type text}, {"entidade_nome", type text}, {"cliente_id", type text}, {"segmento", type text}, {"periodo", type date}, {"valor_atual", type number}, {"valor_base", type number}, {"variacao_pct", type number}, {"detalhe", type text}}),
+		    entidade_chave = Table.AddColumn(tipos, "entidade_chave", each [nivel] & "|" & [entidade_id], type text),
+		    cliente_chave = Table.AddColumn(entidade_chave, "cliente_chave", each if [nivel] = "cliente" then [entidade_id] else [cliente_id], type text)
+		in
+		    cliente_chave
+
+	annotation PBI_ResultType = Table
+
+/// Files/als_oilmodel/saida/forecast_vendas.parquet tipado pelo contrato + chaves derivadas
+expression base_forecast_vendas =
+		let
+		    origem = LerSaida("forecast_vendas.parquet"),
+		    colunas = Table.SelectColumns(origem, {"nivel", "entidade_id", "data_corte", "periodo", "h", "recorrente_base", "nao_recorrente", "novos", "reativados", "churn", "var_mercado", "faturamento_p10", "faturamento_p50", "faturamento_p90", "ebit_p10", "ebit_p50", "ebit_p90", "versao_modelo"}),
+		    tipos = Table.TransformColumnTypes(colunas, {{"nivel", type text}, {"entidade_id", type text}, {"data_corte", type date}, {"periodo", type date}, {"h", Int64.Type}, {"recorrente_base", type number}, {"nao_recorrente", type number}, {"novos", type number}, {"reativados", type number}, {"churn", type number}, {"var_mercado", type number}, {"faturamento_p10", type number}, {"faturamento_p50", type number}, {"faturamento_p90", type number}, {"ebit_p10", type number}, {"ebit_p50", type number}, {"ebit_p90", type number}, {"versao_modelo", type text}}),
+		    cliente_chave = Table.AddColumn(tipos, "cliente_chave", each if [nivel] = "cliente" then [entidade_id] else null, type text),
+		    segmento_chave = Table.AddColumn(cliente_chave, "segmento_chave", each if [nivel] = "segmento" then [entidade_id] else null, type text)
+		in
+		    segmento_chave
+
+	annotation PBI_ResultType = Table
+
+/// Files/als_oilmodel/saida/backtest_metricas.parquet tipado pelo contrato + chaves derivadas
+expression base_backtest_metricas =
+		let
+		    origem = LerSaida("backtest_metricas.parquet"),
+		    colunas = Table.SelectColumns(origem, {"kpi", "modelo", "nivel", "segmento", "horizonte", "data_corte", "versao_modelo", "n", "wape", "mae", "bias_pct", "smape", "cobertura"}),
+		    tipos = Table.TransformColumnTypes(colunas, {{"kpi", type text}, {"modelo", type text}, {"nivel", type text}, {"segmento", type text}, {"horizonte", Int64.Type}, {"data_corte", type date}, {"versao_modelo", type text}, {"n", Int64.Type}, {"wape", type number}, {"mae", type number}, {"bias_pct", type number}, {"smape", type number}, {"cobertura", type number}})
+		in
+		    tipos
+
+	annotation PBI_ResultType = Table

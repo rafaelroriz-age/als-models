@@ -1,0 +1,161 @@
+/// entidade × mês (ou semana) × data de corte; histórico + horizonte · contrato T28 (v_als_forecast_consumo → Files/als_oilmodel/saida/forecast_consumo.parquet)
+table forecast_consumo
+
+	/// segmento | cliente | equipamento
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	/// id no nível (raiz do CNPJ no cliente; id do equipamento)
+	column entidade_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_id
+
+		annotation SummarizationSetBy = User
+
+	/// rótulo exibido
+	column entidade_nome
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_nome
+
+		annotation SummarizationSetBy = User
+
+	/// cliente dono (vazio no nível segmento)
+	column cliente_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = User
+
+	/// segmento do cliente
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	column granularidade
+		dataType: string
+		summarizeBy: none
+		sourceColumn: granularidade
+
+		annotation SummarizationSetBy = User
+
+	/// 1º dia do mês ou segunda-feira da semana
+	column periodo
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: periodo
+
+		annotation SummarizationSetBy = User
+
+	/// amostras coletadas (vazio em período futuro)
+	column realizado
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: realizado
+
+		annotation SummarizationSetBy = User
+
+	/// forecast Real, percentil 10 (vazio em período passado)
+	column prev_p10
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: prev_p10
+
+		annotation SummarizationSetBy = User
+
+	/// forecast Real, mediana
+	column prev_p50
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: prev_p50
+
+		annotation SummarizationSetBy = User
+
+	/// forecast Real, percentil 90
+	column prev_p90
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: prev_p90
+
+		annotation SummarizationSetBy = User
+
+	/// potencial do período, valor central (benchmark T16)
+	column potencial
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: potencial
+
+		annotation SummarizationSetBy = User
+
+	/// potencial, percentil 10 (incerteza do benchmark)
+	column potencial_p10
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: potencial_p10
+
+		annotation SummarizationSetBy = User
+
+	/// potencial, percentil 90
+	column potencial_p90
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: potencial_p90
+
+		annotation SummarizationSetBy = User
+
+	/// data de corte do forecast
+	column data_corte
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: data_corte
+
+		annotation SummarizationSetBy = User
+
+	/// modelo + hash dos dados (snapshot.versao_dados)
+	column versao_modelo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: versao_modelo
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: nivel|entidade_id, liga a dim_entidade
+	column entidade_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: entidade_chave
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: o próprio id no nível cliente, senão cliente_id
+	column cliente_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cliente_chave
+
+		annotation SummarizationSetBy = User
+
+	partition forecast_consumo = m
+		mode: import
+		source =
+				base_forecast_consumo

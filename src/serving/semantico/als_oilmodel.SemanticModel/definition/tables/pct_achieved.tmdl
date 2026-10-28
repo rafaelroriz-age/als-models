@@ -1,0 +1,104 @@
+/// entidade × data de corte (janela de 12 meses) · contrato T28 (v_als_pct_achieved → Files/als_oilmodel/saida/pct_achieved.parquet)
+table pct_achieved
+
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	column entidade_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_id
+
+		annotation SummarizationSetBy = User
+
+	column entidade_nome
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_nome
+
+		annotation SummarizationSetBy = User
+
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	/// faixa de porte por nº de equipamentos (potencial.porte)
+	column porte
+		dataType: string
+		summarizeBy: none
+		sourceColumn: porte
+
+		annotation SummarizationSetBy = User
+
+	column n_equip
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: n_equip
+
+		annotation SummarizationSetBy = User
+
+	column data_corte
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: data_corte
+
+		annotation SummarizationSetBy = User
+
+	/// amostras dos 12 meses até o corte
+	column realizado_12m
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: realizado_12m
+
+		annotation SummarizationSetBy = User
+
+	/// potencial anual (benchmark); nulo/zero → % vazio
+	column potencial_12m
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: potencial_12m
+
+		annotation SummarizationSetBy = User
+
+	/// D6: realizado_12m ÷ potencial_12m (fração, pode passar de 1)
+	column pct_achieved
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: pct_achieved
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: nivel|entidade_id, liga a dim_entidade
+	column entidade_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: entidade_chave
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: entidade_id no nível cliente, senão vazio
+	column cliente_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cliente_chave
+
+		annotation SummarizationSetBy = User
+
+	partition pct_achieved = m
+		mode: import
+		source =
+				base_pct_achieved

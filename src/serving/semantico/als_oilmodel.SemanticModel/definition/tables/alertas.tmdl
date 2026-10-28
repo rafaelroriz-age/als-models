@@ -1,0 +1,112 @@
+/// um alerta aberto por entidade × período (× compartimento no churn) · contrato T28 (v_als_alertas → Files/als_oilmodel/saida/alertas.parquet)
+table alertas
+
+	column tipo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tipo
+
+		annotation SummarizationSetBy = User
+
+	/// cliente (queda) | equipamento (churn)
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	column entidade_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_id
+
+		annotation SummarizationSetBy = User
+
+	column entidade_nome
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_nome
+
+		annotation SummarizationSetBy = User
+
+	column cliente_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = User
+
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	/// mês do alerta (queda) ou mês de corte (churn)
+	column periodo
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: periodo
+
+		annotation SummarizationSetBy = User
+
+	/// queda: amostras do mês; churn: horas sem coleta
+	column valor_atual
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: valor_atual
+
+		annotation SummarizationSetBy = User
+
+	/// queda: base de comparação; churn: intervalo esperado (h)
+	column valor_base
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: valor_base
+
+		annotation SummarizationSetBy = User
+
+	/// queda: 1 − atual ÷ base (fração, > 0,20); churn: vazio
+	column variacao_pct
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: variacao_pct
+
+		annotation SummarizationSetBy = User
+
+	/// texto curto (base usada, compartimento)
+	column detalhe
+		dataType: string
+		summarizeBy: none
+		sourceColumn: detalhe
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: nivel|entidade_id, liga a dim_entidade
+	column entidade_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: entidade_chave
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: o próprio id no nível cliente, senão cliente_id
+	column cliente_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cliente_chave
+
+		annotation SummarizationSetBy = User
+
+	partition alertas = m
+		mode: import
+		source =
+				base_alertas

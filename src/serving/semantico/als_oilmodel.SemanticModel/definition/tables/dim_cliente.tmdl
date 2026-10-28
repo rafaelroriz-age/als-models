@@ -1,0 +1,45 @@
+/// clientes com nome (linhas de nível cliente) e donos citados nas demais linhas
+table dim_cliente
+
+	/// raiz do CNPJ
+	column cliente_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = User
+
+	column cliente_nome
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cliente_nome
+
+		annotation SummarizationSetBy = User
+
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	partition dim_cliente = m
+		mode: import
+		source =
+				let
+				    nomeados = Table.Combine({
+				        Table.SelectColumns(Table.SelectRows(base_forecast_consumo, each [nivel] = "cliente"), {"entidade_id", "entidade_nome", "segmento"}),
+				        Table.SelectColumns(Table.SelectRows(base_pct_achieved, each [nivel] = "cliente"), {"entidade_id", "entidade_nome", "segmento"})}),
+				    renomeados = Table.RenameColumns(nomeados, {{"entidade_id", "cliente_id"}, {"entidade_nome", "cliente_nome"}}),
+				    donos = Table.Combine({
+				        Table.SelectColumns(base_forecast_consumo, {"cliente_chave", "segmento"}),
+				        Table.SelectColumns(base_alertas, {"cliente_chave", "segmento"}),
+				        Table.SelectColumns(base_forecast_vendas, {"cliente_chave"})}),
+				    sem_nome = Table.AddColumn(Table.RenameColumns(donos, {{"cliente_chave", "cliente_id"}}), "cliente_nome", each [cliente_id], type text),
+				    todas = Table.Buffer(Table.Combine({renomeados, sem_nome})),
+				    validas = Table.SelectRows(todas, each [cliente_id] <> null and [cliente_id] <> ""),
+				    unicas = Table.Distinct(validas, {"cliente_id"}),
+				    tipos = Table.TransformColumnTypes(unicas, {{"cliente_id", type text}, {"cliente_nome", type text}, {"segmento", type text}})
+				in
+				    tipos
