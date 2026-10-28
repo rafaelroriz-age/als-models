@@ -72,3 +72,27 @@ Autenticação: o padrão é o `InteractiveBrowserCredential` em cache de `src/p
 - Login em cache sem interação: credencial pronta em 3,1 s; workspace e `LakehouseOeL` resolvidos, localização completa em ~10 s.
 - **O notebook de perfil não está publicado:** o workspace tem 10 notebooks e nenhum `als_*`, e `Files/als_oilmodel/` não existe no lakehouse (o OneLake devolve 404). O executor respondeu `notebook não publicado: als_00_perfil_qualidade` e o download tratou a pasta ausente sem erro (17 s no total, só leitura). `python scripts/fabric_run.py perfil` foi recusado sem autenticar.
 - Execução do job e tempo do perfil: **pendentes**. Publicar (`python scripts/fabric_deploy.py --aplicar --workspace "O&L Global - Prod - DA"`) cria os 3 notebooks `als_*` e grava o wheel em `Files/als_oilmodel/wheels/` do workspace de produção. Pelo AGENTS.md isso exige confirmação explícita, então não foi feito nesta tarefa. Depois de publicar, rodar `python scripts/fabric_run.py als_00_perfil_qualidade` e registrar aqui o status e o tempo (caminho da T02).
+
+## 5. Barreira de escrita: `scripts/fabric_guard.py` (T27)
+
+O guard inspeciona o texto de comandos e arquivos (hook `.claude/hooks/fabric_guard_hook.py`, `fabric_deploy.py` e `fabric_run.py`). Comportamento desde a T27 (testes novos em `tests/test_fabric_guard.py`, 58 casos no arquivo):
+
+| Texto | Resultado |
+|---|---|
+| `CREATE [OR REPLACE] [GLOBAL] TEMP[ORARY] VIEW`, `createOrReplaceTempView`, `createTempView`, `createOrReplaceGlobalTempView` | **livre** (a view some com a sessão) |
+| `CREATE [OR REPLACE] [EXTERNAL] TABLE/VIEW` permanentes | bloqueado |
+| DDL de schema/database (create, drop, alter) e `CREATE OR REPLACE` de outros objetos (ex.: função) | bloqueado |
+| `INSERT INTO`, `UPDATE … SET`, `DELETE FROM`, `DROP/ALTER TABLE/VIEW`, `TRUNCATE`, `MERGE INTO`, `saveAsTable`, `insertInto` | bloqueado |
+| Operação Delta de escrita e gravação em `/Tables/` | bloqueado, mesmo para `als_dev_*` |
+
+**Liberações (variáveis de ambiente da sessão, definidas por uma pessoa; valem só com o valor `1`):**
+
+- `ALS_FABRIC_ESCRITA=1`: libera tudo, como antes.
+- `ALS_FABRIC_DEV=1`: libera criar, gravar e apagar **apenas** tabelas/views cujo nome (último trecho de `schema.nome`, sem aspas, sem diferenciar maiúsculas) começa com `als_dev_`, nos padrões que têm nome: `CREATE TABLE/VIEW`, `INSERT INTO`, `UPDATE`, `DELETE FROM`, `DROP/ALTER/TRUNCATE`, `MERGE INTO`, `saveAsTable`, `insertInto`. Num texto com várias instruções, uma só fora do prefixo mantém o bloqueio. É independente de `ALS_FABRIC_ESCRITA`: uma não ativa a outra.
+
+**Limites (o guard só lê texto):**
+
+- Nome montado em tempo de execução (variável) não é verificável e continua bloqueado; `f'als_dev_{x}'` passa porque o prefixo é literal.
+- Não vê escrita por outro caminho (API REST direta, outra linguagem, SQL montado em string e executado depois); a revisão humana antes de publicar notebook continua necessária.
+- `ALS_FABRIC_DEV` não impede o uso de um nome `als_dev_x` que já exista com dado de outra pessoa: usar o prefixo só em tabelas criadas por nós e limpar ao fim.
+- Gravação em `Files/als_oilmodel/` segue livre; `/Tables/` segue bloqueado, também para `als_dev_`.

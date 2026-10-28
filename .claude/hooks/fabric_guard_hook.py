@@ -31,8 +31,9 @@ achados = violacoes(texto)
 if achados:
     print(
         "Bloqueado pela barreira do Fabric (" + ", ".join(achados) + "): este projeto só lê dados existentes "
-        "e grava em Files/als_oilmodel/. Para uma escrita legítima, peça ao usuário que defina "
-        "ALS_FABRIC_ESCRITA=1 na sessão.",
+        "e grava em Files/als_oilmodel/ (views temporárias são livres). Para uma tabela temporária de "
+        "desenvolvimento, use o prefixo als_dev_ e peça ao usuário ALS_FABRIC_DEV=1; para outra escrita "
+        "legítima, ALS_FABRIC_ESCRITA=1 na sessão.",
         file=sys.stderr,
     )
     sys.exit(2)
