@@ -2,16 +2,15 @@
 
 > Gerado por `python scripts/run_backlog.py status` a partir do [BACKLOG.md](BACKLOG.md). Não edite à mão.
 
-Atualizado em 28/10/2026 10:55 · **25/36 concluídas** · 0 em andamento · 10 a fazer · 1 bloqueadas
+Atualizado em 28/10/2026 14:15 · **31/36 concluídas** · 1 em andamento · 3 a fazer · 1 bloqueadas
 
 ## Próximo lote (pode rodar em paralelo)
 
-- **T27** [offline, media → sonnet] Guard para o fluxo de tabelas temporárias e pré-consultas
-- **T28** [offline, media → sonnet] Contrato das saídas (pré-consultas e arquivos em `saida/`)
+- nenhum liberado
 
 ## Sessões em background agora
 
-- nenhuma
+- backlog-T31: ?
 
 ## Bloco A — Acesso e Fase 0 (dados reais) (6/6)
 
@@ -63,18 +62,18 @@ Atualizado em 28/10/2026 10:55 · **25/36 concluídas** · 0 em andamento · 10 
 | ✅ | **T23** Pauta de decisões para o time | @gestor-projetos | humano | baixa | — |
 | ✅ | **T24** Regerar a apresentação executiva com o escopo atual | @organizador | offline | baixa | T23 |
 
-## Bloco F — Desenvolvimento no Fabric via notebooks (Fase 5b) (0/11)
+## Bloco F — Desenvolvimento no Fabric via notebooks (Fase 5b) (6/11)
 
 | | Tarefa | Papel | Ambiente | Dificuldade | Depende |
 |---|---|---|---|---|---|
 | ⛔ | **T26** Pergunta residual ao Caio: tabelas `als_dev_*` para DirectLake | @gestor-projetos | humano | baixa | — |
-| ⬜ | **T27** Guard para o fluxo de tabelas temporárias e pré-consultas | @engenheiro-software | offline | media | — |
-| ⬜ | **T28** Contrato das saídas (pré-consultas e arquivos em `saida/`) | @especialista-dados | offline | media | — |
-| ⬜ | **T29** Gerar as saídas reais de forecast, potencial e alertas | @cientista-dados | offline | alta | T28 |
-| ⬜ | **T30** Notebooks de desenvolvimento com lakehouse parametrizado | @engenheiro-software | offline | alta | T27, T28 |
-| ⬜ | **T31** Publicar e rodar os notebooks de dev no Fabric | @engenheiro-software | fabric | media | T29, T30 |
-| ⬜ | **T32** Dashboard com dados reais e SQL como pré-consultas | @engenheiro-ia | offline | media | T28, T29 |
+| ✅ | **T27** Guard para o fluxo de tabelas temporárias e pré-consultas | @engenheiro-software | offline | media | — |
+| ✅ | **T28** Contrato das saídas (pré-consultas e arquivos em `saida/`) | @especialista-dados | offline | media | — |
+| ✅ | **T29** Gerar as saídas reais de forecast, potencial e alertas | @cientista-dados | offline | alta | T28 |
+| ✅ | **T30** Notebooks de desenvolvimento com lakehouse parametrizado | @engenheiro-software | offline | alta | T27, T28 |
+| 🔄 | **T31** Publicar e rodar os notebooks de dev no Fabric | @engenheiro-software | fabric | media | T29, T30 |
+| ✅ | **T32** Dashboard com dados reais e SQL como pré-consultas | @engenheiro-ia | offline | media | T28, T29 |
 | ⬜ | **T33** Validar as pré-consultas e medir tempo e CU | @engenheiro-software | fabric | media | T31, T32 |
-| ⬜ | **T34** Definição do modelo semântico | @engenheiro-ia | offline | alta | T28 |
+| ✅ | **T34** Definição do modelo semântico | @engenheiro-ia | offline | alta | T28 |
 | ⬜ | **T35** Publicar o modelo semântico e medir | @engenheiro-ia | fabric | media | T31, T34 |
 | ⬜ | **T36** Fechamento da fase de desenvolvimento | @gestor-projetos | offline | baixa | T33, T35 |
