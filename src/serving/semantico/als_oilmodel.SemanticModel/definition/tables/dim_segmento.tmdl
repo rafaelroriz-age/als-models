@@ -1,0 +1,20 @@
+/// segmentos citados nas saídas
+table dim_segmento
+
+	column segmento
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	partition dim_segmento = m
+		mode: import
+		source =
+				let
+				    listas = List.Combine({base_forecast_consumo[segmento], base_pct_achieved[segmento], base_alertas[segmento], base_forecast_vendas[segmento_chave]}),
+				    unicos = List.Distinct(List.Select(listas, each _ <> null and _ <> "")),
+				    tabela = Table.FromList(unicos, Splitter.SplitByNothing(), type table [segmento = text])
+				in
+				    tabela

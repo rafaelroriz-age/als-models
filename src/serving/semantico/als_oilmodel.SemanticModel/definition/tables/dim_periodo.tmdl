@@ -1,0 +1,79 @@
+/// calendário diário do 1º ao último mês das saídas; marcado como tabela de datas
+table dim_periodo
+	dataCategory: Time
+
+	column data
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isKey
+		summarizeBy: none
+		sourceColumn: data
+
+		annotation SummarizationSetBy = User
+
+	column ano
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ano
+
+		annotation SummarizationSetBy = User
+
+	column trimestre
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: trimestre
+
+		annotation SummarizationSetBy = User
+
+	column mes_num
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: mes_num
+
+		annotation SummarizationSetBy = User
+
+	/// AAAA-MM
+	column ano_mes
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ano_mes
+
+		annotation SummarizationSetBy = User
+
+	column inicio_mes
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: inicio_mes
+
+		annotation SummarizationSetBy = User
+
+	/// segunda-feira da semana (mesma convenção do contrato)
+	column inicio_semana
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: inicio_semana
+
+		annotation SummarizationSetBy = User
+
+	partition dim_periodo = m
+		mode: import
+		source =
+				let
+				    datas = List.Combine({base_forecast_consumo[periodo], base_alertas[periodo], base_forecast_vendas[periodo]}),
+				    ini = Date.StartOfMonth(List.Min(datas)),
+				    fim = Date.EndOfMonth(List.Max(datas)),
+				    dias = List.Dates(ini, Duration.Days(fim - ini) + 1, #duration(1, 0, 0, 0)),
+				    base = Table.FromList(dias, Splitter.SplitByNothing(), type table [data = date]),
+				    ano = Table.AddColumn(base, "ano", each Date.Year([data]), Int64.Type),
+				    tri = Table.AddColumn(ano, "trimestre", each Date.QuarterOfYear([data]), Int64.Type),
+				    mes = Table.AddColumn(tri, "mes_num", each Date.Month([data]), Int64.Type),
+				    rotulo = Table.AddColumn(mes, "ano_mes", each Date.ToText([data], "yyyy-MM"), type text),
+				    inicio_mes = Table.AddColumn(rotulo, "inicio_mes", each Date.StartOfMonth([data]), type date),
+				    inicio_semana = Table.AddColumn(inicio_mes, "inicio_semana", each Date.StartOfWeek([data], Day.Monday), type date)
+				in
+				    inicio_semana

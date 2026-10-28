@@ -1,0 +1,55 @@
+relationship forecast_consumo_entidade_chave__dim_entidade
+	fromColumn: forecast_consumo.entidade_chave
+	toColumn: dim_entidade.entidade_chave
+
+relationship forecast_consumo_cliente_chave__dim_cliente
+	fromColumn: forecast_consumo.cliente_chave
+	toColumn: dim_cliente.cliente_id
+
+relationship forecast_consumo_segmento__dim_segmento
+	fromColumn: forecast_consumo.segmento
+	toColumn: dim_segmento.segmento
+
+relationship forecast_consumo_periodo__dim_periodo
+	fromColumn: forecast_consumo.periodo
+	toColumn: dim_periodo.data
+
+relationship pct_achieved_entidade_chave__dim_entidade
+	fromColumn: pct_achieved.entidade_chave
+	toColumn: dim_entidade.entidade_chave
+
+relationship pct_achieved_cliente_chave__dim_cliente
+	fromColumn: pct_achieved.cliente_chave
+	toColumn: dim_cliente.cliente_id
+
+relationship pct_achieved_segmento__dim_segmento
+	fromColumn: pct_achieved.segmento
+	toColumn: dim_segmento.segmento
+
+relationship alertas_entidade_chave__dim_entidade
+	fromColumn: alertas.entidade_chave
+	toColumn: dim_entidade.entidade_chave
+
+relationship alertas_cliente_chave__dim_cliente
+	fromColumn: alertas.cliente_chave
+	toColumn: dim_cliente.cliente_id
+
+relationship alertas_segmento__dim_segmento
+	fromColumn: alertas.segmento
+	toColumn: dim_segmento.segmento
+
+relationship alertas_periodo__dim_periodo
+	fromColumn: alertas.periodo
+	toColumn: dim_periodo.data
+
+relationship forecast_vendas_cliente_chave__dim_cliente
+	fromColumn: forecast_vendas.cliente_chave
+	toColumn: dim_cliente.cliente_id
+
+relationship forecast_vendas_segmento_chave__dim_segmento
+	fromColumn: forecast_vendas.segmento_chave
+	toColumn: dim_segmento.segmento
+
+relationship forecast_vendas_periodo__dim_periodo
+	fromColumn: forecast_vendas.periodo
+	toColumn: dim_periodo.data

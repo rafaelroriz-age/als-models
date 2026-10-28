@@ -1,0 +1,63 @@
+/// uma linha por nível × entidade presente em forecast_consumo, alertas ou pct_achieved
+table dim_entidade
+
+	/// nivel|entidade_id
+	column entidade_chave
+		dataType: string
+		isKey
+		isHidden
+		summarizeBy: none
+		sourceColumn: entidade_chave
+
+		annotation SummarizationSetBy = User
+
+	/// segmento | cliente | equipamento
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	column entidade_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_id
+
+		annotation SummarizationSetBy = User
+
+	column entidade_nome
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_nome
+
+		annotation SummarizationSetBy = User
+
+	/// cliente dono (vazio no nível segmento)
+	column cliente_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = User
+
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	partition dim_entidade = m
+		mode: import
+		source =
+				let
+				    campos = {"entidade_chave", "nivel", "entidade_id", "entidade_nome", "cliente_id", "segmento"},
+				    fc = Table.SelectColumns(base_forecast_consumo, campos),
+				    al = Table.SelectColumns(base_alertas, campos),
+				    pa = Table.SelectColumns(base_pct_achieved, List.RemoveItems(campos, {"cliente_id"})),
+				    todas = Table.Buffer(Table.Combine({fc, al, pa})),
+				    unicas = Table.Distinct(todas, {"entidade_chave"}),
+				    tipos = Table.TransformColumnTypes(unicas, {{"entidade_chave", type text}, {"nivel", type text}, {"entidade_id", type text}, {"entidade_nome", type text}, {"cliente_id", type text}, {"segmento", type text}})
+				in
+				    tipos

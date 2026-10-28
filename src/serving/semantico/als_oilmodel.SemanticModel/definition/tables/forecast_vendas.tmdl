@@ -1,0 +1,177 @@
+/// entidade × mês projetado × data de corte · contrato T28 (v_als_forecast_vendas → Files/als_oilmodel/saida/forecast_vendas.parquet)
+table forecast_vendas
+
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	/// 'total' no nível total
+	column entidade_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entidade_id
+
+		annotation SummarizationSetBy = User
+
+	column data_corte
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: data_corte
+
+		annotation SummarizationSetBy = User
+
+	/// mês projetado (1º dia)
+	column periodo
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: periodo
+
+		annotation SummarizationSetBy = User
+
+	/// horizonte em meses a partir do corte (1..H)
+	column h
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: h
+
+		annotation SummarizationSetBy = User
+
+	/// componente 1: base dos clientes recorrentes
+	column recorrente_base
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: recorrente_base
+
+		annotation SummarizationSetBy = User
+
+	/// componente 2: clientes não recorrentes ativos
+	column nao_recorrente
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: nao_recorrente
+
+		annotation SummarizationSetBy = User
+
+	/// componente 3: fora do escopo (D3), 0
+	column novos
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: novos
+
+		annotation SummarizationSetBy = User
+
+	/// componente 4: fora do escopo (D3), 0
+	column reativados
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: reativados
+
+		annotation SummarizationSetBy = User
+
+	/// componente 5: perda (valor positivo, subtraída no total)
+	column churn
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: churn
+
+		annotation SummarizationSetBy = User
+
+	/// componente 6: variação de mercado (fração, pode ser negativa)
+	column var_mercado
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: var_mercado
+
+		annotation SummarizationSetBy = User
+
+	/// KPI 2: faturamento, percentil 10 (R$)
+	column faturamento_p10
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: faturamento_p10
+
+		annotation SummarizationSetBy = User
+
+	column faturamento_p50
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: faturamento_p50
+
+		annotation SummarizationSetBy = User
+
+	column faturamento_p90
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: faturamento_p90
+
+		annotation SummarizationSetBy = User
+
+	/// KPI 2: EBIT como target separado, percentil 10 (R$)
+	column ebit_p10
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: ebit_p10
+
+		annotation SummarizationSetBy = User
+
+	column ebit_p50
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: ebit_p50
+
+		annotation SummarizationSetBy = User
+
+	column ebit_p90
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: ebit_p90
+
+		annotation SummarizationSetBy = User
+
+	column versao_modelo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: versao_modelo
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: entidade_id no nível cliente, senão vazio
+	column cliente_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cliente_chave
+
+		annotation SummarizationSetBy = User
+
+	/// derivada: entidade_id no nível segmento, senão vazio
+	column segmento_chave
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: segmento_chave
+
+		annotation SummarizationSetBy = User
+
+	partition forecast_vendas = m
+		mode: import
+		source =
+				base_forecast_vendas

@@ -1,0 +1,112 @@
+/// modelo × nível × segmento × horizonte, agregando a janela rolling-origin · contrato T28 (v_als_backtest_metricas → Files/als_oilmodel/saida/backtest_metricas.parquet)
+table backtest_metricas
+
+	column kpi
+		dataType: string
+		summarizeBy: none
+		sourceColumn: kpi
+
+		annotation SummarizationSetBy = User
+
+	column modelo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: modelo
+
+		annotation SummarizationSetBy = User
+
+	column nivel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = User
+
+	/// 'todos' quando a métrica não é por segmento
+	column segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = User
+
+	/// meses à frente (1..H)
+	column horizonte
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: horizonte
+
+		annotation SummarizationSetBy = User
+
+	/// último corte avaliado no backtest
+	column data_corte
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: data_corte
+
+		annotation SummarizationSetBy = User
+
+	column versao_modelo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: versao_modelo
+
+		annotation SummarizationSetBy = User
+
+	/// pares previsto × realizado
+	column n
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: n
+
+		annotation SummarizationSetBy = User
+
+	/// src.backtest.harness.metricas
+	column wape
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: wape
+
+		annotation SummarizationSetBy = User
+
+	column mae
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: mae
+
+		annotation SummarizationSetBy = User
+
+	column bias_pct
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: bias_pct
+
+		annotation SummarizationSetBy = User
+
+	column smape
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: smape
+
+		annotation SummarizationSetBy = User
+
+	/// fração do realizado dentro de [p10, p90]; declarada = 0,80
+	column cobertura
+		dataType: double
+		formatString: #,##0.00
+		summarizeBy: none
+		sourceColumn: cobertura
+
+		annotation SummarizationSetBy = User
+
+	partition backtest_metricas = m
+		mode: import
+		source =
+				base_backtest_metricas

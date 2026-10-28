@@ -1,0 +1,318 @@
+/// medidas do modelo; colunas das fatos ficam com summarizeBy none para não somar níveis
+table Medidas
+
+	/// nível de forecast_consumo/pct_achieved usado pelas medidas: o nível filtrado em dim_entidade; senão cliente se houver filtro de cliente; senão segmento
+	measure 'Nível ativo' =
+			VAR _n = SELECTEDVALUE ( dim_entidade[nivel] )
+			RETURN
+			    IF ( NOT ISBLANK ( _n ), _n, IF ( ISFILTERED ( dim_cliente ), "cliente", "segmento" ) )
+		displayFolder: Contexto
+		isHidden
+
+	/// mes por padrão; semana se filtrada em forecast_consumo[granularidade]
+	measure 'Granularidade ativa' = SELECTEDVALUE ( forecast_consumo[granularidade], "mes" )
+		displayFolder: Contexto
+		isHidden
+
+	/// cliente se houver filtro de cliente; senão segmento se houver filtro de segmento; senão total
+	measure 'Nível vendas ativo' =
+			IF (
+			    ISFILTERED ( dim_cliente ),
+			    "cliente",
+			    IF ( ISFILTERED ( dim_segmento ), "segmento", "total" )
+			)
+		displayFolder: Contexto
+		isHidden
+
+	/// amostras coletadas (períodos antes do corte)
+	measure 'Consumo realizado' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			RETURN
+			    CALCULATE (
+			        SUM ( forecast_consumo[realizado] ),
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran )
+			    )
+		formatString: #,##0
+		displayFolder: Consumo Real
+
+	/// forecast Real, mediana (períodos a partir do corte)
+	measure 'Consumo previsto p50' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			RETURN
+			    CALCULATE (
+			        SUM ( forecast_consumo[prev_p50] ),
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran )
+			    )
+		formatString: #,##0
+		displayFolder: Consumo Real
+
+	/// realizado no passado + p50 no futuro (as colunas não se sobrepõem, contrato T28)
+	measure 'Consumo Real' = [Consumo realizado] + [Consumo previsto p50]
+		formatString: #,##0
+		displayFolder: Consumo Real
+
+	/// forecast Real, percentil 10; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Consumo previsto p10' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_consumo,
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran ),
+			        NOT ISBLANK ( forecast_consumo[prev_p10] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_consumo[prev_p10] ) )
+		formatString: #,##0
+		displayFolder: Intervalo p10-p90
+
+	/// forecast Real, percentil 90; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Consumo previsto p90' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_consumo,
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran ),
+			        NOT ISBLANK ( forecast_consumo[prev_p90] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_consumo[prev_p90] ) )
+		formatString: #,##0
+		displayFolder: Intervalo p10-p90
+
+	/// p90 − p10 do forecast Real
+	measure 'Amplitude do intervalo' = [Consumo previsto p90] - [Consumo previsto p10]
+		formatString: #,##0
+		displayFolder: Intervalo p10-p90
+
+	/// potencial do período, valor central (benchmark T16)
+	measure 'Consumo potencial' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			RETURN
+			    CALCULATE (
+			        SUM ( forecast_consumo[potencial] ),
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran )
+			    )
+		formatString: #,##0
+		displayFolder: Potencial
+
+	/// potencial, percentil 10; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Potencial p10' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_consumo,
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran ),
+			        NOT ISBLANK ( forecast_consumo[potencial_p10] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_consumo[potencial_p10] ) )
+		formatString: #,##0
+		displayFolder: Potencial
+
+	/// potencial, percentil 90; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Potencial p90' =
+			VAR _nivel = [Nível ativo]
+			VAR _gran = [Granularidade ativa]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_consumo,
+			        KEEPFILTERS ( forecast_consumo[nivel] = _nivel ),
+			        KEEPFILTERS ( forecast_consumo[granularidade] = _gran ),
+			        NOT ISBLANK ( forecast_consumo[potencial_p90] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_consumo[potencial_p90] ) )
+		formatString: #,##0
+		displayFolder: Potencial
+
+	/// potencial − consumo Real no período
+	measure 'Gap para o potencial' = [Consumo potencial] - [Consumo Real]
+		formatString: #,##0
+		displayFolder: Potencial
+
+	/// amostras dos 12 meses até o corte (pct_achieved)
+	measure 'Realizado 12m' =
+			VAR _nivel = [Nível ativo]
+			RETURN
+			    CALCULATE ( SUM ( pct_achieved[realizado_12m] ), KEEPFILTERS ( pct_achieved[nivel] = _nivel ) )
+		formatString: #,##0
+		displayFolder: % Achieved
+
+	/// potencial anual (benchmark)
+	measure 'Potencial 12m' =
+			VAR _nivel = [Nível ativo]
+			RETURN
+			    CALCULATE ( SUM ( pct_achieved[potencial_12m] ), KEEPFILTERS ( pct_achieved[nivel] = _nivel ) )
+		formatString: #,##0
+		displayFolder: % Achieved
+
+	/// D6: realizado 12m ÷ potencial anual, só entidades com potencial > 0; acima de uma entidade é a razão das somas (não a média dos %)
+	measure '% Achieved' =
+			VAR _nivel = [Nível ativo]
+			VAR _base =
+			    CALCULATETABLE (
+			        pct_achieved,
+			        KEEPFILTERS ( pct_achieved[nivel] = _nivel ),
+			        KEEPFILTERS ( pct_achieved[potencial_12m] > 0 )
+			    )
+			RETURN
+			    DIVIDE ( SUMX ( _base, pct_achieved[realizado_12m] ), SUMX ( _base, pct_achieved[potencial_12m] ) )
+		formatString: 0.0%
+		displayFolder: % Achieved
+
+	/// queda (RN-05) + churn de compartimento (RN-06)
+	measure 'Alertas abertos' = COUNTROWS ( alertas )
+		formatString: #,##0
+		displayFolder: Alertas
+
+	/// queda > 20% contra a base (RN-05)
+	measure 'Alertas de queda' = CALCULATE ( COUNTROWS ( alertas ), KEEPFILTERS ( alertas[tipo] = "queda" ) )
+		formatString: #,##0
+		displayFolder: Alertas
+
+	/// compartimento sem coleta acima do intervalo esperado (RN-06)
+	measure 'Alertas de churn' = CALCULATE ( COUNTROWS ( alertas ), KEEPFILTERS ( alertas[tipo] = "churn" ) )
+		formatString: #,##0
+		displayFolder: Alertas
+
+	/// média de variacao_pct dos alertas de queda
+	measure 'Queda média' = CALCULATE ( AVERAGE ( alertas[variacao_pct] ), KEEPFILTERS ( alertas[tipo] = "queda" ) )
+		formatString: 0.0%
+		displayFolder: Alertas
+
+	/// clientes distintos com alerta de queda
+	measure 'Clientes em queda' = CALCULATE ( DISTINCTCOUNT ( alertas[entidade_id] ), KEEPFILTERS ( alertas[tipo] = "queda" ) )
+		formatString: #,##0
+		displayFolder: Alertas
+
+	/// equipamentos distintos com alerta de churn
+	measure 'Equipamentos em churn' = CALCULATE ( DISTINCTCOUNT ( alertas[entidade_id] ), KEEPFILTERS ( alertas[tipo] = "churn" ) )
+		formatString: #,##0
+		displayFolder: Alertas
+
+	/// Faturamento, p10; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Faturamento p10' =
+			VAR _nivel = [Nível vendas ativo]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_vendas,
+			        KEEPFILTERS ( forecast_vendas[nivel] = _nivel ),
+			        NOT ISBLANK ( forecast_vendas[faturamento_p10] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_vendas[faturamento_p10] ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// Faturamento, p50
+	measure 'Faturamento p50' =
+			VAR _nivel = [Nível vendas ativo]
+			RETURN
+			    CALCULATE ( SUM ( forecast_vendas[faturamento_p50] ), KEEPFILTERS ( forecast_vendas[nivel] = _nivel ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// Faturamento, p90; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'Faturamento p90' =
+			VAR _nivel = [Nível vendas ativo]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_vendas,
+			        KEEPFILTERS ( forecast_vendas[nivel] = _nivel ),
+			        NOT ISBLANK ( forecast_vendas[faturamento_p90] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_vendas[faturamento_p90] ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// EBIT, p10; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'EBIT p10' =
+			VAR _nivel = [Nível vendas ativo]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_vendas,
+			        KEEPFILTERS ( forecast_vendas[nivel] = _nivel ),
+			        NOT ISBLANK ( forecast_vendas[ebit_p10] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_vendas[ebit_p10] ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// EBIT, p50
+	measure 'EBIT p50' =
+			VAR _nivel = [Nível vendas ativo]
+			RETURN
+			    CALCULATE ( SUM ( forecast_vendas[ebit_p50] ), KEEPFILTERS ( forecast_vendas[nivel] = _nivel ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// EBIT, p90; fora do total: só tem valor com uma entidade e um período no contexto (quantis não somam)
+	measure 'EBIT p90' =
+			VAR _nivel = [Nível vendas ativo]
+			VAR _linhas =
+			    CALCULATETABLE (
+			        forecast_vendas,
+			        KEEPFILTERS ( forecast_vendas[nivel] = _nivel ),
+			        NOT ISBLANK ( forecast_vendas[ebit_p90] )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _linhas ) = 1, MAXX ( _linhas, forecast_vendas[ebit_p90] ) )
+		formatString: R$ #,##0
+		displayFolder: Vendas (KPI 2)
+
+	/// WAPE ponderado pelo nº de pares
+	measure 'WAPE (backtest)' =
+			VAR _t = FILTER ( backtest_metricas, NOT ISBLANK ( backtest_metricas[wape] ) )
+			RETURN
+			    DIVIDE ( SUMX ( _t, backtest_metricas[wape] * backtest_metricas[n] ), SUMX ( _t, backtest_metricas[n] ) )
+		formatString: 0.0%
+		displayFolder: Backtest
+
+	/// bias_pct ponderado pelo nº de pares
+	measure 'Viés (backtest)' =
+			VAR _t = FILTER ( backtest_metricas, NOT ISBLANK ( backtest_metricas[bias_pct] ) )
+			RETURN
+			    DIVIDE ( SUMX ( _t, backtest_metricas[bias_pct] * backtest_metricas[n] ), SUMX ( _t, backtest_metricas[n] ) )
+		formatString: 0.0%
+		displayFolder: Backtest
+
+	/// fração do realizado dentro de [p10, p90]
+	measure 'Cobertura p10-p90 (backtest)' =
+			VAR _t = FILTER ( backtest_metricas, NOT ISBLANK ( backtest_metricas[cobertura] ) )
+			RETURN
+			    DIVIDE ( SUMX ( _t, backtest_metricas[cobertura] * backtest_metricas[n] ), SUMX ( _t, backtest_metricas[n] ) )
+		formatString: 0.0%
+		displayFolder: Backtest
+
+	/// cobertura nominal do intervalo (contrato T28)
+	measure 'Cobertura declarada' = 0.8
+		formatString: 0.0%
+		displayFolder: Backtest
+
+	column vazio
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: vazio
+
+	partition Medidas = m
+		mode: import
+		source =
+				let
+				    vazia = #table(type table [vazio = text], {})
+				in
+				    vazia
