@@ -441,7 +441,7 @@ Tarefa T27 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_guard.py, .claude/hooks
 ```
 
 ### T28 · Contrato das saídas (pré-consultas e arquivos em `saida/`)
-- **Status:** doing
+- **Status:** done
 - **Papel:** @especialista-dados
 - **Depende:** —
 - **Ambiente:** offline
