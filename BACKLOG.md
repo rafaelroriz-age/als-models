@@ -525,7 +525,7 @@ Tarefa T33 do BACKLOG.md. Leia AGENTS.md, a Fase 5 de docs_fabric/06 (item abert
 ```
 
 ### T34 · Definição do modelo semântico
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-ia
 - **Depende:** T28
 - **Ambiente:** offline
