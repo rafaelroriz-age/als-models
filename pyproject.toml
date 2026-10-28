@@ -11,7 +11,7 @@ dependencies = ["pandas>=2.0", "numpy", "pyarrow", "openpyxl"]
 
 [project.optional-dependencies]
 local = ["pyodbc", "azure-identity", "requests"]
-dev = ["pytest"]
+dev = ["pytest", "duckdb"]
 stats = ["statsmodels>=0.14", "scipy"]
 ml = ["lightgbm>=4.0"]
 

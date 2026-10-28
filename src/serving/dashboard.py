@@ -1,10 +1,14 @@
-"""Dashboard HTML estático do forecast de consumo (protótipo H3a, T20).
+"""Dashboard HTML estático do forecast de consumo (protótipo H3a, T20; saídas reais na T32).
 
-Um arquivo HTML sem backend a partir de duas tabelas (CSV/parquet) com o contrato de `COLUNAS_FORECAST` e
-`COLUNAS_ALERTAS`. Sem a saída do T15 em `data/`, `gerar_sintetico` produz dados sintéticos e o HTML os
-marca com um aviso fixo. As consultas T-SQL que geram as mesmas tabelas no Fabric estão em `sql/`.
+Um arquivo HTML sem backend a partir de `forecast_consumo` e `alertas` no contrato da T28
+(`src/serving/contrato.py`). As saídas são validadas no G4 antes de gerar; reprovada, não gera. Sem entrada,
+`gerar_sintetico` produz dados sintéticos e o HTML os marca com um aviso fixo. As pré-consultas SQL sobre
+`v_als_*` que geram as mesmas tabelas no Fabric estão em `consultas.py` e `sql/`.
 
-Uso: python -m src.serving.dashboard [--forecast f.csv --alertas a.csv] [--saida dashboard.html]
+Uso:
+  python -m src.serving.dashboard --pasta data/serving      # parquet do contrato (forecast_consumo + alertas)
+  python -m src.serving.dashboard --base data/base/base_cliente_mes.parquet   # saídas locais da base real
+  python -m src.serving.dashboard                           # exemplo sintético
 """
 from __future__ import annotations
 
@@ -15,50 +19,34 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.serving.contrato import ALERTAS, FORECAST_CONSUMO, aprovado, validar
 from src.features.alertas import ParametrosChurnCompartimento, alertar_queda, compartimento_churn
 
-# Contrato: uma linha por nível × entidade × granularidade × período.
-COLUNAS_FORECAST = {
-    "nivel": "segmento | cliente | equipamento",
-    "entidade_id": "id da entidade no nível",
-    "entidade_nome": "rótulo exibido",
-    "cliente_id": "cliente dono (vazio no nível segmento)",
-    "segmento": "segmento do cliente",
-    "granularidade": "mes | semana",
-    "periodo": "1º dia do mês ou segunda-feira da semana (YYYY-MM-DD)",
-    "realizado": "amostras coletadas (vazio em período futuro)",
-    "prev_p10": "forecast Real, percentil 10 (vazio em período passado)",
-    "prev_p50": "forecast Real, mediana",
-    "prev_p90": "forecast Real, percentil 90",
-    "potencial": "amostras potenciais do período (benchmark, T16)",
-    "data_corte": "data de corte do forecast",
-    "versao_modelo": "identificador do modelo/dados",
-}
-# Uma linha por alerta aberto.
-COLUNAS_ALERTAS = {
-    "tipo": "queda | churn",
-    "nivel": "cliente (queda) | equipamento (churn de compartimento)",
-    "entidade_id": "id da entidade",
-    "entidade_nome": "rótulo exibido",
-    "cliente_id": "cliente dono",
-    "segmento": "segmento",
-    "periodo": "mês do alerta (queda) ou mês de corte (churn)",
-    "valor_atual": "queda: amostras do mês; churn: horas sem coleta",
-    "valor_base": "queda: base de comparação; churn: intervalo esperado (h)",
-    "variacao_pct": "queda: 1 − atual ÷ base (fração); churn: vazio",
-    "detalhe": "texto curto (base usada, compartimento)",
-}
+# Contrato (fonte: src/serving/contrato.py): colunas -> descrição.
+COLUNAS_FORECAST = {c.nome: c.descricao for c in FORECAST_CONSUMO.colunas}
+COLUNAS_ALERTAS = {c.nome: c.descricao for c in ALERTAS.colunas}
 SEGMENTOS = ["Mineração", "Construção", "Agro"]
 MESES_HIST = 22      # histórico sintético: jan/25 .. out/26
 MESES_PREV = 6       # nov/26 .. abr/27
 CORTE = pd.Timestamp("2026-11-01")
-_VALORES = ["realizado", "prev_p10", "prev_p50", "prev_p90", "potencial"]
+_VALORES = ["realizado", "prev_p10", "prev_p50", "prev_p90", "potencial", "potencial_p10", "potencial_p90"]
 
 
 def _validar(df: pd.DataFrame, colunas: dict, nome: str) -> None:
     falta = [c for c in colunas if c not in df.columns]
     if falta:
         raise ValueError(f"{nome}: colunas ausentes {falta}")
+
+
+def validar_contrato(saidas: dict[str, pd.DataFrame]) -> list[dict]:
+    """G4 de forecast_consumo e alertas; levanta ValueError se reprovar. Alertas vazio é válido (nada aberto)."""
+    res = []
+    for nome, df in saidas.items():
+        res += [r for r in validar(nome, df) if not (nome == "alertas" and r["checagem"] == "nao_vazia")]
+    if not aprovado(res):
+        falhas = [f"{r['alvo']}:{r['checagem']} ({r['detalhe']})" for r in res if r["gate"] == "G4" and not r["ok"]]
+        raise ValueError("saídas reprovadas no G4: " + "; ".join(falhas))
+    return res
 
 
 def _serie(rng, gran, nivel, ent_id, nome, c, ideal, real, pot, meses) -> pd.DataFrame:
@@ -78,6 +66,7 @@ def _serie(rng, gran, nivel, ent_id, nome, c, ideal, real, pot, meses) -> pd.Dat
         "granularidade": gran, "periodo": per.strftime("%Y-%m-%d"), "realizado": realizado,
         "prev_p10": np.round(p50 * (1 - 1.28 * ampl), 2), "prev_p50": np.round(p50, 2),
         "prev_p90": np.round(p50 * (1 + 1.28 * ampl), 2), "potencial": np.round(pot[idx] * fator, 2),
+        "potencial_p10": np.round(pot[idx] * fator * 0.85, 2), "potencial_p90": np.round(pot[idx] * fator * 1.15, 2),
         "data_corte": CORTE.date().isoformat(), "versao_modelo": "sintetico-v0"})
 
 
@@ -140,7 +129,9 @@ def _ler(path: Path) -> pd.DataFrame:
 
 
 def _linhas(df: pd.DataFrame, colunas: dict) -> dict:
-    df = df[list(colunas)]
+    df = df[list(colunas)].copy()
+    for c in df.columns[df.dtypes.map(pd.api.types.is_datetime64_any_dtype)]:
+        df[c] = df[c].dt.strftime("%Y-%m-%d")
     return {"cols": list(df.columns), "rows": df.astype(object).where(df.notna(), None).values.tolist()}
 
 
@@ -155,18 +146,31 @@ def montar_html(forecast: pd.DataFrame, alertas: pd.DataFrame, sintetico: bool) 
 
 def main(argv=None) -> Path:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--pasta", help="pasta com forecast_consumo.parquet e alertas.parquet (contrato T28)")
+    ap.add_argument("--base", help="base_cliente_mes.parquet: gera as saídas locais (baseline) e grava em --pasta")
     ap.add_argument("--forecast")
     ap.add_argument("--alertas")
-    ap.add_argument("--saida", default="src/serving/exemplo/dashboard_sintetico.html")
+    ap.add_argument("--saida")
     a = ap.parse_args(argv)
-    if a.forecast and a.alertas:
+    pasta = Path(a.pasta or "data/serving")
+    if a.base:
+        from src.serving.local import gerar_da_base
+        fc, al = gerar_da_base(Path(a.base), pasta)
+        sint = False
+    elif a.pasta:
+        fc, al = pd.read_parquet(pasta / FORECAST_CONSUMO.arquivo), pd.read_parquet(pasta / ALERTAS.arquivo)
+        sint = False
+    elif a.forecast and a.alertas:
         fc, al, sint = _ler(Path(a.forecast)), _ler(Path(a.alertas)), False
     else:
         fc, al, sint = *gerar_sintetico(), True
         Path("src/serving/exemplo").mkdir(parents=True, exist_ok=True)
         fc.to_csv("src/serving/exemplo/forecast_consumo_sintetico.csv", index=False)
         al.to_csv("src/serving/exemplo/alertas_sintetico.csv", index=False)
-    out = Path(a.saida)
+    if not sint:
+        validar_contrato({"forecast_consumo": fc, "alertas": al})   # G4 antes de gerar; reprovado não gera
+    out = Path(a.saida or ("src/serving/exemplo/dashboard_sintetico.html" if sint else pasta / "dashboard.html"))
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(montar_html(fc, al, sint), encoding="utf-8")
     return out
 
