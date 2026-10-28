@@ -455,7 +455,7 @@ Tarefa T28 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 (§1, tabelas fct_*), s
 ```
 
 ### T29 · Gerar as saídas reais de forecast, potencial e alertas
-- **Status:** doing
+- **Status:** done
 - **Papel:** @cientista-dados
 - **Depende:** T28
 - **Ambiente:** offline
