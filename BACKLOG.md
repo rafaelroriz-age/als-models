@@ -497,7 +497,7 @@ Tarefa T31 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 e scripts/fabric_run.py
 ```
 
 ### T32 · Dashboard com dados reais e SQL como pré-consultas
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-ia
 - **Depende:** T28, T29
 - **Ambiente:** offline
