@@ -469,7 +469,7 @@ Tarefa T29 do BACKLOG.md. Leia AGENTS.md, docs_fabric/16, o contrato da T28 (src
 ```
 
 ### T30 · Notebooks de desenvolvimento com lakehouse parametrizado
-- **Status:** doing
+- **Status:** done
 - **Papel:** @engenheiro-software
 - **Depende:** T27, T28
 - **Ambiente:** offline
