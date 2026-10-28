@@ -483,7 +483,7 @@ Tarefa T30 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_deploy.py (NOTEBOOKS fi
 ```
 
 ### T31 · Publicar e rodar os notebooks de dev no Fabric
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-software
 - **Depende:** T29, T30
 - **Ambiente:** fabric
@@ -497,7 +497,7 @@ Tarefa T31 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 e scripts/fabric_run.py
 ```
 
 ### T32 · Dashboard com dados reais e SQL como pré-consultas
-- **Status:** todo
+- **Status:** doing
 - **Papel:** @engenheiro-ia
 - **Depende:** T28, T29
 - **Ambiente:** offline
