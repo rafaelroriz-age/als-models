@@ -106,6 +106,14 @@ Se o MCP for escolhido, adicionar à **Fase 5 — Entrega e handoff**:
 - **SQL:** `src/serving/sql/01_forecast_consumo.sql` (T-SQL de leitura; tabelas `als_*` de entrada são propostas, ainda inexistentes no Fabric).
 - **Testes:** `tests/test_serving.py`. Pendente: ligar à saída real da T15/T16 quando existir.
 
+### T32 · Dashboard com saídas do contrato e SQL sobre `v_als_*` (28/10)
+
+- **Saídas reais:** `data/forecast` (T29) estava vazio neste worktree. Sem Fabric, as saídas do contrato foram geradas **da base real** `data/base/base_cliente_mes.parquet` (T14) com o baseline ingênuo sazonal de `src/pipeline/dev.py` (`src/serving/local.py`): níveis segmento e cliente, corte 2026-10-01, horizonte 12 meses. Resultado em `data/serving/` (fora do git): `forecast_consumo.parquet` (247 920 linhas), `pct_achieved.parquet` (5 662), `alertas.parquet` (203 quedas), `relatorio_dev.json` (G4 aprovado) e `dashboard.html`. Sem equipamento, potencial nem churn (não estão na base). Quando a T29 gravar `saida/`, basta `--pasta`.
+- **Gerador:** `python -m src.serving.dashboard --pasta data/serving` (parquet do contrato) ou `--base data/base/base_cliente_mes.parquet` (gera, grava e monta). **G4 roda antes de gerar** (`validar_contrato`): saída reprovada não vira HTML; alertas vazio é válido. Sem argumentos continua o exemplo sintético.
+- **Contrato:** `COLUNAS_FORECAST`/`COLUNAS_ALERTAS` agora derivam de `src/serving/contrato.py`; o contrato ganhou `potencial_p10/potencial_p90`, então o exemplo sintético (CSV e HTML) foi regenerado.
+- **SQL:** `src/serving/consultas.py` gera 4 pré-consultas (`dashboard_forecast`, `dashboard_alertas`, `resumo_entidade` = % Achieved + previsão do horizonte, `consumo_segmento_mes`) sobre `v_als_*`, em dialeto comum a Spark SQL e T-SQL (sem LIMIT/TOP/funções de data/crases). Nome e prefixo configuráveis: `consultas(prefixo="fct_", nomes={"alertas": "..."})`. O arquivo `src/serving/sql/01_pre_consultas.sql` é gerado delas e substitui `01_forecast_consumo.sql`, que lia as tabelas `als_*` inexistentes.
+- **Testes:** `tests/test_serving.py` (20 casos): consultas rodam em DuckDB sobre parquet gerado de uma base pequena **e** sobre `data/serving` real (pula se ausente), com totais iguais aos do parquet; prefixo trocado; dialeto; arquivo SQL em dia. `python -m pytest`: 309 passed, 2 skipped (`duckdb` entrou nos extras `dev`).
+
 ## Comparativo das três opções de entrega (T21, 27/10)
 
 - Quadro (a) dashboard HTML + SQL, (b) modelo semântico, (c) API/MCP, com esforço, manutenção, latência, aderência ao agente do CRM e riscos: [13 §2, H3](13_revisao_alinhamento_reuniao_2026-10-21.md).
