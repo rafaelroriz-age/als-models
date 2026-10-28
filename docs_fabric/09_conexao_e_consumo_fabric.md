@@ -2,7 +2,17 @@
 
 > Como o projeto lê Bronze/Silver, grava o Forecast e como o resultado é consumido (Power BI, Data Agent, MCP). Complementa [07_integracao_mcp.md](07_integracao_mcp.md).
 
-## 1. Topologia (isolamento da Gold do agente atual)
+## 0. Fase de desenvolvimento (Fase 5b, 28/10/2026): notebooks em lakehouses existentes
+
+Resposta do Caio ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) D13): desenvolver em **notebook**, escolhendo o lakehouse; usar os **lakehouses já existentes**; criar **só tabelas temporárias ou pré-consultas**. Por isso a topologia da §1 (novo `lh_forecast`, tabelas Delta de saída) **não é pré-requisito** nesta fase e fica como alvo de produção a rediscutir (T36).
+
+- **Leitura:** Silver do `LakehouseOel`, somente leitura (parâmetro de lakehouse nos notebooks `notebooks/50_dev`, T30).
+- **Pré-consultas:** temp views Spark `v_als_*` (vivem só na sessão do notebook; nome e colunas no contrato da T28).
+- **Saída persistente:** arquivos em `Files/als_oilmodel/saida/` (parquet), baixados por `scripts/fabric_run.py`. É o que o dashboard (a) e o semântico (b, modo Import) consomem.
+- **Guard:** liberar `CREATE TEMP VIEW`/`createOrReplaceTempView` e fechar `CREATE TABLE/VIEW` permanentes é a T27. `als_dev_*` Delta só com `ALS_FABRIC_DEV=1` e depois da resposta do Caio (T26).
+- **Publicação:** o único workspace acessível é `O&L Global - Prod - DA`; cada publicação exige confirmação explícita do usuário (AGENTS.md). Estado em 28/10: 10 notebooks e nenhum `als_*` no workspace; `Files/als_oilmodel/` não existe.
+
+## 1. Topologia (isolamento da Gold do agente atual; alvo de produção, não da Fase 5b)
 
 - Novo lakehouse **`lh_forecast`** (idealmente em workspace próprio, mesma capacidade F8).
 - Bronze/Silver (S360, Protheus, Zoho) entram por **OneLake Shortcuts** somente leitura: zero cópia, sem tocar na Gold existente.

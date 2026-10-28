@@ -13,7 +13,7 @@ BACKLOG.md ──► run_backlog.py run ──► uma sessão `claude --bg` por 
                        `auto` = colher + run em loop até acabar
 ```
 
-- **[BACKLOG.md](BACKLOG.md)** é a fila: 25 tarefas (T01–T25) com status, dependências, arquivos que tocam, dificuldade e prompt.
+- **[BACKLOG.md](BACKLOG.md)** é a fila: 36 tarefas (T01–T36) com status, dependências, arquivos que tocam, dificuldade e prompt.
 - **Lote:** `run` pega as tarefas `todo` cujas dependências estão `done` e escolhe as que não tocam nos mesmos arquivos, para rodarem em paralelo sem conflito.
 - **Sessão:** cada tarefa vira uma sessão em background, num worktree próprio (`.claude/worktrees/backlog-Txx`, branch `worktree-backlog-Txx`). O agente trabalha, roda `pytest`, documenta e faz commit lá.
 - **Colheita:** `colher` integra na `main` o que terminou e marca `done`. Só com `done` as tarefas dependentes são liberadas.
@@ -30,7 +30,7 @@ A tabela está em `ROTA`, em [scripts/run_backlog.py](scripts/run_backlog.py). `
 ## 2. Regras
 
 1. **Aprovação automática:** as sessões rodam em `bypassPermissions`, sem pedir aprovação, e fazem commit local sozinhas. Nunca fazem push.
-2. **Dados da empresa no Fabric:** ler é livre; gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. Alterar ou apagar dado que já existe (tabelas, schemas, views) é bloqueado pelo hook [fabric_guard](scripts/fabric_guard.py) mesmo no modo automático. Só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`. Limite: o guard lê o texto do comando ou do arquivo, então não pega escrita montada dinamicamente; revise notebooks novos antes de publicar.
+2. **Dados da empresa no Fabric:** ler é livre; gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. Tabelas só temporárias (temp views) ou pré-consultas, nunca permanentes (Bloco F, resposta do Caio em 28/10; a T27 ajusta o guard para isso). Alterar ou apagar dado que já existe (tabelas, schemas, views) é bloqueado pelo hook [fabric_guard](scripts/fabric_guard.py) mesmo no modo automático. Só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`. Limite: o guard lê o texto do comando ou do arquivo, então não pega escrita montada dinamicamente; revise notebooks novos antes de publicar.
 3. **Agentes não editam o BACKLOG.md.** O status só muda por `run`, `colher` ou `backlog.py set`.
 4. **Regra de pronto** (vale para toda tarefa, detalhada no topo do BACKLOG.md): testes verdes, resultado registrado no doc indicado, sem TAT.
 5. **Fechamento de lote:** depois que um lote termina, rode o prompt "Fechamento de lote" do BACKLOG.md (o Organizador consolida os docs 06, 12 e 13) antes do próximo.

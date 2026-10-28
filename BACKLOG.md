@@ -20,7 +20,7 @@ Visão geral e ordem automática: `python scripts/backlog.py list` e `python scr
 1. Com código: `python -m pytest` verde, com testes novos para o que foi criado.
 2. Registrar o resultado no doc indicado em `Doc` (fatos, números, caminhos). Sem opinião sem dado.
 3. Em lote paralelo, **não editar `BACKLOG.md` nem os docs 06/12/13**: o status é atualizado com `backlog.py set` e o **Fechamento de lote** (abaixo) consolida.
-4. Dados reais ficam em `data/` (fora do git). No Fabric: ler à vontade e gravar só em `Files/als_oilmodel/` e em notebooks `als_*`. **Nunca alterar dados que já existem** (tabelas, schemas, views): a barreira `scripts/fabric_guard.py` bloqueia isso nos hooks e no `fabric_deploy.py`; só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`.
+4. Dados reais ficam em `data/` (fora do git). No Fabric: ler à vontade e gravar só em `Files/als_oilmodel/` e em notebooks `als_*`; tabelas só **temporárias** (temp views) ou pré-consultas, nunca permanentes (Bloco F, resposta do Caio em 28/10). **Nunca alterar dados que já existem** (tabelas, schemas, views): a barreira `scripts/fabric_guard.py` bloqueia isso nos hooks e no `fabric_deploy.py`; só uma pessoa libera, com `ALS_FABRIC_ESCRITA=1`.
 5. Não reintroduzir TAT nem perguntas já resolvidas ([13](docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md)).
 
 ## Fechamento de lote (Organizador)
@@ -399,4 +399,169 @@ Tarefa T23 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 §5 e docs_fabric/14 §
 - **Prompt:**
 ```text
 Tarefa T24 do BACKLOG.md. Leia AGENTS.md, docs_fabric/13 (§1 a §4) e a apresentação docs_fabric/Apresentacao_Executiva_Forecast_Amostras_Vendas_Fabric-v2.md. Reescreva o markdown da apresentação com o escopo atual: KPI 1 (Real e Potencial) e KPI 2 derivado do consumo, faturamento e EBIT como targets separados, novos e reativados fora do escopo, % Achieved unificado, entrega por protótipos (H3) e as decisões já tomadas. Não mexa no .pptx nem no .pdf (anote em docs_fabric/13 §4 que continuam na versão anterior até regerar). Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+---
+
+## Bloco F — Desenvolvimento no Fabric via notebooks (Fase 5b)
+
+Fase aberta em 28/10/2026, depois do backlog T01–T25. Decisões que valem para todo o bloco ([13](docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md) D13/D14):
+
+- **Entrega** = (a) dashboard HTML + SQL **e** (b) modelo semântico.
+- **Método (resposta do Caio, 28/10):** desenvolver em **notebook**, escolhendo no notebook o lakehouse; pode-se usar os **lakehouses já existentes**; criar **só tabelas temporárias ou pré-consultas**. Não há lakehouse novo nem tabela permanente.
+- **O que persiste** são arquivos em `Files/als_oilmodel/saida/` (parquet/CSV). O semântico (b) usa modo **Import** sobre esses arquivos; DirectLake só se o Caio autorizar tabelas `als_dev_*` (T26).
+- **Publicar** notebooks `als_*` no workspace `O&L Global - Prod - DA` exige confirmação explícita do usuário na hora, a cada publicação.
+
+### T26 · Pergunta residual ao Caio: tabelas `als_dev_*` para DirectLake
+- **Status:** blocked
+- **Papel:** @gestor-projetos
+- **Depende:** —
+- **Ambiente:** humano
+- **Dificuldade:** baixa
+- **Toca:** docs_fabric/15_pauta_decisoes_time.md
+- **Doc:** docs_fabric/15_pauta_decisoes_time.md (item 7), docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md D14
+- **Pronto:** resposta do Caio registrada: pode ou não criar tabelas Delta `als_dev_*` descartáveis (necessárias ao DirectLake). Sem resposta, o semântico segue em Import e a tarefa fica `blocked`.
+- **Prompt:**
+```text
+Tarefa T26 do BACKLOG.md. Leia AGENTS.md, docs_fabric/15_pauta_decisoes_time.md (item 7) e docs_fabric/13 (D13, D14). O Caio respondeu em 28/10 que o desenvolvimento é por notebook, em lakehouses existentes, só com tabelas temporárias ou pré-consultas. Falta uma pergunta: o modelo semântico DirectLake só lê tabelas Delta persistidas, então ele pode autorizar tabelas `als_dev_*` descartáveis num lakehouse existente, ou o semântico fica em modo Import sobre os arquivos de Files/? Redija a pergunta em duas linhas com as duas opções e a recomendação, registre a resposta quando existir em docs_fabric/15 e docs_fabric/13 D14. Não envie mensagem; só rascunho. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T27 · Guard para o fluxo de tabelas temporárias e pré-consultas
+- **Status:** todo
+- **Papel:** @engenheiro-software
+- **Depende:** —
+- **Ambiente:** offline
+- **Dificuldade:** media
+- **Toca:** scripts/fabric_guard.py, .claude/hooks/fabric_guard_hook.py, tests/test_fabric_guard.py
+- **Doc:** docs_fabric/09_conexao_e_consumo_fabric.md
+- **Pronto:** `CREATE TEMP VIEW` e `createOrReplaceTempView` passam no guard; `CREATE TABLE/VIEW` permanentes e qualquer escrita fora de `Files/als_oilmodel/` continuam bloqueados; `als_dev_*` só com `ALS_FABRIC_DEV=1`.
+- **Prompt:**
+```text
+Tarefa T27 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_guard.py, .claude/hooks/fabric_guard_hook.py e tests/test_fabric_guard.py. O padrão `CREATE OR REPLACE` bloqueia hoje `CREATE OR REPLACE TEMP VIEW`, e `CREATE TABLE/VIEW` permanentes passam por qualquer nome. Ajuste o guard para: (1) liberar `CREATE [OR REPLACE] TEMP[ORARY] VIEW` e `createOrReplaceTempView`/`createTempView`; (2) bloquear `CREATE TABLE` e `CREATE VIEW` não temporários; (3) manter o bloqueio de escrita em `/Tables/`, `saveAsTable`, `insertInto` e DML/DDL; (4) aceitar tabelas com prefixo `als_dev_` somente quando `ALS_FABRIC_DEV=1`, separado de `ALS_FABRIC_ESCRITA`. Cubra tudo em tests/test_fabric_guard.py e mantenha `test_codigo_atual_do_projeto_passa` verde. Documente o novo comportamento e o limite (o guard só lê texto) em docs_fabric/09. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T28 · Contrato das saídas (pré-consultas e arquivos em `saida/`)
+- **Status:** todo
+- **Papel:** @especialista-dados
+- **Depende:** —
+- **Ambiente:** offline
+- **Dificuldade:** media
+- **Toca:** src/serving/contrato.py, tests/test_contrato.py, docs_fabric/10_estrutura_do_projeto.md
+- **Doc:** docs_fabric/10_estrutura_do_projeto.md
+- **Pronto:** nomes, colunas, tipos e chaves de cada saída definidos em código e doc, com a divergência `fct_*` (doc 09) × `als_*` (SQL da T20) resolvida, e validação de contrato testada.
+- **Prompt:**
+```text
+Tarefa T28 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 (§1, tabelas fct_*), src/serving/sql/01_forecast_consumo.sql (tabelas als_*), src/serving/dashboard.py (COLUNAS_FORECAST e COLUNAS_ALERTAS) e docs_fabric/10 §3.2. Defina o contrato das saídas do projeto sob a regra "só tabelas temporárias ou pré-consultas": nome de cada pré-consulta (`v_als_*`), o arquivo correspondente em Files/als_oilmodel/saida/ (parquet), colunas, tipos, chaves, granularidade e data de corte, cobrindo forecast de consumo (Real e Potencial, p10/p50/p90), %Achieved, alertas de queda e churn, forecast de vendas (6 componentes) e métricas de backtest. Implemente src/serving/contrato.py com o esquema e uma função de validação (colunas, tipos, chaves únicas, p10<=p50<=p90) ligada aos gates G4/G5, com tests/test_contrato.py. Resolva e registre em docs_fabric/10 a divergência de nomes entre doc 09 e o SQL da T20. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T29 · Gerar as saídas reais de forecast, potencial e alertas
+- **Status:** todo
+- **Papel:** @cientista-dados
+- **Depende:** T28
+- **Ambiente:** offline
+- **Dificuldade:** alta
+- **Toca:** notebooks/20_kpi1_consumo, data/forecast, tests/test_comparacao.py
+- **Doc:** docs_fabric/16_decisao_modelos.md, docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §3
+- **Pronto:** `data/forecast/` com forecast Real e Potencial (p10/p50/p90), %Achieved e alertas no contrato da T28, validados; notebook `23_potencial.py` criado; teste G3 pré-existente corrigido.
+- **Prompt:**
+```text
+Tarefa T29 do BACKLOG.md. Leia AGENTS.md, docs_fabric/16, o contrato da T28 (src/serving/contrato.py), src/models/potencial.py, src/models/ml_global.py, src/features/alertas.py e data/base/. O backlog marca T15 e T16 como concluídas, mas data/ não tem as saídas de forecast nem de potencial e notebooks/20_kpi1_consumo/23_potencial.py não existe. Gere em data/forecast/ (fora do git) o forecast de consumo Real e Potencial por cliente/equipamento/segmento com p10/p50/p90, o %Achieved pela definição unificada (D6) e os alertas de queda >20% e churn, no formato do contrato, usando os modelos escolhidos em docs_fabric/16. Crie o notebook 23_potencial.py e um notebook de geração em notebooks/20_kpi1_consumo. Investigue e corrija o teste pré-existente `test_g3_oraculo_bate_baselines_e_tem_cobertura` (diga a causa). Valide a saída com a função do contrato. Registre contagens, cobertura e tempo em docs_fabric/16. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T30 · Notebooks de desenvolvimento com lakehouse parametrizado
+- **Status:** todo
+- **Papel:** @engenheiro-software
+- **Depende:** T27, T28
+- **Ambiente:** offline
+- **Dificuldade:** alta
+- **Toca:** notebooks/50_dev, scripts/fabric_deploy.py, scripts/fabric_run.py, tests/test_fabric_run.py
+- **Doc:** docs_fabric/09_conexao_e_consumo_fabric.md
+- **Pronto:** notebooks `als_*` que leem Silver do lakehouse escolhido por parâmetro (padrão `LakehouseOel`, só leitura), montam pré-consultas em temp views, gravam em `Files/als_oilmodel/saida/` e passam no guard; `fabric_deploy.py` e `fabric_run.py` publicam, executam e baixam qualquer notebook `als_*` registrado.
+- **Prompt:**
+```text
+Tarefa T30 do BACKLOG.md. Leia AGENTS.md, scripts/fabric_deploy.py (NOTEBOOKS fixo em 3 itens), scripts/fabric_run.py (SAIDAS), src/pipeline/fabric.py, o contrato da T28 e o guard ajustado na T27. Crie notebooks/50_dev com notebooks que: recebem o lakehouse por parâmetro (padrão LakehouseOel), leem Silver somente leitura, preparam as pré-consultas `v_als_*` como temp views e gravam o resultado em Files/als_oilmodel/saida/ no formato do contrato. Generalize fabric_deploy.py e fabric_run.py para registrar notebooks novos por convenção de nome (als_*) em vez de mapa fixo, aceitando workspace e lakehouse por argumento ou variável de ambiente, sem mudar o padrão atual. Atualize tests/test_fabric_run.py com mocks. Nenhum notebook pode usar saveAsTable, tabela permanente ou escrever em /Tables/. Documente o fluxo em docs_fabric/09. Não publique nada: use apenas o modo de simulação. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T31 · Publicar e rodar os notebooks de dev no Fabric
+- **Status:** todo
+- **Papel:** @engenheiro-software
+- **Depende:** T29, T30
+- **Ambiente:** fabric
+- **Dificuldade:** media
+- **Toca:** docs_fabric/09_conexao_e_consumo_fabric.md
+- **Doc:** docs_fabric/09_conexao_e_consumo_fabric.md
+- **Pronto:** notebooks publicados com confirmação explícita, executados pela API, `saida/` baixada para `data/` e conferida contra a saída local da T29 (contagens e gates G4/G5), com tempo de execução registrado.
+- **Prompt:**
+```text
+Tarefa T31 do BACKLOG.md. Leia AGENTS.md, docs_fabric/09 e scripts/fabric_run.py. ATENÇÃO: o único workspace acessível é o de produção (O&L Global - Prod - DA). Antes de publicar qualquer coisa, peça confirmação explícita ao usuário, listando os notebooks als_* que serão criados e a pasta Files/als_oilmodel/saida/ que será escrita. Só depois de confirmado: publique com scripts/fabric_run.py --publicar, execute os notebooks de notebooks/50_dev, baixe a saída para data/ e compare com a saída local da T29 (contagem de linhas por tabela, soma do realizado, p10<=p50<=p90, gates G4/G5). Registre tempos, falhas e correções em docs_fabric/09. Sem confirmação, pare e deixe a tarefa como blocked. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T32 · Dashboard com dados reais e SQL como pré-consultas
+- **Status:** todo
+- **Papel:** @engenheiro-ia
+- **Depende:** T28, T29
+- **Ambiente:** offline
+- **Dificuldade:** media
+- **Toca:** src/serving, tests/test_serving.py
+- **Doc:** docs_fabric/07_integracao_mcp.md
+- **Pronto:** dashboard HTML gerado das saídas reais da T29 (sem dados sintéticos) e as consultas SQL reescritas como pré-consultas sobre `v_als_*`, com nomes configuráveis e testadas em DuckDB/pandas.
+- **Prompt:**
+```text
+Tarefa T32 do BACKLOG.md. Leia AGENTS.md, src/serving/dashboard.py, src/serving/sql/01_forecast_consumo.sql, o contrato da T28 e a saída de data/forecast (T29). Gere o dashboard HTML estático a partir das saídas reais, validando-as com o contrato antes, e reescreva as consultas SQL para as pré-consultas `v_als_*` (temp views criadas nos notebooks de notebooks/50_dev), com nome e prefixo configuráveis, em dialeto comum a Spark SQL e T-SQL. Teste as consultas contra os parquet reais com uma engine local (DuckDB ou pandas) em tests/test_serving.py. O HTML gerado com dados reais fica em data/ (fora do git; o repositório é público). Atualize o exemplo sintético só se o contrato mudou. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T33 · Validar as pré-consultas e medir tempo e CU
+- **Status:** todo
+- **Papel:** @engenheiro-software
+- **Depende:** T31, T32
+- **Ambiente:** fabric
+- **Dificuldade:** media
+- **Toca:** docs_fabric/06_plano_execucao.md
+- **Doc:** docs_fabric/06_plano_execucao.md (Fase 5 e 5b)
+- **Pronto:** pré-consultas executadas no Fabric com resultado igual ao local, tempo por consulta e CU (métrica de capacidade ou proxy declarado), com a janela estimada para a F8.
+- **Prompt:**
+```text
+Tarefa T33 do BACKLOG.md. Leia AGENTS.md, a Fase 5 de docs_fabric/06 (item aberto de CU e latência de consulta) e as pré-consultas da T32. Execute as pré-consultas nos notebooks já publicados (T31, sem nova publicação em produção sem confirmação explícita), compare os resultados com a execução local e meça tempo por consulta e CU usando o Capacity Metrics se houver acesso, ou tempo × núcleos como proxy dizendo qual. Atualize a estimativa da janela de CU na F8 e marque o item de CU/latência da Fase 5 em docs_fabric/06. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T34 · Definição do modelo semântico
+- **Status:** todo
+- **Papel:** @engenheiro-ia
+- **Depende:** T28
+- **Ambiente:** offline
+- **Dificuldade:** alta
+- **Toca:** src/serving/semantico, tests/test_semantico.py, docs_fabric/07_integracao_mcp.md
+- **Doc:** docs_fabric/07_integracao_mcp.md
+- **Pronto:** definição do modelo (TMDL) versionável, em modo Import sobre os parquet de `Files/als_oilmodel/saida/` com opção DirectLake documentada, relacionamentos e medidas DAX (consumo real e potencial, %Achieved, alertas), validada por teste de estrutura.
+- **Prompt:**
+```text
+Tarefa T34 do BACKLOG.md. Leia AGENTS.md, docs_fabric/07, docs_fabric/13 (D13, D14), docs_fabric/13 §2 (H3) e o contrato da T28. Crie em src/serving/semantico a definição do modelo semântico em TMDL: tabelas do contrato, relacionamentos (entidade, cliente, segmento, período), medidas DAX para consumo real, potencial, %Achieved pela definição unificada, intervalo p10/p90 e alertas, e a fonte em modo Import lendo os parquet de Files/als_oilmodel/saida/ (parametrizada por workspace e lakehouse). Documente como trocar para DirectLake se o Caio autorizar tabelas als_dev_* (T26). tests/test_semantico.py deve validar a estrutura (tabelas e colunas do TMDL batem com o contrato, medidas referenciam colunas existentes). Sem credenciais nem endpoint no repositório (é público). Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T35 · Publicar o modelo semântico e medir
+- **Status:** todo
+- **Papel:** @engenheiro-ia
+- **Depende:** T31, T34
+- **Ambiente:** fabric
+- **Dificuldade:** media
+- **Toca:** docs_fabric/07_integracao_mcp.md
+- **Doc:** docs_fabric/07_integracao_mcp.md
+- **Pronto:** modelo semântico publicado com confirmação explícita, medidas validadas contra as pré-consultas e tempo de refresh e de consulta medidos.
+- **Prompt:**
+```text
+Tarefa T35 do BACKLOG.md. Leia AGENTS.md, docs_fabric/07, a definição da T34 e os resultados da T31. ATENÇÃO: publicar no workspace de produção exige confirmação explícita do usuário antes; liste o que será criado e espere. Depois de confirmado, publique o modelo semântico por API, faça o refresh sobre Files/als_oilmodel/saida/, compare as medidas (consumo, potencial, %Achieved, alertas) com as pré-consultas da T32 e meça tempo de refresh e de consulta e o CU. Registre números e falhas em docs_fabric/07. Sem confirmação, pare e deixe a tarefa como blocked. Siga a "Regra de pronto" do BACKLOG.md.
+```
+
+### T36 · Fechamento da fase de desenvolvimento
+- **Status:** todo
+- **Papel:** @gestor-projetos
+- **Depende:** T33, T35
+- **Ambiente:** offline
+- **Dificuldade:** baixa
+- **Toca:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md
+- **Doc:** docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md §2 (H3)
+- **Pronto:** relatório da Fase 5b com CU, latência e tempos medidos, divergências com o plano, riscos e o plano para operacionalizar (agendamento na F8) com a decisão (a)+(b) confirmada.
+- **Prompt:**
+```text
+Tarefa T36 do BACKLOG.md. Leia AGENTS.md, os resultados das tarefas T29 a T35 em docs_fabric/06, 07, 09 e 13. Escreva o fechamento da Fase 5b em docs_fabric/13: o que foi medido (tempo de execução, CU, latência de consulta, refresh do semântico), o que divergiu do plano, riscos restantes e os passos para operacionalizar (agendamento na F8, o que depende do Caio, o que precisa de tabelas persistentes). Confirme ou ajuste a decisão (a)+(b) e a recomendação Import × DirectLake com base nos números. Só afirme o que os resultados sustentam. Siga a "Regra de pronto" do BACKLOG.md.
 ```

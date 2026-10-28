@@ -76,9 +76,25 @@ Zoho CRM ──────────┘    (Delta)              (bruto)   (li
 ### Fase 5 — Entrega e handoff
 - [x] Protótipos de entrega: **T20 (27/10)** — dashboard HTML estático com dados sintéticos (Real/Potencial, p10–p90, % Achieved, filtros por segmento/mês/período, tabela por cliente/equipamento, alertas); `src/serving/dashboard.template.html` e exemplo em `exemplo/dashboard_sintetico.html`. SQL da saída não executado. Alternativas (b) semântico e (c) API/MCP em aberto ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2, H3). Pipeline agendada pendente da escolha do cliente.
 - [x] Comparativo das opções de entrega: **T21 (27/10)** — quadro (a) HTML + SQL × (b) semântico × (c) API/MCP em [13](13_revisao_alinhamento_reuniao_2026-10-21.md) §2 (H3). Recomendação: (b) como entrega principal sobre `als_*` da Gold, (a) só como retrato provisório, (c) na fase do agente do CRM. Escolha final é do cliente (7 perguntas no 13).
-- [ ] Medir CU e latência de consulta do semântico/SQL com as tabelas reais da T15/T16 (a T22 mediu só o custo de treino/previsão dos modelos).
+- [ ] Medir CU e latência de consulta do semântico/SQL com as saídas reais da T15/T16 (a T22 mediu só o custo de treino/previsão dos modelos). Passa a ser feito na Fase 5b (T33 para as pré-consultas, T35 para o semântico).
 - [x] FinOps: custo × acurácia dos modelos escolhidos (T22, proxy tempo × vCores; detalhe abaixo; refazer com a métrica de capacidade na F8).
 - Documentação de premissas/limitações e handoff.
+
+### Fase 5b — Desenvolvimento no Fabric via notebooks (aberta em 28/10/2026)
+
+Entrega escolhida: **(a) dashboard HTML + SQL e (b) modelo semântico**. Método (resposta do Caio, 28/10): desenvolver em notebook, escolhendo o lakehouse; usar os lakehouses existentes; criar só tabelas temporárias ou pré-consultas ([13](13_revisao_alinhamento_reuniao_2026-10-21.md) D13). Não há lakehouse novo (a proposta `lh_forecast` do [09](09_conexao_e_consumo_fabric.md) não é pré-requisito). O que persiste são arquivos em `Files/als_oilmodel/saida/`; o semântico lê esses arquivos em modo Import, e DirectLake só com tabelas `als_dev_*` autorizadas (T26, D14). Cada publicação no workspace de produção exige confirmação explícita do usuário. Tarefas no [BACKLOG](../BACKLOG.md), Bloco F.
+
+- [ ] **T26** Pergunta residual ao Caio sobre `als_dev_*` para DirectLake (`blocked` até haver resposta).
+- [ ] **T27** Guard liberando temp views e fechando `CREATE TABLE/VIEW` permanentes.
+- [ ] **T28** Contrato das saídas (`v_als_*` e arquivos em `saida/`; resolve `fct_*` × `als_*`).
+- [ ] **T29** Saídas reais de forecast Real/Potencial, %Achieved e alertas (hoje inexistentes em `data/`); corrigir o teste G3 pré-existente.
+- [ ] **T30** Notebooks de dev com lakehouse parametrizado; generalizar `fabric_deploy.py` e `fabric_run.py`.
+- [ ] **T31** Publicar e rodar no Fabric, baixar `saida/` e conferir contra o local.
+- [ ] **T32** Dashboard (a) com dado real e SQL como pré-consultas.
+- [ ] **T33** Validar pré-consultas e medir tempo e CU.
+- [ ] **T34** Definição do modelo semântico (b) em TMDL.
+- [ ] **T35** Publicar o semântico e medir refresh e latência.
+- [ ] **T36** Fechamento da fase e plano de operacionalização na F8.
 
 #### FinOps: custo × acurácia por modelo (T22, 27/10/2026)
 
@@ -131,7 +147,7 @@ Leitura custo × acurácia (WAPE do recorte, só para ordenar; os números ofici
 | Fase 5 — Entrega/handoff | 3–4 | 6–8 |
 | **Total** | **~21–30 dias** | **~42–60 dias úteis (~8–12 semanas)** |
 
-**Nota:** a estimativa não inclui a Fase 1b nem a prototipagem comparativa de entregáveis; revisar o prazo.
+**Nota:** a estimativa não inclui a Fase 1b, a prototipagem comparativa de entregáveis nem a Fase 5b (desenvolvimento no Fabric via notebooks, 11 tarefas T26–T36, ainda sem estimativa de dias); revisar o prazo.
 
 **Premissas:**
 - Acesso ao lakehouse (S360 espelhado, ERP, Zoho) liberado no início.

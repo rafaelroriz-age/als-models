@@ -29,3 +29,5 @@ Toda descoberta ou implementação só está concluída depois de:
 5. **Memória** — só fatos não óbvios pelo repositório (ambiente, restrições, preferências do usuário) vão para a memória do Claude.
 
 Não reintroduzir TAT nem perguntas já resolvidas. Não publicar no workspace de produção do Fabric sem confirmação explícita.
+
+Desenvolvimento no Fabric (Fase 5b, [13](docs_fabric/13_revisao_alinhamento_reuniao_2026-10-21.md) D13): por notebook, em lakehouses existentes, só com tabelas temporárias ou pré-consultas; o que persiste fica em `Files/als_oilmodel/saida/`. Nenhuma tabela permanente sem nova autorização do Caio.

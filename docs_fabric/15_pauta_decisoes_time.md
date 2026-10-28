@@ -72,6 +72,8 @@
   - (c) Rodar os notebooks dentro do Fabric sem publicar (`scripts/fabric_deploy.py` sem `--aplicar`).
 - **Recomendação:** (b), com (c) para os testes enquanto a 1433 estiver bloqueada. Nenhuma publicação em produção sem confirmação explícita.
 - **Quem decide:** Caio.
+- **Resposta (Caio, 28/10/2026, por mensagem): decisão fechada.** Desenvolver em notebook, escolhendo o lakehouse; pode usar os lakehouses já existentes e criar apenas tabelas temporárias ou pré-consultas. Equivale à opção (c) ampliada: não há lakehouse novo (`lh_forecast`) nem tabela permanente. Registrada como D13 em [13](13_revisao_alinhamento_reuniao_2026-10-21.md). Cada publicação em produção continua exigindo confirmação explícita do usuário.
+- **Pergunta residual (T26):** o modelo semântico DirectLake só lê tabelas Delta persistidas. O Caio autoriza tabelas `als_dev_*` descartáveis num lakehouse existente? Sem resposta, o semântico fica em modo Import sobre os arquivos de `Files/als_oilmodel/saida/`. Recomendação: seguir em Import e só pedir as tabelas se a medição de CU (T33/T35) mostrar ganho com DirectLake.
 
 ## Resumo para decisão
 
@@ -83,4 +85,4 @@
 | 4 | Janela de CU na F8 | Caio + admin da F8 | Agendamento de pipelines |
 | 5 | Fórmula de março | Diego/Keli | Baseline do Forecast 27 |
 | 6 | Status manual (~9%) | Diego/Keli | Regra final de receita |
-| 7 | Destino da publicação | Caio | Qualquer publicação no Fabric |
+| 7 | Destino da publicação | Caio | **Respondida em 28/10** (notebook em lakehouse existente, só temporárias). Resta a pergunta sobre `als_dev_*` (T26), que só afeta o DirectLake |

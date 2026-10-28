@@ -27,7 +27,7 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 | [15_matriz_cobertura.md](15_matriz_cobertura.md) | Matriz insumo × fonte da Etapa 1 (✅/⚠️/❌) com tabela real, granularidade e plano para cada lacuna (T04) |
 | [16_decisao_modelos.md](16_decisao_modelos.md) | Modelo × critério, candidatos provisórios por problema, protocolo de avaliação e experimentos priorizados (T19) |
 | [15_pauta_decisoes_time.md](15_pauta_decisoes_time.md) | Pauta para o time: 7 decisões pendentes, com opções, recomendação e quem decide (T23) |
-| [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 24 tarefas com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
+| [../BACKLOG.md](../BACKLOG.md) | Backlog executável: 36 tarefas (T01–T36; Bloco F = Fase 5b, desenvolvimento no Fabric via notebooks) com prompt copiável, dependências e ordem automática; gerador de lotes paralelos (`scripts/backlog.py`) |
 | [../PROGRESSO.md](../PROGRESSO.md) | Status do backlog por bloco e próximo lote; gerado por `scripts/run_backlog.py status` |
 | [../CELULAR.md](../CELULAR.md) | Guia curto para rodar pelo celular: comandos prontos e prompt de fechamento de lote |
 | [../AUTOMATIZACAO.md](../AUTOMATIZACAO.md) | Manual do backlog automatizado: como iniciar, acompanhar, parar e consertar; regras e barreira de escrita no Fabric |
@@ -39,7 +39,7 @@ Engajamento de ciência de dados. Índice da documentação (novo escopo, ecossi
 
 - **Objetivo:** previsibilidade comercial — consumo de amostras (KPI 1) e vendas/faturamento derivado (KPI 2).
 - **Ecossistema:** Azure / Microsoft Fabric (lakehouse OneLake, capacidade F8).
-- **Entregável:** formato definido após prototipagem (dashboard HTML + SQL, modelo semântico, API/MCP) — não um notebook.
+- **Entregável:** dashboard HTML + SQL **e** modelo semântico (decidido em 28/10, [13](13_revisao_alinhamento_reuniao_2026-10-21.md) D13/D14); API/MCP fica para a fase do agente. Desenvolvimento no Fabric por notebook, em lakehouses existentes, só com tabelas temporárias ou pré-consultas (Fase 5b, [06](06_plano_execucao.md)).
 - **Ponto de partida:** 3 planilhas (Calculadora, Customer Status, Forecast) + dicionário de dados; medallion bronze/silver já existente no `LakehouseOel`.
 - **Sucesso:** MAPE por mês/segmento/cliente via snapshot mensal + reconstrução retroativa; great expectations/pytest.
 - **Esforço:** ~21–30 dias (tempo integral) ou ~8–12 semanas a 4–6 h/dia.
